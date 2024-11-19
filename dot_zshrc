@@ -1,0 +1,59 @@
+## PATH
+PATH="$HOME/.rd/bin:$PATH" # Rancher Desktop for Docker management
+PATH="/opt/homebrew/opt/libpq/bin:$PATH" # PostgreSQL
+PATH="${XDG_DATA_HOME:-$HOME/.local/share}/mise/shims:$PATH" # Mise shims
+PATH="${XDG_DATA_HOME:-$HOME/.local/share}/google-cloud-sdk/bin:$PATH" # Google Cloud SDK
+export PATH
+
+## COMPLETIONS
+zstyle ':completion:*' menu yes select
+# Configure carapace completions
+# export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # Choose the shell bridges you want to use
+zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
+# eza styles https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/eza#configuration
+zstyle ':omz:plugins:eza' 'dirs-first' 'yes'
+zstyle ':omz:plugins:eza' 'git-status' 'yes'
+zstyle ':omz:plugins:eza' 'header' 'yes'
+zstyle ':omz:plugins:eza' 'show-group' 'yes'
+zstyle ':omz:plugins:eza' 'icons' 'yes'
+zstyle ':omz:plugins:eza' 'size-prefix' 'si'
+zstyle ':omz:plugins:eza' 'time-style' 'long-iso'
+zstyle ':omz:plugins:eza' 'hyperlink' 'yes'
+# Configure builtin completions
+zmodload -a colors
+zmodload -a autocomplete
+zmodload -a complist
+autoload -Uz compinit && compinit
+# Load carapace completions
+# It includes completions for: aws, gcloud, docker, git, kubectl, terraform, and more
+[[ -x "$(command -v carapace)" ]] && source <(carapace _carapace)
+
+# Load op completions
+[[ -x "$(command -v op)" ]] && source <(op completion zsh)
+
+# Load starship prompt
+[[ -x "$(command -v starship)" ]] && source <(starship init zsh)
+
+# Load antidote plugin manager
+if [[ -f /opt/homebrew/opt/antidote/share/antidote/antidote.zsh ]]; then
+  source /opt/homebrew/opt/antidote/share/antidote/antidote.zsh
+  # initialize plugins statically with ${ZDOTDIR:-~}/.zsh_plugins.txt
+  antidote load
+fi
+
+# Integrate fzf if present in $PATH
+[[ -x "$(command -v fzf)" ]] && source <(fzf --zsh)
+export FZF_COMPLETION_OPTS='--border --info=inline'
+export FZF_DEFAULT_OPTS='--height 60% --tmux=center,80% --layout=reverse --border --info=inline'
+
+# OS-specific fixes
+# Mac
+if [[ $(uname) == "Darwin" ]]; then
+  # Erlang installs
+  export CPPFLAGS="${CPPFLAGS+"$CPPFLAGS "}-I/opt/homebrew/opt/unixodbc/include"
+  export LDFLAGS="${LDFLAGS+"$LDFLAGS "}-L/opt/homebrew/opt/unixodbc/lib"
+  export KERL_CONFIGURE_OPTIONS="--with-odbc=/opt/homebrew/opt/unixodbc"
+fi
+
+# Set up aliases
+alias q="exit"

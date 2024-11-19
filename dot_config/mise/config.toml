@@ -1,0 +1,11 @@
+[tools]
+ruby = "3.3"
+node = "latest"
+go = "1.23"
+python = "3.11"
+java = "temurin-23.0.1+11"
+elixir = "1.17.3-otp-27"
+erlang = "27.1.2"
+
+[settings]
+experimental = true

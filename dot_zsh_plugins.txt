@@ -1,0 +1,25 @@
+## Standard plugins
+mattmc3/ez-compinit                         # faster compinit
+zsh-users/zsh-autosuggestions               # suggest commands based on history
+zdharma-continuum/fast-syntax-highlighting  # fast syntax highlighting
+zsh-users/zsh-history-substring-search      # search history with substring
+
+# (belak/zsh-utils)[https://github.com/belak/zsh-utils/blob/main/PLUGINS.md]
+
+## Completions
+zsh-users/zsh-completions kind:fpath path:src
+belak/zsh-utils path:completion/functions kind:autoload post:compstyle_zshzoo_setup
+
+## Utilities
+belak/zsh-utils path:utility
+
+## OMZ plugins
+getantidote/use-omz                     # handle OMZ dependencies
+ohmyzsh/ohmyzsh path:plugins/cp         # copy files with progress bar; alias to rsync [https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/cp]
+#ohmyzsh/ohmyzsh path:plugins/dotenv     # load .env files [https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/dotenv]
+ohmyzsh/ohmyzsh path:plugins/eza        # eza aliases and functions; replaces ls [https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/eza]
+ohmyzsh/ohmyzsh path:plugins/git        # git aliases and functions [https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/git]
+ohmyzsh/ohmyzsh path:plugins/gitignore  # gitignore aliases and functions [https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/gitignore]
+#ohmyzsh/ohmyzsh path:plugins/mise      # like ASDF and direnv all in one (and more)[https://mise.jdx.dev/] [https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/mise]
+ohmyzsh/ohmyzsh path:plugins/rake-fast  # faster rake completion [https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/rake-fast]
+#ohmyzsh/ohmyzsh path:plugins/redis-cli  # redis-cli aliases and functions [https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/redis-cli]
