@@ -1,0 +1,30 @@
+[gpg]
+  format = ssh
+[gpg "ssh"]
+  alllowedSignersFile = ~/.ssh/allowed_signers
+  {{- if eq .chezmoi.os "darwin" }}
+  program = "/Applications/1Password.app/Contents/MacOs/op-ssh-sign"
+  {{- else if eq .chezmoi.os "linux" }}
+  program = "/opt/1Password/op-ssh-sign"
+  {{- end }}
+[commit]
+  gpgSign = true
+[user]
+  name = "Ender Veiga Bueno"
+  email = "letstalk@ender.codes"
+  signingkey = {{ onepasswordRead "op://Private/Personal Key/public key" }}
+[includeIf "gitdir/i:~/work/"]
+  path = ~/work/.gitconfig
+[push]
+  autoSetupRemote = true
+[core]
+  pager = delta
+[interactive]
+  diffFilter = delta --color-only
+[delta]
+  navigate = true
+  side-by-side = true
+[merge]
+  conflictStyle = diff3
+[diff]
+  colorMoved = default
