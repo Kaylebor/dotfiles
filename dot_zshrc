@@ -9,6 +9,7 @@ case $(uname) in
 esac
 
 ## PATH
+PATH="$HOME/.local/bin:$PATH" # User-installed binaries
 PATH="$HOME/.rd/bin:$PATH" # Rancher Desktop for Docker management
 PATH="$(brew --prefix libpq)/bin:$PATH" # PostgreSQL
 PATH="${XDG_DATA_HOME:-$HOME/.local/share}/mise/shims:$PATH" # Mise shims
