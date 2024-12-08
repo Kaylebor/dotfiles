@@ -8,13 +8,28 @@ case $(uname) in
     ;;
 esac
 
+# Force en_US.UTF-8 locale
+export LC_ALL=en_US.UTF-8
+
 ## PATH
 PATH="$HOME/.local/bin:$PATH" # User-installed binaries
 PATH="$HOME/.rd/bin:$PATH" # Rancher Desktop for Docker management
 PATH="$(brew --prefix libpq)/bin:$PATH" # PostgreSQL
 PATH="${XDG_DATA_HOME:-$HOME/.local/share}/mise/shims:$PATH" # Mise shims
 PATH="${XDG_DATA_HOME:-$HOME/.local/share}/google-cloud-sdk/bin:$PATH" # Google Cloud SDK
+PATH="$HOME/.local/share/yabridge:$PATH" # Yabridge for VST plugins
 export PATH
+
+## HISTORY
+export HISTFILE=~/.zsh_history
+export HISTSIZE=500000
+export SAVEHIST=500000
+setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
+setopt INC_APPEND_HISTORY        # Write to the history file immediately, not when the shell exits.
+setopt SHARE_HISTORY             # Share history between all sessions.
+setopt HIST_FIND_NO_DUPS         # Do not display a line previously found.
+setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history file.
+setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording entry.
 
 ## COMPLETIONS
 zstyle ':completion:*' menu yes select
