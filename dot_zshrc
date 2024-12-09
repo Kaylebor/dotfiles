@@ -84,5 +84,9 @@ case $(uname) in
     ;;
 esac
 
+if [[ -f $HOME/.config/op/plugins.sh ]]; then
+  source $HOME/.config/op/plugins.sh
+fi
+
 # Set up aliases
 alias q="exit"
