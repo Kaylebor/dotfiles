@@ -1,12 +1,11 @@
+#!/usr/bin/env zsh
+
 # Initialize brew
-case $(uname) in
-  Linux)
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-    ;;
-  Darwin)
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-    ;;
-esac
+{{- if eq .chezmoi.os "darwin" }}
+eval "$(/opt/homebrew/bin/brew shellenv)"
+{{- else }}
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+{{- end }}
 
 # Force en_US.UTF-8 locale
 export LC_ALL=en_US.UTF-8
@@ -72,17 +71,15 @@ fi
 export FZF_COMPLETION_OPTS='--border --info=inline'
 export FZF_DEFAULT_OPTS='--height 60% --tmux=center,80% --layout=reverse --border --info=inline'
 
-# OS-specific fixes
-# Mac
-case $(uname) in
-  Darwin)
-    # Erlang install fixes
-    UNIXODBCHOME=$(brew --prefix unixodbc)
-    export CPPFLAGS="${CPPFLAGS+"$CPPFLAGS "}-I${UNIXODBCHOME}/include"
-    export LDFLAGS="${LDFLAGS+"$LDFLAGS "}-L${UNIXODBCHOME}/lib"
-    export KERL_CONFIGURE_OPTIONS="--with-odbc=${UNIXODBCHOME}"
-    ;;
-esac
+{{- if eq .chezmoi.os "darwin" }}
+# MacOS-specific fixes
+
+# Erlang install fixes
+UNIXODBCHOME=$(brew --prefix unixodbc)
+export CPPFLAGS="${CPPFLAGS+"$CPPFLAGS "}-I${UNIXODBCHOME}/include"
+export LDFLAGS="${LDFLAGS+"$LDFLAGS "}-L${UNIXODBCHOME}/lib"
+export KERL_CONFIGURE_OPTIONS="--with-odbc=${UNIXODBCHOME}"
+{{- end }}
 
 if [[ -f $HOME/.config/op/plugins.sh ]]; then
   source $HOME/.config/op/plugins.sh
