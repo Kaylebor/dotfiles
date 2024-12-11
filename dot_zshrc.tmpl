@@ -1,11 +1,6 @@
 #!/usr/bin/env zsh
 
-# Initialize brew
-{{- if eq .chezmoi.os "darwin" }}
-eval "$(/opt/homebrew/bin/brew shellenv)"
-{{- else }}
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-{{- end }}
+{{- template "brew_eval" . }}
 
 # Force en_US.UTF-8 locale
 export LC_ALL=en_US.UTF-8
@@ -13,7 +8,7 @@ export LC_ALL=en_US.UTF-8
 ## PATH
 PATH="$HOME/.local/bin:$PATH" # User-installed binaries
 PATH="$HOME/.rd/bin:$PATH" # Rancher Desktop for Docker management
-PATH="$(brew --prefix libpq)/bin:$PATH" # PostgreSQL
+PATH="$HOMEBREW_PREFIX/opt/libpq/bin:$PATH" # PostgreSQL
 PATH="${XDG_DATA_HOME:-$HOME/.local/share}/mise/shims:$PATH" # Mise shims
 PATH="${XDG_DATA_HOME:-$HOME/.local/share}/google-cloud-sdk/bin:$PATH" # Google Cloud SDK
 PATH="$HOME/.local/share/yabridge:$PATH" # Yabridge for VST plugins
@@ -32,9 +27,8 @@ setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording en
 
 ## COMPLETIONS
 zstyle ':completion:*' menu yes select
-# Configure carapace completions
-# export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # Choose the shell bridges you want to use
 zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
+{{- if lookPath "eza" }}
 # eza styles https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/eza#configuration
 zstyle ':omz:plugins:eza' 'dirs-first' 'yes'
 zstyle ':omz:plugins:eza' 'git-status' 'yes'
@@ -44,51 +38,58 @@ zstyle ':omz:plugins:eza' 'icons' 'yes'
 zstyle ':omz:plugins:eza' 'size-prefix' 'si'
 zstyle ':omz:plugins:eza' 'time-style' 'long-iso'
 zstyle ':omz:plugins:eza' 'hyperlink' 'yes'
+{{- end }}
 # Configure builtin completions
 zmodload -a colors
 zmodload -a autocomplete
 zmodload -a complist
 autoload -Uz compinit && compinit
+{{- if lookPath "carapace" }}
 # Load carapace completions
 # It includes completions for: aws, gcloud, docker, git, kubectl, terraform, and more
-[[ -x "$(command -v carapace)" ]] && source <(carapace _carapace)
+source <(carapace _carapace)
+{{- end }}
 
+{{- if lookPath "op" }}
 # Load op completions
-[[ -x "$(command -v op)" ]] && source <(op completion zsh)
+source <(op completion zsh)
+{{- end }}
 
+{{- if lookPath "starship" }}
 # Load starship prompt
-[[ -x "$(command -v starship)" ]] && source <(starship init zsh)
+source <(starship init zsh)
+{{- end }}
 
 # Load antidote plugin manager
-if [[ -f $HOMEBREW_PREFIX/opt/antidote/share/antidote/antidote.zsh ]]; then
-  source $HOMEBREW_PREFIX/opt/antidote/share/antidote/antidote.zsh
-  # initialize plugins statically with ${ZDOTDIR:-~}/.zsh_plugins.txt
-  antidote load
-fi
+source "$HOMEBREW_PREFIX/opt/antidote/share/antidote/antidote.zsh"
+# initialize plugins statically with ${ZDOTDIR:-~}/.zsh_plugins.txt
+antidote load
 
-# Integrate fzf if present in $PATH
-[[ -x "$(command -v fzf)" ]] && source <(fzf --zsh)
+{{- if lookPath "fzf" }}
+# Integrate fzf
+source <(fzf --zsh)
 export FZF_COMPLETION_OPTS='--border --info=inline'
 export FZF_DEFAULT_OPTS='--height 60% --tmux=center,80% --layout=reverse --border --info=inline'
+{{- end }}
 
 {{- if eq .chezmoi.os "darwin" }}
-# MacOS-specific fixes
+## MacOS-specific fixes
 
 # Erlang install fixes
-UNIXODBCHOME=$(brew --prefix unixodbc)
+UNIXODBCHOME="$HOMEBREW_PREFIX/opt/unixodbc"
 export CPPFLAGS="${CPPFLAGS+"$CPPFLAGS "}-I${UNIXODBCHOME}/include"
 export LDFLAGS="${LDFLAGS+"$LDFLAGS "}-L${UNIXODBCHOME}/lib"
 export KERL_CONFIGURE_OPTIONS="--with-odbc=${UNIXODBCHOME}"
 {{- end }}
 
-if [[ -f $HOME/.config/op/plugins.sh ]]; then
-  source $HOME/.config/op/plugins.sh
-fi
+{{- if (gt (len (glob ".config/op/plugins.sh")) 0) }}
+source $HOME/.config/op/plugins.sh
+{{- end }}
 
 # Set up aliases
-alias q="exit"
+source $HOME/.config/zsh/aliases.zsh
 
-# If exists, source .config/zsh/.zshrc.local
-if [[ -f $HOME/.config/zsh/.zshrc.local ]]; then
-  source $HOME/.config/zsh/.zshrc.local
-fi
+{{- if (gt (len (glob ".config/zsh/.zshrc.local")) 0) }}
+# Per-machine configuration
+source $HOME/.config/zsh/.zshrc.local
+{{- end }}

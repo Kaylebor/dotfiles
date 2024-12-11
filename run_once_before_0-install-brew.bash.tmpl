@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+{{- if (not (lookPath "brew")) }}
+# Install Homebrew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+{{- end }}
+# Install Homebrew packages
+{{- template "brew_eval" . }}
+brew bundle --file="{{ .chezmoi.sourceDir }}/dot_config/brewfile/Brewfile"
