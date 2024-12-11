@@ -16,7 +16,7 @@ belak/zsh-utils path:utility
 ## OMZ plugins
 getantidote/use-omz                     # handle OMZ dependencies
 ohmyzsh/ohmyzsh path:plugins/cp         # copy files with progress bar; alias to rsync [https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/cp]
-ohmyzsh/ohmyzsh path:plugins/direnv     # load .envrc files [https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/direnv]
+#ohmyzsh/ohmyzsh path:plugins/direnv     # load .envrc files [https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/direnv]
 #ohmyzsh/ohmyzsh path:plugins/dotenv     # load .env files [https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/dotenv]
 ohmyzsh/ohmyzsh path:plugins/eza        # eza aliases and functions; replaces ls [https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/eza]
 #ohmyzsh/ohmyzsh path:plugins/git        # git aliases and functions [https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/git]

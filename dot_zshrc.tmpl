@@ -87,3 +87,8 @@ fi
 
 # Set up aliases
 alias q="exit"
+
+# If exists, source .config/zsh/.zshrc.local
+if [[ -f $HOME/.config/zsh/.zshrc.local ]]; then
+  source $HOME/.config/zsh/.zshrc.local
+fi
