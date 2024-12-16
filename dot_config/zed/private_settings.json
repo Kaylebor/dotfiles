@@ -1,0 +1,69 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "assistant": {
+    "default_model": {
+      "provider": "copilot_chat",
+      "model": "gpt-4o"
+    },
+    "version": "2",
+    "enable_experimental_live_diffs": true
+  },
+  "ui_font_size": 14,
+  "ui_font_family": "FiraCode Nerd Font",
+  // "buffer_font_size": 14,
+  "buffer_font_family": "FiraCode Nerd Font",
+  "tab_size": 2,
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "Atelier Sulphurpool Dark"
+  },
+  "languages": {
+    "Ruby": {
+      "language_servers": ["!ruby-lsp", "solargraph", "rubocop"]
+    },
+    "HTML": {
+      "prettier": { "allowed": false }
+    }
+  },
+  "lsp": {
+    "rubocop": {
+      "initialization_options": {
+        "safeAutocorrect": false
+      }
+    },
+    "ruby-lsp": {
+      "initialization_options": {
+        "enabledFeatures": {
+          "diagnostics": false // Zed does not support pull-based diagnostics yet
+        }
+      }
+    }
+  },
+  "context_servers": {
+    "postgres-context-server": {
+      "settings": {
+        "database_url": "postgresql://kay:@localhost:5432/loyal_guru"
+      }
+    }
+  },
+  "language_models": {
+    "ollama": {
+      "api_url": "http://localhost:11434",
+      "available_models": [
+        {
+          "name": "mistral",
+          "display_name": "mistral 7.2B",
+          "max_tokens": 32768
+        }
+      ]
+    }
+  }
+}

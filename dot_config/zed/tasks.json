@@ -1,0 +1,14 @@
+[
+  {
+    "label": "test $ZED_RELATIVE_FILE:$ZED_ROW",
+    "command": "bundle exec rspec",
+    "args": ["\"$ZED_RELATIVE_FILE:$ZED_ROW\""],
+    "tags": ["ruby-test"]
+  },
+  {
+    "label": "test $ZED_RELATIVE_FILE:$ZED_ROW",
+    "command": "go test",
+    "args": ["\"$ZED_DIRNAME\"", "-run", "$ZED_SYMBOL"],
+    "tags": ["go-test"]
+  }
+]
