@@ -1,1 +1,14 @@
 alias q="exit"
+{{- if lookPath "rg" }}
+ALIASED_RG_OPTS='-P'
+rg() {
+  case $TERM_PROGRAM in
+    *zed*)
+      command rg $ALIASED_RG_OPTS --no-heading --line-number --column --with-filename "$@"
+      ;;
+    *)
+      command rg $ALIASED_RG_OPTS "$@"
+      ;;
+  esac
+}
+{{- end }}
