@@ -12,3 +12,6 @@ rg() {
   esac
 }
 {{- end }}
+{{- if lookPath "clipboard" }}
+alias cb="clipboard"
+{{- end }}
