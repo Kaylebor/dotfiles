@@ -230,3 +230,7 @@ records = true
 
 ## The port that should be used for TCP on non unix systems
 # tcp_port = 8889
+
+# As it will default to enabled in the future, but we're using chezmoi to manage this file
+[dotfiles]
+enabled = false
