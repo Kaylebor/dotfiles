@@ -6,3 +6,7 @@
 # Install Homebrew packages
 {{- template "brew_eval" . }}
 brew bundle --file="{{ .chezmoi.sourceDir }}/dot_config/brewfile/Brewfile"
+{{- if lookPath "atuin" }}
+# Use atuin for history management
+atuin login -u "{{ onepasswordRead "op://Private/Atuin/username" }}" -p "{{ onepasswordRead "op://Private/Atuin/password" }}" -k "{{ onepasswordRead "op://Private/Atuin/key" }}"
+{{- end }}

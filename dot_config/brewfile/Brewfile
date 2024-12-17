@@ -3,6 +3,7 @@
 require 'os'
 
 brew 'antidote'
+brew 'atuin'
 brew 'autoconf'
 brew 'bat'
 brew 'binutils'
