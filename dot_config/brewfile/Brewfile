@@ -52,6 +52,7 @@ brew 'watch'
 brew 'wdiff'
 brew 'wget'
 brew 'wxwidgets'
+brew 'xdg-ninja'
 brew 'zsh'
 
 if OS.mac?
