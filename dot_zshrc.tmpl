@@ -5,7 +5,9 @@ export LC_ALL=en_US.UTF-8
 
 ## PATH
 PATH="$HOME/.local/bin:$PATH" # User-installed binaries
+{{- if (gt (len (glob ".rd/bin")) 0) }}
 PATH="$HOME/.rd/bin:$PATH" # Rancher Desktop for Docker management
+{{- end }}
 PATH="$HOMEBREW_PREFIX/opt/libpq/bin:$PATH" # PostgreSQL
 PATH="${XDG_DATA_HOME:-$HOME/.local/share}/google-cloud-sdk/bin:$PATH" # Google Cloud SDK
 PATH="$HOME/.local/share/yabridge:$PATH" # Yabridge for VST plugins
