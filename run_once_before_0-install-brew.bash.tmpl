@@ -3,9 +3,13 @@
 # Install Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 {{- end }}
-# Install Homebrew packages
 {{- template "brew_eval" . }}
+# Install Homebrew packages
 brew bundle --file="{{ .chezmoi.sourceDir }}/dot_config/brewfile/Brewfile"
+
+# Install Mise tools
+mise install
+
 {{- if lookPath "atuin" }}
 # Use atuin for history management
 if ! atuin status | rg '\[Remote\]'>/dev/null 2>&1; then
