@@ -26,6 +26,7 @@ packages:
       - "gzip"
       - "ijq"
       - "imagemagick"
+      - "jc"
       - "less"
       - "libpq"
       - "libxslt"

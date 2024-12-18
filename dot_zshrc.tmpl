@@ -94,7 +94,7 @@ source $HOME/.config/op/plugins.sh
 {{- end }}
 
 # Set up aliases
-source $HOME/.config/zsh/aliases.zsh
+[[ $- == *i* ]] && source $HOME/.config/zsh/aliases.zsh
 
 {{- if (gt (len (glob ".config/zsh/.zshrc.local")) 0) }}
 # Per-machine configuration
