@@ -9,3 +9,8 @@ erlang = "27.1.2"
 
 [settings]
 experimental = true
+
+[env]
+{{- if eq .chezmoi.arch "arm64" }}
+GOARCH = "amd64"
+{{- end }}
