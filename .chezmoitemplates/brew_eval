@@ -1,4 +1,4 @@
-# Initialize brew
+# Initialize brew [https://brew.sh]
 {{- if eq .chezmoi.os "darwin" }}
 eval "$(/opt/homebrew/bin/brew shellenv)"
 {{- else }}

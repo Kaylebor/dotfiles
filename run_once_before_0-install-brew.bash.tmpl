@@ -8,7 +8,7 @@
 brew bundle --file="{{ .chezmoi.sourceDir }}/dot_config/brewfile/Brewfile"
 {{- if lookPath "atuin" }}
 # Use atuin for history management
-if ! atuin status | rg '\[Remote\]'; then
+if ! atuin status | rg '\[Remote\]'>/dev/null 2>&1; then
   atuin login -u "{{ onepasswordRead "op://Private/Atuin/username" }}" -p "{{ onepasswordRead "op://Private/Atuin/password" }}" -k "{{ onepasswordRead "op://Private/Atuin/key" }}"
 fi
 {{- end }}

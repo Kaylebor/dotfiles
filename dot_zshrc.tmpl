@@ -1,7 +1,5 @@
 #!/usr/bin/env zsh
 
-{{- template "brew_eval" . }}
-
 # Force en_US.UTF-8 locale
 export LC_ALL=en_US.UTF-8
 
@@ -9,10 +7,13 @@ export LC_ALL=en_US.UTF-8
 PATH="$HOME/.local/bin:$PATH" # User-installed binaries
 PATH="$HOME/.rd/bin:$PATH" # Rancher Desktop for Docker management
 PATH="$HOMEBREW_PREFIX/opt/libpq/bin:$PATH" # PostgreSQL
-PATH="${XDG_DATA_HOME:-$HOME/.local/share}/mise/shims:$PATH" # Mise shims
+# PATH="${XDG_DATA_HOME:-$HOME/.local/share}/mise/shims:$PATH" # Mise shims
 PATH="${XDG_DATA_HOME:-$HOME/.local/share}/google-cloud-sdk/bin:$PATH" # Google Cloud SDK
 PATH="$HOME/.local/share/yabridge:$PATH" # Yabridge for VST plugins
 export PATH
+
+# Activate mise
+eval "$(mise activate zsh)"
 
 {{- if lookPath "fzf" }}
 # Integrate fzf
