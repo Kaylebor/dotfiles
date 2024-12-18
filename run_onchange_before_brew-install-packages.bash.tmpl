@@ -1,7 +1,7 @@
 #!/bin/bash
 {{- if (not (lookPath "brew")) }}
 # Install Homebrew
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+/bin/bash -c "$(curl -fsSL {{ .urls.homebrew.install }})"
 {{- end }}
 {{- template "brew_eval" . }}
 

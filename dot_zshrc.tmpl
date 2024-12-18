@@ -14,7 +14,7 @@ PATH="$HOME/.local/share/yabridge:$PATH" # Yabridge for VST plugins
 export PATH
 
 # Activate mise
-eval "$(mise activate zsh)"
+source <(mise activate zsh)
 
 {{- if lookPath "fzf" }}
 # Integrate fzf
@@ -26,7 +26,7 @@ export FZF_DEFAULT_OPTS='--height 60% --tmux=center,80% --layout=reverse --borde
 ## HISTORY
 {{- if lookPath "atuin" }}
 # Use atuin for history management
-eval "$(atuin init zsh)"
+source <(atuin init zsh)
 {{- else }}
 export HISTFILE=~/.zsh_history
 export HISTSIZE=500000
