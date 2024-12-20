@@ -10,3 +10,6 @@ Execute this command to install chezmoi and apply the dotfiles:
 ```bash
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply Kaylebor
 ```
+
+## Extras
+- Fonts: [Iosevka and Iosevka Term](https://typeof.net/Iosevka/)

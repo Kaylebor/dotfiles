@@ -6,7 +6,7 @@
 " - Avoid using standard Vim directory names like 'plugin'
 call plug#begin('~/.local/share/nvim/plugged')
 
-Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }            " fzf Fuzzy Search
+Plug 'junegunn/fzf', { 'dir': '~/.fzf' }                                     " fzf Fuzzy Search
 Plug 'w0rp/ale'                                                              " ale linter
 Plug 'vim-airline/vim-airline'                                               " Status bar
 Plug 'vim-airline/vim-airline-themes'                                        " airline themes

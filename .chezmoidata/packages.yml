@@ -10,6 +10,7 @@ packages:
       - "carapace"
       - "coreutils"
       - "curl"
+      - "curlie"
       - "delta"
       - "eza"
       - "fd"
@@ -54,6 +55,21 @@ packages:
       - "wxwidgets"
       - "xdg-ninja"
       - "zsh"
+  arch:
+    paru:
+      - "cmake"
+      - "curlie"
+      - "erlang"
+      - "fd"
+      - "fzf"
+      - "git-delta"
+      - "ijq"
+      - "imagemagick"
+      - "jc"
+      - "jdk17-openjdk"
+      - "mise"
+      - "neovim"
+      - "ripgrep"
   darwin:
     brews:
       - "diffutils"

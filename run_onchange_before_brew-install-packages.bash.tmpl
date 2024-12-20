@@ -1,4 +1,6 @@
 #!/bin/bash
+
+{{ if eq .chezmoi.os "darwin" -}}
 {{- if (not (lookPath "brew")) }}
 # Install Homebrew
 /bin/bash -c "$(curl -fsSL {{ .urls.homebrew.install }})"
@@ -18,4 +20,5 @@ brew {{ . | quote }}
 cask {{ . | quote }}
 {{ end -}}
 EOF
+{{ end -}}
 {{ end -}}
