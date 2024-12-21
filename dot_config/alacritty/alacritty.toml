@@ -1,6 +1,6 @@
 [window]
 opacity = 0.9
-dimensions = { columns = 134, lines = 31 }
+dimensions = { columns = 134, lines = 32 }
 
 [scrolling]
 history = 100000

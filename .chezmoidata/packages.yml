@@ -57,6 +57,7 @@ packages:
       - "zsh"
   arch:
     paru:
+      - "carapace"
       - "cmake"
       - "curlie"
       - "erlang"
@@ -70,6 +71,9 @@ packages:
       - "mise"
       - "neovim"
       - "ripgrep"
+      - "starship"
+      - "usage"
+      - "zsh-antidote"
   darwin:
     brews:
       - "diffutils"
