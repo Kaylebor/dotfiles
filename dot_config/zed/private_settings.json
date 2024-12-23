@@ -40,6 +40,12 @@
     },
     "HTML": {
       "prettier": { "allowed": false }
+    },
+    "TypeScript": {
+      "prettier": { "allowed": false }
+    },
+    "JavaScript": {
+      "prettier": { "allowed": false }
     }
   },
   "lsp": {
