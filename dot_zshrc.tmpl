@@ -8,9 +8,15 @@ PATH="$HOME/.local/bin:$PATH" # User-installed binaries
 {{- if (gt (len (glob ".rd/bin")) 0) }}
 PATH="$HOME/.rd/bin:$PATH" # Rancher Desktop for Docker management
 {{- end }}
+{{- if (gt (len (glob "$HOMEBREW_PREFIX/opt/libpq/bin")) 0) }}
 PATH="$HOMEBREW_PREFIX/opt/libpq/bin:$PATH" # PostgreSQL
+{{- end }}
+{{- if (gt (len (glob "${XDG_DATA_HOME:-$HOME/.local/share}/google-cloud-sdk/bin")) 0) }}
 PATH="${XDG_DATA_HOME:-$HOME/.local/share}/google-cloud-sdk/bin:$PATH" # Google Cloud SDK
+{{- end }}
+{{- if (gt (len (glob "$HOME/.local/share/yabridge")) 0) }}
 PATH="$HOME/.local/share/yabridge:$PATH" # Yabridge for VST plugins
+{{- end }}
 export PATH
 
 # Activate mise

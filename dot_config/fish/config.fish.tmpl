@@ -1,5 +1,7 @@
+{{- if eq .chezmoi.os "linux" }}
 {{- if eq .chezmoi.osRelease.id "cachyos" }}
 source /usr/share/cachyos-fish-config/cachyos-config.fish
+{{- end }}
 {{- end }}
 
 # overwrite greeting

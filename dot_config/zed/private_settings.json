@@ -21,6 +21,12 @@
   "buffer_font_family": "Iosevka Nerd Font",
   "tab_size": 2,
   "terminal": {
+    "shell": {
+      "with_arguments": {
+        "program": "fish",
+        "args": ["-l"]
+      }
+    },
     "font_family": "IosevkaTerm Nerd Font"
   },
   "theme": {

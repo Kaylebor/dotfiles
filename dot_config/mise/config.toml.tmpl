@@ -14,6 +14,8 @@ experimental = true
 {{- if eq .chezmoi.arch "arm64" }}
 GOARCH = "amd64"
 {{- end }}
+{{- if eq .chezmoi.os "linux" }}
 {{- if eq .chezmoi.osRelease.idLike "arch" }}
 KERL_CONFIGURE_OPTIONS="--with-odbc=/var/lib/pacman/local/unixodbc-$(pacman -Q unixodbc | cut -d' ' -f2)"
+{{- end }}
 {{- end }}

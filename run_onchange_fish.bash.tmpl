@@ -1,19 +1,4 @@
 #!/usr/bin/env bash
 {{- if lookPath "fish" }}
-
-{{- if lookPath "mise" }}
-# Activate mise
-mise activate fish > .config/fish/conf.d/mise.fish
-{{- end }}
-
-{{- if lookPath "fzf" }}
-# Integrate fzf
-fzf --fish > .config/fish/functions/fzf_key_bindings.fish
-{{- end }}
-
-{{- if lookPath "starship" }}
-# Integrate starship
-starship init fish --print-full-init > .config/fish/conf.d/starship.fish
-{{- end }}
-
+fish {{ .chezmoi.sourceDir }}/.setup_env.fish
 {{- end }}
