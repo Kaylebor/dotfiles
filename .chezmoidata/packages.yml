@@ -54,6 +54,7 @@ packages:
       - 'wget'
       - 'wxwidgets'
       - 'xdg-ninja'
+      - 'yq'
       - 'zsh'
   arch:
     paru:

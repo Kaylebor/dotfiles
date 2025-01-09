@@ -12,6 +12,8 @@ experimental = true
 disable_tools = ["python"]
 
 [env]
+# It is safer to unset this, as `go install` breaks otherwise, and anyway this is being set to `$GOROOT/bin` which is the default already
+GOBIN = ""
 {{- if eq .chezmoi.arch "arm64" }}
 GOARCH = "amd64"
 {{- end }}

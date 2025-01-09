@@ -7,10 +7,13 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "features": {
+    "inline_completion_provider": "supermaven"
+  },
   "assistant": {
     "default_model": {
-      "provider": "copilot_chat",
-      "model": "claude-3-5-sonnet"
+      "provider": "google",
+      "model": "gemini-1.5-flash"
     },
     "version": "2",
     "enable_experimental_live_diffs": true
@@ -72,13 +75,7 @@
   "language_models": {
     "ollama": {
       "api_url": "http://localhost:11434",
-      "available_models": [
-        {
-          "name": "mistral",
-          "display_name": "mistral 7.2B",
-          "max_tokens": 32768
-        }
-      ]
+      "available_models": []
     }
   }
 }
