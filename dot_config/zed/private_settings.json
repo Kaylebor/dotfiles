@@ -7,6 +7,7 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "vim_mode": true,
   "features": {
     "inline_completion_provider": "supermaven"
   },
@@ -76,6 +77,15 @@
     "ollama": {
       "api_url": "http://localhost:11434",
       "available_models": []
+    },
+    "google": {
+      "available_models": [
+        {
+          "name": "gemini-2.0-flash-exp",
+          "display_name": "Gemini 2.0 Flash (Experimental)",
+          "max_tokens": 1048576
+        }
+      ]
     }
   }
 }
