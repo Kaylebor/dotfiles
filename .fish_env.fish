@@ -1,13 +1,20 @@
 #!/usr/bin/env fish
 
-if test -x (command -v zed)
+if type -q zed
   set -Ux VISUAL "zed -w"
 end
 
-if test -x (command -v nvim)
+if type -q emacsclient
+  set -Ux EDITOR 'ec'
+  set -Ux VISUAL 'ecc'
+else if type -q nvim
   set -Ux EDITOR nvim
-else if test -x (command -v vim)
+else if type -q vim
   set -Ux EDITOR vim
-else if test -x (command -v vi)
+else if type -q vi
   set -Ux EDITOR vi
+end
+
+if not type -q doom
+  fish_add_path -Upm $HOME/.config/emacs/bin
 end

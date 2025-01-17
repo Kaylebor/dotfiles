@@ -8,6 +8,7 @@ packages:
       - 'binutils'
       - 'btop'
       - 'carapace'
+      - 'cmake'
       - 'coreutils'
       - 'curl'
       - 'curlie'
@@ -79,6 +80,7 @@ packages:
     brews:
       - 'diffutils'
       - 'findutils'
+      - 'ffmpegthumbnailer'
       - 'gawk'
       - 'git'
       - 'gnu-indent'
@@ -86,6 +88,9 @@ packages:
       - 'gnu-tar'
       - 'gnu-which'
       - 'gpatch'
+      - 'mediainfo'
+      - 'poppler'
+      - 'unzip'
       - 'zip'
     casks:
       - 'font-iosevka-nerd-font'
