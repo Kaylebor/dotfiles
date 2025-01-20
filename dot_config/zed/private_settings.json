@@ -9,12 +9,12 @@
 {
   "vim_mode": true,
   "features": {
-    "inline_completion_provider": "supermaven"
+    "inline_completion_provider": "zed"
   },
   "assistant": {
     "default_model": {
       "provider": "google",
-      "model": "gemini-1.5-flash"
+      "model": "gemini-exp-1206"
     },
     "version": "2",
     "enable_experimental_live_diffs": true
@@ -81,9 +81,14 @@
     "google": {
       "available_models": [
         {
-          "name": "gemini-2.0-flash-exp",
-          "display_name": "Gemini 2.0 Flash (Experimental)",
-          "max_tokens": 1048576
+          "name": "gemini-exp-1206",
+          "display_name": "Gemini 1206 (Experimental)",
+          "max_tokens": 2097152
+        },
+        {
+          "name": "gemini-2.0-flash-thinking-exp-1219",
+          "display_name": "Gemini 2.0 Flash Thinking (Experimental)",
+          "max_tokens": 32767
         }
       ]
     }
