@@ -79,6 +79,11 @@
 (setq-default indent-tabs-mode nil)
 ;; Set tab to two spaces
 (setq-default tab-width 2)
+(setq-default smie-indent-basic 2)
+(setq-default c-basic-offset 2)
+(setq-default sh-basic-offset 2)
+(setq-default standard-indent 2)
+(setq-default typescript-indent-level 2)
 
 ;; Remove icon from title bar
 (setq ns-use-proxy-icon nil)
@@ -88,3 +93,14 @@
   (exec-path-from-shell-initialize))
 (when (daemonp)
   (exec-path-from-shell-initialize))
+
+;; Force Emacs to use a POSIX shell
+(setq shell-file-name (executable-find
+                       "bash"))
+;; Switch vterm to fish shell
+(setq vterm-shell (executable-find
+                   "fish"))
+
+;; Authentication configurations
+(use-package! auth-source-pass)
+(auth-source-pass-enable)
