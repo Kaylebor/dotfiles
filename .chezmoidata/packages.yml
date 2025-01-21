@@ -83,6 +83,7 @@ packages:
       - 'ffmpegthumbnailer'
       - 'gawk'
       - 'git'
+      - 'grip'
       - 'gnu-indent'
       - 'gnu-sed'
       - 'gnu-tar'
@@ -90,6 +91,8 @@ packages:
       - 'gpatch'
       - 'mediainfo'
       - 'poppler'
+      - 'prettier'
+      - 'shfmt'
       - 'unzip'
       - 'zip'
     casks:
