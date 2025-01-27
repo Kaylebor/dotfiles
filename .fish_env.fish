@@ -1,12 +1,13 @@
 #!/usr/bin/env fish
 
 if type -q zed
-  set -Ux VISUAL "zed -w"
-end
-
-if type -q emacsclient
-  set -Ux EDITOR 'ec'
-  set -Ux VISUAL 'ecc'
+  set ignore_visual true
+  set -Ux VISUAL 'zed -w'
+else if type -q emacsclient
+  set -Ux EDITOR 'emacsclient -t'
+  if not set -q ignore_visual
+    set -Ux VISUAL 'emacsclient -c'
+  end
 else if type -q nvim
   set -Ux EDITOR nvim
 else if type -q vim

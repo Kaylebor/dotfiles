@@ -1,21 +1,27 @@
 #!/usr/bin/env bash
 {{- if lookPath "fish" }}
 
+{{/* Version management */}}
 {{- if lookPath "mise" }}
 # Activate mise
-echo 'if status --is-interactive' > .config/fish/conf.d/mise.fish
-mise activate fish >> .config/fish/conf.d/mise.fish
-echo 'end' >> .config/fish/conf.d/mise.fish
+echo 'if status --is-interactive' >.config/fish/conf.d/mise.fish
+mise activate fish >>.config/fish/conf.d/mise.fish
+echo 'end' >>.config/fish/conf.d/mise.fish
 {{- end }}
 
-{{- if lookPath "fzf" }}
+{{/* History lookup */}}
+{{- if lookPath "atuin" }}
+# Integrate atuin
+atuin init fish >.config/fish/conf.d/atuin.fish
+{{- else if lookPath "fzf" }}
 # Integrate fzf
-fzf --fish > .config/fish/functions/fzf_key_bindings.fish
+fzf --fish >.config/fish/functions/fzf_key_bindings.fish
 {{- end }}
 
+{{/* Prompt */}}
 {{- if lookPath "starship" }}
 # Integrate starship
-starship init fish --print-full-init > .config/fish/conf.d/starship.fish
+starship init fish --print-full-init >.config/fish/conf.d/starship.fish
 {{- end }}
 
 fish -c "source {{ .chezmoi.sourceDir }}/.fish_env.fish"

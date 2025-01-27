@@ -16,18 +16,12 @@ for path in $brew_paths
   end
 end
 
-# Activate mise
-if command -v mise > /dev/null
-  mise activate fish > ~/.config/fish/conf.d/mise.fish
-end
-# Integrate fzf
-if command -v fzf &>/dev/null
-  fzf --fish > ~/.config/fish/functions/fzf_key_bindings.fish
-end
-# Integrate starship
-if command -v starship &>/dev/null
+# Prompt
+if command -q starship
+  # Integrate starship
   starship init fish > ~/.config/fish/conf.d/starship.fish
 end
+
 
 set -U LC_ALL en_US.UTF-8
 
@@ -45,4 +39,4 @@ for path in $paths
 end
 
 # Fisher plugin manager
-curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
+curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher update
