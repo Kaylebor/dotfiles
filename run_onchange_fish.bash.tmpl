@@ -10,10 +10,6 @@ echo 'end' >>.config/fish/conf.d/mise.fish
 {{- end }}
 
 {{/* History lookup */}}
-{{- if lookPath "atuin" }}
-# Integrate atuin
-atuin init fish >.config/fish/conf.d/atuin.fish
-{{- end }}
 {{- if lookPath "fzf" }}
 # Integrate fzf
 fzf --fish >.config/fish/conf.d/0fzf_key_bindings.fish

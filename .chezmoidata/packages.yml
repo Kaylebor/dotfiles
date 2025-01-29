@@ -2,7 +2,6 @@ packages:
   any:
     brews:
       - 'antidote'
-      - 'atuin'
       - 'autoconf'
       - 'bat'
       - 'binutils'
