@@ -9,7 +9,8 @@
 {
   "vim_mode": false,
   "features": {
-    "inline_completion_provider": "zed"
+    "inline_completion_provider": "copilot",
+    "copilot": true
   },
   "assistant": {
     "default_model": {
@@ -56,6 +57,11 @@
     "rubocop": {
       "initialization_options": {
         "safeAutocorrect": false
+      }
+    },
+    "solargraph": {
+      "settings": {
+        "use_bundler": false // Use system solargraph command
       }
     },
     "ruby-lsp": {

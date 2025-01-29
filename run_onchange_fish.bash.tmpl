@@ -13,9 +13,10 @@ echo 'end' >>.config/fish/conf.d/mise.fish
 {{- if lookPath "atuin" }}
 # Integrate atuin
 atuin init fish >.config/fish/conf.d/atuin.fish
-{{- else if lookPath "fzf" }}
+{{- end }}
+{{- if lookPath "fzf" }}
 # Integrate fzf
-fzf --fish >.config/fish/functions/fzf_key_bindings.fish
+fzf --fish >.config/fish/conf.d/0fzf_key_bindings.fish
 {{- end }}
 
 {{/* Prompt */}}
