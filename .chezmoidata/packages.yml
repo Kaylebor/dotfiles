@@ -97,5 +97,5 @@ packages:
     casks:
       - 'font-iosevka-nerd-font'
       - 'font-iosevka-term-nerd-font'
+      - 'mos'
       - 'rancher'
-      - 'smoothscroll'
