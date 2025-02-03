@@ -48,5 +48,7 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;; (unpin! t)
 
+;; To fix available env in MacOS
 (package! exec-path-from-shell)
 (package! dbml-mode)
+(package! gptel)

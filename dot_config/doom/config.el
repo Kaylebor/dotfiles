@@ -106,3 +106,39 @@
 (use-package! auth-source-pass)
 (auth-source-pass-enable)
 
+;; gptel OpenRouter configuration
+(setq gptel-openrouter-api-key nil) ; Initialize the cache variable
+(setq gptel-openrouter-api-key-expiration 0) ; Initialize expiration time
+
+(defun gptel-get-openrouter-api-key ()
+  "Retrieves the OpenRouter API key from 1Password, caching it for 30 minutes."
+  (let ((current-time (float-time)))
+    (cond
+     ((or (not gptel-openrouter-api-key)
+          (< gptel-openrouter-api-key-expiration current-time))
+      ;; Key is not cached or has expired
+      (message "Fetching OpenRouter API key from 1Password...")
+      (let ((api-key (string-trim (shell-command-to-string "op read \"op://Private/3wd65tvsf4vpc2gm2564lj5yky/credential\""))))
+        (setq gptel-openrouter-api-key api-key)
+        (setq gptel-openrouter-api-key-expiration (+ current-time (* 30 60))) ; Cache for 30 minutes (30 * 60 seconds)
+        api-key))
+     (t
+      ;; Key is cached and valid
+      gptel-openrouter-api-key))))
+
+(setq gptel-model   'deepseek/deepseek-r1:free
+      gptel-backend
+      (gptel-make-openai "OpenRouter"               ;Any name you want
+        :host "openrouter.ai"
+        :endpoint "/api/v1/chat/completions"
+        :stream t
+        :key #'gptel-get-openrouter-api-key ; Use the caching function
+        :models '(deepseek/deepseek-r1:free
+                  deepseek/deepseek-r1
+                  openai/gpt-3.5-turbo
+                  mistralai/mixtral-8x7b-instruct
+                  meta-llama/codellama-34b-instruct
+                  codellama/codellama-70b-instruct
+                  google/gemini-exp-1206:free
+                  google/gemini-2.0-flash-exp:free
+                  google/gemini-2.0-flash-thinking-exp:free)))
