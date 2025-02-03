@@ -2,6 +2,10 @@ github.com/jessfraz/dockfmt@latest
 github.com/fatih/gomodifytags@latest
 github.com/cweill/gotests/gotests@latest
 github.com/x-motemen/gore/cmd/gore@latest
+github.com/stamblerre/gocode@latest
+golang.org/x/tools/cmd/godoc@latest
+golang.org/x/tools/cmd/gorename@latest
+golang.org/x/tools/cmd/goimports@latest
 mvdan.cc/sh/v3/cmd/shfmt@latest
 golang.org/x/tools/gopls@latest
 honnef.co/go/tools/cmd/staticcheck@latest
