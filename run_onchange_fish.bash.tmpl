@@ -23,4 +23,9 @@ starship init fish --print-full-init >.config/fish/conf.d/starship.fish
 
 fish -c "source {{ .chezmoi.sourceDir }}/.fish_env.fish"
 
+{{- if eq .chezmoi.os "darwin" }}
+# MacOS-specific variable configuration
+fish -l -c "fish_add_path -Uam (brew --prefix sqlite)/bin"
+{{- end }}
+
 {{- end }}
