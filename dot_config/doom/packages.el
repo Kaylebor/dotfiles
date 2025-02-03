@@ -50,4 +50,3 @@
 
 (package! exec-path-from-shell)
 (package! dbml-mode)
-(package! blamer :recipe (:host github :repo "artawower/blamer.el"))
