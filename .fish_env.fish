@@ -55,3 +55,6 @@ end
 
 # Fisher plugin manager
 curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher update
+
+# Eza variables from (eza fish plugin)[https://github.com/plttn/fish-eza?tab=readme-ov-file#-configuration]
+set -U EZA_STANDARD_OPTIONS --smart-group --header --group-directories-first --hyperlink --time-style=long-iso --icons=always
