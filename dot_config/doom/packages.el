@@ -50,5 +50,9 @@
 
 ;; To fix available env in MacOS
 (package! exec-path-from-shell)
+
+;; To run jest tests
+(package! jest)
+
 (package! dbml-mode)
 (package! gptel)
