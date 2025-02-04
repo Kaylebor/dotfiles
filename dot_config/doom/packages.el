@@ -54,5 +54,8 @@
 ;; To run jest tests
 (package! jest)
 
-(package! dbml-mode)
+;; GPT and family
 (package! gptel)
+
+;; Assorted extra modes
+(package! dbml-mode)

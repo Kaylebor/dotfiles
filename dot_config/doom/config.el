@@ -86,6 +86,9 @@
 (setq-default standard-indent 2)
 (setq-default typescript-indent-level 2)
 
+;; Disable autoformat on HTML files
+(add-to-list '+format-on-save-disabled-modes 'html-mode)
+
 ;; Remove icon from title bar
 (setq ns-use-proxy-icon nil)
 

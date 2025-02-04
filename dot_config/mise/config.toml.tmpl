@@ -8,15 +8,13 @@ elixir = "1.17.3-otp-27"
 erlang = "27.2"
 rust = "stable"
 deno = "latest"
+bun = "latest"
 
 [settings]
 experimental = true
 disable_tools = ["python"]
 
 [env]
-{{- if eq .chezmoi.arch "arm64" }}
-GOARCH = "amd64"
-{{- end }}
 {{- if eq .chezmoi.os "linux" }}
 {{- if eq .chezmoi.osRelease.idLike "arch" }}
 KERL_CONFIGURE_OPTIONS="--with-odbc=/var/lib/pacman/local/unixodbc-$(pacman -Q unixodbc | cut -d' ' -f2)"
