@@ -132,24 +132,9 @@
   (auth-source-1password-enable))
 
 ;; gptel OpenRouter configuration
-(setq gptel-openrouter-api-key nil) ; Initialize the cache variable
-(setq gptel-openrouter-api-key-expiration 0) ; Initialize expiration time
-
 (defun gptel-get-openrouter-api-key ()
-  "Retrieves the OpenRouter API key from 1Password, caching it for 30 minutes."
-  (let ((current-time (float-time)))
-    (cond
-     ((or (not gptel-openrouter-api-key)
-          (< gptel-openrouter-api-key-expiration current-time))
-      ;; Key is not cached or has expired
-      (message "Fetching OpenRouter API key from 1Password...")
-      (let ((api-key (string-trim (shell-command-to-string "op read \"op://Private/3wd65tvsf4vpc2gm2564lj5yky/credential\""))))
-        (setq gptel-openrouter-api-key api-key)
-        (setq gptel-openrouter-api-key-expiration (+ current-time (* 30 60))) ; Cache for 30 minutes (30 * 60 seconds)
-        api-key))
-     (t
-      ;; Key is cached and valid
-      gptel-openrouter-api-key))))
+  "Retrieves the OpenRouter API key from 1Password"
+  (auth-source-pick-first-password :host "OpenRouter" :user "API Token"))
 
 (setq gptel-model   'deepseek/deepseek-r1:free
       gptel-backend
