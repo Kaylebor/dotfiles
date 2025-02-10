@@ -86,8 +86,21 @@
 (setq-default standard-indent 2)
 (setq-default typescript-indent-level 2)
 
+;; Set hooks to load mise globally
+(add-hook 'after-init-hook #'global-mise-mode)
+
 ;; Disable autoformat on HTML files
 (add-to-list '+format-on-save-disabled-modes 'html-mode)
+
+;; Configure eglot LSPs
+(after! eglot
+  (add-to-list 'eglot-server-programs
+               `(typescript-mode . ("typescript-language-server" "--stdio" :initializationOptions '(:importModuleSpecifierPreference "relative"))))
+               `(json-mode . ("vscode-json-language-server")))
+
+;; Configure apheleia linters
+(after! apheleia
+  (add-to-list 'apheleia-mode-alist '(ruby-mode . (rubocop))))
 
 ;; Remove icon from title bar
 (setq ns-use-proxy-icon nil)
@@ -99,15 +112,24 @@
   (exec-path-from-shell-initialize))
 
 ;; Force Emacs to use a POSIX shell
-(setq shell-file-name (executable-find
-                       "bash"))
+(setq shell-file-name (executable-find "bash"))
 ;; Switch vterm to fish shell
-(setq vterm-shell (executable-find
-                   "fish"))
+(setq vterm-shell (executable-find "fish"))
+(setq explicit-shell-file-name (executable-find "fish"))
 
-;; Authentication configurations
-(use-package! auth-source-pass)
-(auth-source-pass-enable)
+;; 1Password integration
+(defun auth-source-1password--1password-construct-query-path-escaped (_backend _type host user _port)
+  "Construct the full entry-path for the 1password entry for HOST and USER.
+   Usually starting with the `auth-source-1password-vault', followed
+   by host and user."
+  (mapconcat #'identity (list auth-source-1password-vault host (string-replace "^" "_" user)) "/"))
+
+(use-package! auth-source-1password
+  :custom
+  (auth-source-1password-vault "Private")
+  (auth-source-1password-construct-secret-reference #'auth-source-1password--1password-construct-query-path-escaped)
+  :config
+  (auth-source-1password-enable))
 
 ;; gptel OpenRouter configuration
 (setq gptel-openrouter-api-key nil) ; Initialize the cache variable

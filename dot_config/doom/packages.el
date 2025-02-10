@@ -51,6 +51,12 @@
 ;; To fix available env in MacOS
 (package! exec-path-from-shell)
 
+;; 1Password integration
+(package! auth-source-1password :recipe (:type git :host github :repo "dlobraico/auth-source-1password" :build nil))
+
+;; Better integrates Mise with Emacs, so executables are properly sourced
+(package! mise)
+
 ;; To run jest tests
 (package! jest)
 
