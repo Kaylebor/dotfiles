@@ -152,3 +152,7 @@
                   google/gemini-exp-1206:free
                   google/gemini-2.0-flash-exp:free
                   google/gemini-2.0-flash-thinking-exp:free)))
+
+;; Add a keybind to gptel-menu
+(map! "C-c g" #'gptel-menu)
+(map! :leader "l" #'gptel-menu)
