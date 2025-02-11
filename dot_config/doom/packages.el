@@ -52,7 +52,7 @@
 (package! exec-path-from-shell)
 
 ;; 1Password integration
-(package! auth-source-1password :recipe (:type git :host github :repo "dlobraico/auth-source-1password" :build nil))
+(package! auth-source-1password :recipe (:type git :host github :repo "dlobraico/auth-source-1password"))
 
 ;; Better integrates Mise with Emacs, so executables are properly sourced
 (package! mise)
