@@ -153,6 +153,12 @@
                   google/gemini-2.0-flash-exp:free
                   google/gemini-2.0-flash-thinking-exp:free)))
 
+;; Enforce dbml-mode on .dbml files
+(use-package! dbml-mode
+  :config
+  (add-to-list 'auto-mode-alist
+             '("\\.dbml\\'" . dbml-mode)))
+
 ;; Add a keybind to gptel-menu
 (map! "C-c g" #'gptel-menu)
-(map! :leader "l" #'gptel-menu)
+(map! :leader :desc "Pop up gptel menu" "l" #'gptel-menu)
