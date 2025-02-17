@@ -1,4 +1,4 @@
 function cb --wraps=clipboard --description 'alias cb clipboard'
-  clipboard $argv
+  clipboard-cli $argv
         
 end

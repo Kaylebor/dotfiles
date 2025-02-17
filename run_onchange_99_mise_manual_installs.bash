@@ -37,7 +37,10 @@ if find_and_source_mise_env; then
         echo "mdopen is already installed"
     fi
     # Unconditionally install JS CLI tools
-    mise exec bun -c 'bun install -g clipboard-cli firebase-tools typescript-language-server vscode-langservers-extracted'
+    mise exec deno -c 'deno install -g npm:clipboard-cli'
+    mise exec deno -c 'deno install -g npm:firebase-tools'
+    mise exec deno -c 'deno install -g npm:typescript-language-server'
+    mise exec deno -c 'deno install -g npm:vscode-langservers-extracted'
 else
     echo "Skipping mdopen installation as mise environment was not found or could not be sourced"
 fi

@@ -25,6 +25,7 @@ set -l paths \
       ~/.local/share/google-cloud-sdk/bin \
       ~/.local/share/yabridge \
       ~/.rd/bin \
+      ~/.deno/bin \
       ~/.bun/bin \
       ~/.local/bin
 
