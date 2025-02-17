@@ -63,5 +63,8 @@
 ;; GPT and family
 (package! gptel)
 
+;; Copilot for completion
+(package! copilot :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el")))
+
 ;; Assorted extra modes
 (package! dbml-mode)

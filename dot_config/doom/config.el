@@ -92,11 +92,23 @@
 ;; Disable autoformat on HTML files
 (add-to-list '+format-on-save-disabled-modes 'html-mode)
 
+;; Enable word wrap (almost) everywhere
+(+global-word-wrap-mode +1)
+
 ;; Configure eglot LSPs
 (after! eglot
   (add-to-list 'eglot-server-programs
                `(typescript-mode . ("typescript-language-server" "--stdio" :initializationOptions '(:importModuleSpecifierPreference "relative"))))
                `(json-mode . ("vscode-json-language-server")))
+
+;; Configure copilot
+(use-package! copilot
+  :hook (prog-mode . copilot-mode)
+  :bind (:map copilot-completion-map
+              ("<tab>" . 'copilot-accept-completion)
+              ("TAB" . 'copilot-accept-completion)
+              ("C-TAB" . 'copilot-accept-completion-by-word)
+              ("C-<tab>" . 'copilot-accept-completion-by-word)))
 
 ;; Configure apheleia linters
 (after! apheleia
