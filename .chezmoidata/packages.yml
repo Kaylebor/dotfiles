@@ -93,6 +93,7 @@ packages:
       - 'gnu-which'
       - 'golangci-lint'
       - 'gpatch'
+      - 'little-cms2'
       - 'mediainfo'
       - 'poppler'
       - 'prettier'
