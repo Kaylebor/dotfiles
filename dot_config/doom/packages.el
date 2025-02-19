@@ -65,6 +65,10 @@
 
 ;; Copilot for completion
 (package! copilot :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el")))
+;; custom LSP path
+(add-hook 'copilot-setup-hook
+          (lambda ()
+            (setq copilot-server-executable (expand-file-name "~/.bun/bin/copilot-language-server"))))
 
 ;; Assorted extra modes
 (package! dbml-mode)

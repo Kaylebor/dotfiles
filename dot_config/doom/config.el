@@ -143,6 +143,11 @@
   :config
   (auth-source-1password-enable))
 
+;; copilot.el custom LSP executable
+(use-package! copilot
+  :after copilot
+  :config (setq copilot-server-executable (expand-file-name "~/.bun/bin/copilot-language-server")))
+
 ;; gptel OpenRouter configuration
 (defun gptel-get-openrouter-api-key ()
   "Retrieves the OpenRouter API key from 1Password"
@@ -174,3 +179,4 @@
 ;; Add a keybind to gptel-menu
 (map! "C-c g" #'gptel-menu)
 (map! :leader :desc "Pop up gptel menu" "l" #'gptel-menu)
+(setq debug-on-entry 'minibuffer-restore-windows)

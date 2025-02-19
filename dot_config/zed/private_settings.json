@@ -10,7 +10,7 @@
   "icon_theme": "Material Icon Theme",
   "vim_mode": false,
   "features": {
-    "inline_completion_provider": "copilot",
+    "edit_prediction_provider": "zed",
     "copilot": true
   },
   "assistant": {
