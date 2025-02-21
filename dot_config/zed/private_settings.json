@@ -16,10 +16,48 @@
   "assistant": {
     "default_model": {
       "provider": "google",
-      "model": "gemini-exp-1206"
+      "model": "gemini-2.0-pro-exp-02-05"
     },
     "version": "2",
     "enable_experimental_live_diffs": true
+  },
+  "context_servers": {
+    "postgres-context-server": {
+      "settings": {
+        "database_url": "postgresql://kay:@localhost:5432/loyal_guru"
+      }
+    }
+  },
+  "language_models": {
+    "google": {
+      "available_models": [
+        {
+          "name": "gemini-2.0-flash",
+          "display_name": "Gemini 2.0 Flash",
+          "max_tokens": 1048576
+        },
+        {
+          "name": "gemini-2.0-flash-exp",
+          "display_name": "Gemini 2.0 Flash Experimental",
+          "max_tokens": 1048576
+        },
+        {
+          "name": "gemini-2.0-pro-exp-02-05",
+          "display_name": "Gemini 2.0 Pro Experimental 02-05",
+          "max_tokens": 2097152
+        },
+        {
+          "name": "gemini-2.0-flash-thinking-exp-01-21",
+          "display_name": "Gemini 2.0 Flash Thinking Experimental 01-21",
+          "max_tokens": 1048576
+        },
+        {
+          "name": "gemini-2.0-flash-lite-preview-02-05",
+          "display_name": "Gemini 2.0 Flash Lite Preview 02-05",
+          "max_tokens": 1048576
+        }
+      ]
+    }
   },
   "ui_font_size": 14,
   "ui_font_family": "Iosevka Nerd Font",
@@ -30,7 +68,9 @@
     "shell": {
       "with_arguments": {
         "program": "fish",
-        "args": ["-l"]
+        "args": [
+          "-l"
+        ]
       }
     },
     "font_family": "IosevkaTerm Nerd Font"
@@ -42,22 +82,44 @@
   },
   "languages": {
     "Ruby": {
-      "language_servers": ["!ruby-lsp", "solargraph", "rubocop"]
+      "language_servers": [
+        "!ruby-lsp",
+        "solargraph",
+        "rubocop"
+      ]
     },
     "HTML": {
-      "prettier": { "allowed": false }
+      "prettier": {
+        "allowed": false
+      }
     },
     "TypeScript": {
-      "prettier": { "allowed": false }
+      "language_servers": [
+        "typescript-language-server",
+        "!vtsls"
+      ],
+      "prettier": {
+        "allowed": false
+      }
     },
     "JavaScript": {
-      "prettier": { "allowed": false }
+      "prettier": {
+        "allowed": false
+      }
     }
   },
+  "formatter": "language_server",
   "lsp": {
     "rubocop": {
       "initialization_options": {
         "safeAutocorrect": false
+      }
+    },
+    "typescript-language-server": {
+      "initialization_options": {
+        "preferences": {
+          "importModuleSpecifierPreference": "project-relative"
+        }
       }
     },
     "solargraph": {
@@ -71,33 +133,6 @@
           "diagnostics": false // Zed does not support pull-based diagnostics yet
         }
       }
-    }
-  },
-  "context_servers": {
-    "postgres-context-server": {
-      "settings": {
-        "database_url": "postgresql://kay:@localhost:5432/loyal_guru"
-      }
-    }
-  },
-  "language_models": {
-    "ollama": {
-      "api_url": "http://localhost:11434",
-      "available_models": []
-    },
-    "google": {
-      "available_models": [
-        {
-          "name": "gemini-exp-1206",
-          "display_name": "Gemini 1206 (Experimental)",
-          "max_tokens": 2097152
-        },
-        {
-          "name": "gemini-2.0-flash-thinking-exp-1219",
-          "display_name": "Gemini 2.0 Flash Thinking (Experimental)",
-          "max_tokens": 32767
-        }
-      ]
     }
   }
 }
