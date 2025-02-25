@@ -1,5 +1,7 @@
 #!/bin/bash
+{{/* Script to check OS and install packages based on OS */}}
 
+{{/* MacOS setup commands */}}
 {{ if eq .chezmoi.os "darwin" -}}
 {{- if (not (lookPath "brew")) }}
 # Install Homebrew
@@ -9,9 +11,6 @@
 
 # Install Homebrew packages
 brew bundle --no-lock --file=- <<EOF
-{{ range .packages.any.brews -}}
-brew {{ . | quote }}
-{{ end -}}
 {{ if eq .chezmoi.os "darwin" -}}
 {{ range .packages.darwin.brews -}}
 brew {{ . | quote }}
@@ -22,3 +21,30 @@ cask {{ . | quote }}
 EOF
 {{ end -}}
 {{ end -}}
+
+{{/* Linux setup commands */}}
+{{- if eq .chezmoi.os "linux" }}
+
+{{/* Arch Linux setup commands */}}
+{{- if eq .chezmoi.osRelease.idLike "arch" }}
+
+# Install base development tools
+{{- if (not (eq (output "pacman" "-Q" "base-devel") "base-devel")) }}
+sudo pacman -S --needed --noconfirm base-devel
+{{- end }}
+
+# Install paru AUR helper
+{{- if (not (lookPath "paru")) }}
+curl -L "https://aur.archlinux.org/cgit/aur.git/snapshot/paru.tar.gz" | tar xz
+cd paru
+makepkg -si --noconfirm
+cd ..
+rm -rf paru
+{{- end }}
+
+# Install packages defined in the configuration file
+paru -S --noconfirm {{ range .packages.arch.aur -}} {{ . | quote }} {{ end }}
+
+{{- end }}
+
+{{- end }}

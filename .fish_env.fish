@@ -36,22 +36,32 @@ for path in $paths
 end
 
 if type -q zed
-  set ignore_visual true
   set -Ux VISUAL 'zed -w'
+  set ignore_visual true
 else if type -q emacsclient
   set -Ux EDITOR 'emacsclient -t'
+  set ignore_editor true
   if not set -q ignore_visual
     set -Ux VISUAL 'emacsclient -c'
+    set ignore_visual true
   end
-else if type -q nvim
-  set -Ux EDITOR nvim
-else if type -q vim
-  set -Ux EDITOR vim
-else if type -q vi
-  set -Ux EDITOR vi
 end
 
-if not type -q doom
+if not set -q ignore_editor
+  if type -q hx
+    set -Ux EDITOR hx
+  else if type -q nvim
+    set -Ux EDITOR nvim
+  else if type -q vim
+    set -Ux EDITOR vim
+  else if type -q vi
+    set -Ux EDITOR vi
+  end
+end
+
+set -Ux GIT_EDITOR $EDITOR
+
+if not type -q doom and test -d $HOME/.config/emacs/bin
   fish_add_path -Upm $HOME/.config/emacs/bin
 end
 
