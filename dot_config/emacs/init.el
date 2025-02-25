@@ -57,6 +57,9 @@
 ;; magit
 (elpaca magit)
 
+;; transient
+(elpaca transient)
+
 ;; project.el
 (elpaca project)
 
@@ -75,7 +78,8 @@
   (global-flycheck-mode))
 
 ;; lsp-mode
-(elpaca lsp-mode (lsp-modeline-code-actions-mode))
+(elpaca lsp-mode
+  (lsp-modeline-code-actions-mode))
 
 ;; 1Password integration
 (elpaca (auth-source-1password :host github :repo "dlobraico/auth-source-1password" :build t)
@@ -88,6 +92,10 @@
 (when (display-graphic-p)
   (elpaca all-the-icons))
 ;; Run all-the-icons-install-fonts afterwards
+
+;; Emojis
+(elpaca emojify
+  (global-emojify-mode))
 
 ;; Enforce dbml-mode on .dbml files
 (elpaca dbml-mode
