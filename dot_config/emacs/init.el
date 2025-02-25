@@ -81,8 +81,9 @@
 (elpaca eglot)
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
+    `(ruby-mode . ("solargraph" "stdio"))
     `(typescript-mode . ("typescript-language-server" "--stdio" :initializationOptions '(:importModuleSpecifierPreference "project-relative")))
-    `(json-mode . ("vscode-json-language-server" "--stdio"))))
+    `(json-mode . ("vscode-json-language-server"))))
 
 ;; DAP debugging
 (elpaca dape)
