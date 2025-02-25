@@ -43,7 +43,7 @@ rm -rf paru
 {{- end }}
 
 # Install packages defined in the configuration file
-paru -S --noconfirm {{ range .packages.arch.aur -}} {{ . | quote }} {{ end }}
+paru -S --needed --noconfirm {{ range .packages.arch.aur -}} {{ . | quote }} {{ end }}
 
 {{- end }}
 
