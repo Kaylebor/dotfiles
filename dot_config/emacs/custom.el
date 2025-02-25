@@ -40,21 +40,3 @@
 ;; 1Password config
 (setopt auth-source-1password-vault "Private")
 (setopt auth-source-1password-construct-secret-reference #'auth-source-1password--1password-construct-query-path-escaped)
-
-;; GPTel config
-(setopt gptel-model 'google/gemini-2.0-pro-exp-02-05:free
-        gptel-backend
-          (gptel-make-openai "OpenRouter"
-            :host "openrouter.ai"
-            :endpoint "/api/v1/chat/completions"
-            :stream t
-            :key (lambda () (auth-source-pick-first-password :host "OpenRouter" :user "API Token"))
-            :models '(deepseek/deepseek-r1:free
-                      deepseek/deepseek-r1
-                      openai/gpt-3.5-turbo
-                      mistralai/mixtral-8x7b-instruct
-                      meta-llama/codellama-34b-instruct
-                      codellama/codellama-70b-instruct
-                      google/gemini-2.0-pro-exp-02-05:free
-                      google/gemini-2.0-flash-thinking-exp:free
-                      google/gemini-2.0-flash-lite-preview-02-05:free)))

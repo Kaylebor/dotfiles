@@ -26,7 +26,9 @@
    '("?" . meow-cheatsheet)
    ;; Quickly evaluate expressions in minibuffer
    '(";" . eval-expression)
-   '(":" . pp-eval-expression))
+   '(":" . pp-eval-expression)
+   '("bb" . switch-to-buffer)
+   '("gg" . magit-status))
   (meow-normal-define-key
    '("0" . meow-expand-0)
    '("9" . meow-expand-9)

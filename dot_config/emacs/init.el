@@ -77,16 +77,38 @@
 (elpaca flycheck
   (global-flycheck-mode))
 
-;; lsp-mode
-(elpaca lsp-mode
-  (lsp-modeline-code-actions-mode))
+;; eglot configurations
+(elpaca eglot)
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+    `(typescript-mode . ("typescript-language-server" "--stdio" :initializationOptions '(:importModuleSpecifierPreference "project-relative")))
+    `(json-mode . ("vscode-json-language-server" "--stdio"))))
+
+;; DAP debugging
+(elpaca dape)
 
 ;; 1Password integration
 (elpaca (auth-source-1password :host github :repo "dlobraico/auth-source-1password" :build t)
   (auth-source-1password-enable))
 
 ;; GPT and family
-(elpaca gptel)
+(elpaca gptel
+  (setopt gptel-model 'google/gemini-2.0-pro-exp-02-05:free
+          gptel-backend
+            (gptel-make-openai "OpenRouter"
+              :host "openrouter.ai"
+              :endpoint "/api/v1/chat/completions"
+              :stream t
+              :key (lambda () (auth-source-pick-first-password :host "OpenRouter" :user "API Token"))
+              :models '(deepseek/deepseek-r1:free
+                        deepseek/deepseek-r1
+                        openai/gpt-3.5-turbo
+                        mistralai/mixtral-8x7b-instruct
+                        meta-llama/codellama-34b-instruct
+                        codellama/codellama-70b-instruct
+                        google/gemini-2.0-pro-exp-02-05:free
+                        google/gemini-2.0-flash-thinking-exp:free
+                        google/gemini-2.0-flash-lite-preview-02-05:free))))
 
 ;; icons
 (when (display-graphic-p)
@@ -111,6 +133,27 @@
 ;; Manually process elpaca queues now before loading customizations
 ;; Keybindings may go above this line if they depend on extra packages
 (elpaca-process-queues)
+
+;; Add treesitter grammars so Emacs knows where to find them
+(setq treesit-language-source-alist
+   '((bash "https://github.com/tree-sitter/tree-sitter-bash" "v0.23.3")
+     (cmake "https://github.com/uyha/tree-sitter-cmake" "v0.5.0")
+     (css "https://github.com/tree-sitter/tree-sitter-css" "v0.23.2")
+     (elisp "https://github.com/Wilfred/tree-sitter-elisp" "main")
+     (go "https://github.com/tree-sitter/tree-sitter-go" "v0.23.4")
+     (html "https://github.com/tree-sitter/tree-sitter-html" "v0.23.2")
+     (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "v0.23.1" "src")
+     (json "https://github.com/tree-sitter/tree-sitter-json" "v0.24.8")
+     (make "https://github.com/alemuller/tree-sitter-make" "main")
+     (markdown "https://github.com/ikatyang/tree-sitter-markdown" "v0.7.1")
+     (python "https://github.com/tree-sitter/tree-sitter-python" "v0.23.6")
+     (toml "https://github.com/tree-sitter/tree-sitter-toml" "v0.5.1")
+     (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "v0.23.2" "tsx/src")
+     (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "v0.23.2" "typescript/src")
+     (yaml "https://github.com/ikatyang/tree-sitter-yaml" "v0.5.0")))
+
+;; Forcefully enable some built-in major modes on certain file extensions
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
 
 ;; Customization
 (setopt custom-file (expand-file-name "custom.el" user-emacs-directory))
