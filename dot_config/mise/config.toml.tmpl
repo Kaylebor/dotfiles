@@ -15,8 +15,6 @@ experimental = true
 disable_tools = ["python"]
 
 [env]
-{{- if eq .chezmoi.os "linux" }}
-{{- if eq .chezmoi.osRelease.idLike "arch" }}
-KERL_CONFIGURE_OPTIONS="--with-odbc=/var/lib/pacman/local/unixodbc-$(pacman -Q unixodbc | cut -d' ' -f2)"
-{{- end }}
+{{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.idLike "arch") }}
+KERL_CONFIGURE_OPTIONS="--with-odbc=/var/lib/pacman/local/unixodbc-{{ output "pacman" "-Q" "unixodbc" | trim | splitList " " | last }}"
 {{- end }}
