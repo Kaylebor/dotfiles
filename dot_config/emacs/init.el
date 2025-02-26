@@ -14,32 +14,33 @@
 (elpaca corfu
   (global-corfu-mode))
 
-;; vertico for improved completion UI
+;; vertico for improved completion UI https://github.com/minad/vertico
 (elpaca vertico
   (vertico-mode)
   (vertico-mouse-mode))
 
-;; consult provides a bunch of search commands to vertico
+;; consult provides a bunch of search commands to vertico https://github.com/minad/consult
 (elpaca consult)
 
-;; embark provides contextual actions to vertico
+;; embark provides contextual actions to vertico https://github.com/oantolin/embark
 (elpaca embark
   (setopt prefix-help-command #'embark-prefix-help-command))
 (elpaca embark-consult)
 (add-hook 'embark-collect-mode-hook #'consult-preview-at-point-mode)
 
-;; orderless for improved completion matching
+;; orderless for improved completion matching https://github.com/oantolin/orderless
 (elpaca orderless
   (setopt completion-styles '(orderless basic)
         completion-category-defaults nil
-        completion-category-overrides '((file (styles partial-completion)))))
+        completion-category-overrides '((file (styles partial-completion)))
+        orderless-matching-styles '(orderless-literal orderless-regexp orderless-flex)))
 
-;; Marginalia to add completion information
+;; Marginalia to add completion information https://github.com/minad/marginalia
 (elpaca marginalia
   (marginalia-mode))
 
-;; ibuffer-vc
-(elpaca ibuffer-vc)
+;; Turns grep searches into writable buffers https://github.com/mhayashi1120/Emacs-wgrep
+(elpaca wgrep)
 
 ;; Emacs minibuffer configurations.
 (use-package emacs
@@ -73,9 +74,9 @@
 ;; Better mise integration with Emacs
 (elpaca mise (global-mise-mode))
 
-;; flycheck
-(elpaca flycheck
-  (global-flycheck-mode))
+;; yasnippet
+(elpaca yasnippet
+  (yas-global-mode 1))
 
 ;; eglot configurations
 (elpaca eglot
@@ -123,6 +124,8 @@
 
 ;; Emojis
 (elpaca emojify
+  (setq emojify-emoji-styles '(unicode github))
+  (setq emojify-display-style 'unicode)
   (global-emojify-mode))
 
 ;; Enforce dbml-mode on .dbml files

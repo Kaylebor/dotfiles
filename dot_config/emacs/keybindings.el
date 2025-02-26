@@ -1,6 +1,11 @@
 ;; -*- lexical-binding: t; -*-
 
-(global-set-key (kbd "C-u") 'delete-minibuffer-contents)
+(global-set-key (kbd "C-u") 'delete-minibuffer-contents) ;; Delete minibuffer contents
+
+;; Consult stuff
+(global-set-key "\C-x\C-b" 'consult-buffer)              ;; Show buffer list
+(global-set-key "\M-gg" 'consult-goto-line)
+(global-set-key "\M-gi" 'consult-imenu)
 
 ;; https://github.com/meow-edit/meow/blob/master/KEYBINDING_QWERTY.org
 (elpaca meow
@@ -27,8 +32,13 @@
    ;; Quickly evaluate expressions in minibuffer
    '(";" . eval-expression)
    '(":" . pp-eval-expression)
-   '("bb" . switch-to-buffer)
-   '("gg" . magit-status))
+   '("K" . xref-find-definitions)
+   '("pp" . project-switch-project)
+   '("pb" . consult-project-buffer)
+   '("bb" . consult-buffer)
+   '("gg" . magit-status)
+   '("SPC" . consult-fd)
+   '("." . consult-ripgrep))
   (meow-normal-define-key
    '("0" . meow-expand-0)
    '("9" . meow-expand-9)
