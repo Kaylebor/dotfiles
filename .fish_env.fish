@@ -65,6 +65,9 @@ if not type -q doom and test -d $HOME/.config/emacs/bin
   fish_add_path -Upm $HOME/.config/emacs/bin
 end
 
+# Bat as man pager
+set -Ux MANPAGER "sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p -lman'"
+
 # Fisher plugin manager
 curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher update
 
