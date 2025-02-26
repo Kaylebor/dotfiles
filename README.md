@@ -11,5 +11,10 @@ Execute this command to install chezmoi and apply the dotfiles:
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply Kaylebor
 ```
 
+Within Emacs, you may want to run this to install the tree sitter grammars:
+```elisp
+(mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
+```
+
 ## Extras
 - Fonts: [Iosevka and Iosevka Term](https://typeof.net/Iosevka/)
