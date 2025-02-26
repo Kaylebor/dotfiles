@@ -19,4 +19,6 @@
     (background-color . "#282a36")
     (foreground-color . "#f8f8f2")
     (ns-appearance . dark)
-    (ns-transparent-titlebar . t)))
+    (ns-transparent-titlebar . t)
+  )
+)

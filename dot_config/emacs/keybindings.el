@@ -2,11 +2,6 @@
 
 (global-set-key (kbd "C-u") 'delete-minibuffer-contents) ;; Delete minibuffer contents
 
-;; Consult stuff
-(global-set-key "\C-x\C-b" 'consult-buffer)              ;; Show buffer list
-(global-set-key "\M-gg" 'consult-goto-line)
-(global-set-key "\M-gi" 'consult-imenu)
-
 ;; https://github.com/meow-edit/meow/blob/master/KEYBINDING_QWERTY.org
 (elpaca meow
   (require 'meow)
