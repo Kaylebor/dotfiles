@@ -1,6 +1,8 @@
 packages:
   arch:
     aur:
+      - "1password"
+      - "1password-cli"
       - "autoconf"
       - "bat"
       - "binutils"
@@ -13,6 +15,7 @@ packages:
       - "erlang"
       - "eza"
       - "fd"
+      - "firefox-developer-edition"
       - "fish"
       - "flex"
       - "fop"
@@ -142,7 +145,13 @@ packages:
       - "zip"
       - "zsh"
     casks:
+      - "1password"
+      - "1password-cli"
+      - "firefox@developer-edition"
+      - "font-iosevka"
       - "font-iosevka-nerd-font"
       - "font-iosevka-term-nerd-font"
+      - "libreoffice"
+      - "libreoffice-language-pack"
       - "mos"
       - "rancher"
