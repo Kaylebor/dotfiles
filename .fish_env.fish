@@ -35,6 +35,18 @@ for path in $paths
   end
 end
 
+# Add GNU utils to path on MacOS
+if test (uname) = "Darwin"
+  # Add GNU utils to path on MacOS
+  set -l core_utils coreutils findutils gnu-sed gawk grep
+  for util in $core_utils
+    set -l gnu_path (brew --prefix $util)"/libexec/gnubin"
+    if test -d $gnu_path
+      fish_add_path -Upm $gnu_path
+    end
+  end
+end
+
 if type -q zed
   set -Ux VISUAL 'zed -w'
   set ignore_visual true
