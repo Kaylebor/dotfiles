@@ -2,6 +2,9 @@
 ;; Enable minibuffer history
 (savehist-mode 1)
 
+;; Makes manual buffer switching obey configured display actions
+(setopt switch-to-buffer-obey-display-actions t)
+
 ;; Enable horizontal scrolling
 (setopt mouse-wheel-tilt-scroll t)
 (setopt mouse-wheel-flip-direction t)

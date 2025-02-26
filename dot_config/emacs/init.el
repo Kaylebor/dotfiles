@@ -175,6 +175,9 @@
 ;; Keybindings may go above this line if they depend on extra packages
 (elpaca-process-queues)
 
+;; Enable tabs
+(tab-bar-mode)
+
 ;; Customization
 (setopt custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file 'noerror)
