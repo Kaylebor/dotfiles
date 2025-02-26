@@ -78,12 +78,17 @@
   (global-flycheck-mode))
 
 ;; eglot configurations
-(elpaca eglot)
+(elpaca eglot
+  (add-hook 'ruby-ts-mode-hook 'eglot-ensure)
+  (add-hook 'typescript-ts-mode-hook 'eglot-ensure)
+  (add-hook 'json-ts-mode-hook 'eglot-ensure)
+  (add-hook 'go-ts-mode-hook 'eglot-ensure))
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
-    `(ruby-mode . ("solargraph" "stdio"))
-    `(typescript-mode . ("typescript-language-server" "--stdio" :initializationOptions '(:importModuleSpecifierPreference "project-relative")))
-    `(json-mode . ("vscode-json-language-server"))))
+    `(ruby-ts-mode . ("solargraph" "stdio"))
+    `(typescript-ts-mode . ("typescript-language-server" "--stdio" :initializationOptions '(:importModuleSpecifierPreference "project-relative")))
+    `(json-ts-mode . ("vscode-json-language-server"))
+    `(go-ts-mode . ("gopls"))))
 
 ;; DAP debugging
 (elpaca dape)
@@ -146,7 +151,8 @@
      (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "v0.23.1" "src")
      (json "https://github.com/tree-sitter/tree-sitter-json" "v0.24.8")
      (make "https://github.com/alemuller/tree-sitter-make" "main")
-     (markdown "https://github.com/ikatyang/tree-sitter-markdown" "v0.7.1")
+     (markdown "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "v0.3.2" "tree-sitter-markdown/src")
+     (markdown-inline "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "v0.3.2" "tree-sitter-markdown-inline/src")
      (python "https://github.com/tree-sitter/tree-sitter-python" "v0.23.6")
      (toml "https://github.com/tree-sitter/tree-sitter-toml" "v0.5.1")
      (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "v0.23.2" "tsx/src")
@@ -154,7 +160,9 @@
      (yaml "https://github.com/ikatyang/tree-sitter-yaml" "v0.5.0")))
 
 ;; Forcefully enable some built-in major modes on certain file extensions
+(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
 
 ;; Customization
 (setopt custom-file (expand-file-name "custom.el" user-emacs-directory))
