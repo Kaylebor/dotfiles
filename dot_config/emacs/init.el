@@ -39,8 +39,12 @@
 
 ;; consult provides a bunch of search commands to vertico https://github.com/minad/consult
 (use-package consult
-  :bind (
+  :bind
+  (:map consult-mode-map
+    ("C-x f" . consult-find)
+    ("C-x ." . consult-ripgrep)
     ("C-x C-b" . consult-buffer) ;; Show buffer list
+    ("C-x p b" . consult-project-buffer)
     ("M-g g" . consult-goto-line)
     ("M-g i" . consult-imenu)
   )
@@ -53,7 +57,8 @@
 
 ;; embark provides contextual actions to vertico https://github.com/oantolin/embark
 (use-package embark :ensure t
-  :init (setq prefix-help-command #'embark-prefix-help-command)
+  :custom
+  (prefix-help-command #'embark-prefix-help-command)
 )
 (use-package embark-consult :ensure t
   :after embark
@@ -95,7 +100,19 @@
 )
 
 ;; Code folding based on newer treesit.el
-(use-package treesit-fold :ensure t)
+(use-package treesit-fold :ensure t
+  :bind
+  (:map treesit-fold-mode-map
+    ("C-c C-f" . treesit-fold-toggle)
+    ("C-c C-u" . treesit-fold-unfold-all)
+    ("C-c C-r" . treesit-fold-rebuild)
+  )
+  :custom
+  (treesit-fold-line-count-show t)
+  :init
+  (global-treesit-fold-mode)
+  (global-treesit-fold-indicators-mode)
+)
 
 ;; Better mise integration with Emacs
 (use-package mise :ensure t

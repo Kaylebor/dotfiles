@@ -2,9 +2,9 @@
 (use-package dbml-mode :ensure t)
 
 (use-package tree-sitter :ensure t
-  :init
+  :custom
   ;; Add treesitter grammars so Emacs knows where to find them
-  (setq treesit-language-source-alist
+  (treesit-language-source-alist
     '(
       (bash "https://github.com/tree-sitter/tree-sitter-bash" "v0.23.3")
       (cmake "https://github.com/uyha/tree-sitter-cmake" "v0.5.0")
@@ -28,6 +28,7 @@
       (hcl "https://github.com/tree-sitter-grammars/tree-sitter-hcl" "v1.1.0")
     )
   )
+  :init
   ;; Map file extensions to tree-sitter modes
   (add-to-list 'major-mode-remap-alist '(ruby-mode . ruby-ts-mode))
   (add-to-list 'auto-mode-alist '("\\.html\\'" . html-ts-mode))
@@ -70,4 +71,12 @@
     `(json-ts-mode . ("vscode-json-language-server"))
     `(go-ts-mode . ("gopls"))
   )
+)
+
+;; breadcrumbs
+(use-package breadcrumb :ensure t
+  :bind
+  (("C-c o" . breadcrumb-jump))
+  :init
+  (breadcrumb-mode 1)
 )
