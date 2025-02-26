@@ -40,9 +40,15 @@ if test (uname) = "Darwin"
   # Add GNU utils to path on MacOS
   set -l core_utils coreutils findutils gnu-sed gawk grep
   for util in $core_utils
-    set -l gnu_path (brew --prefix $util)"/libexec/gnubin"
+    set -l libexec_path (brew --prefix $util)"/libexec"
+    set -l gnu_path $libexec_path"/gnubin"
+    set -l man_path $libexec_path"/gnuman"
     if test -d $gnu_path
       fish_add_path -Upm $gnu_path
+    end
+    if test -d $man_path
+      set -q MANPATH || set -Ux MANPATH ""
+      set -Ux MANPATH $man_path $MANPATH
     end
   end
 end
