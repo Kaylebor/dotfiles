@@ -178,6 +178,9 @@
 ;; Enable tabs
 (tab-bar-mode)
 
+;; Disable menu bar
+(menu-bar-mode -1)
+
 ;; Customization
 (setopt custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file 'noerror)
