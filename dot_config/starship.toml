@@ -28,7 +28,7 @@ format = "[$duration]($style) "
 style = "yellow"
 
 [git_branch]
-format = "[$symbol$branch(:$remote_branch)]($style)"
+format = "[$symbol$branch(:$remote_branch)]($style) "
 
 [ruby]
 format = "[$symbol ($version )]($style)"
