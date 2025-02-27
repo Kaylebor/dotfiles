@@ -155,3 +155,4 @@ packages:
       - "libreoffice"
       - "libreoffice-language-pack"
       - "mos"
+      - "pearcleaner"
