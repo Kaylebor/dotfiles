@@ -30,6 +30,9 @@ style = "yellow"
 [git_branch]
 format = "[$symbol$branch(:$remote_branch)]($style) "
 
+[git_state]
+format = "([$state( $progress_current/$progress_total)]($style)) "
+
 [ruby]
 format = "[$symbol ($version )]($style)"
 
