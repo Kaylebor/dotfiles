@@ -32,11 +32,6 @@
     "google": {
       "available_models": [
         {
-          "name": "gemini-2.0-flash",
-          "display_name": "Gemini 2.0 Flash",
-          "max_tokens": 1048576
-        },
-        {
           "name": "gemini-2.0-flash-exp",
           "display_name": "Gemini 2.0 Flash Experimental",
           "max_tokens": 1048576
