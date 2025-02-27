@@ -109,6 +109,7 @@ packages:
       - "libpq"
       - "libxslt"
       - "libyaml"
+      - "lima"
       - "little-cms2"
       - "make"
       - "mediainfo"
@@ -154,4 +155,3 @@ packages:
       - "libreoffice"
       - "libreoffice-language-pack"
       - "mos"
-      - "rancher"
