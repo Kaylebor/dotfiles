@@ -24,6 +24,12 @@
 ;; project.el
 (use-package project :ensure t)
 
+;; completion-preview for minimal completion suggestions (built-in)
+(use-package completion-preview :ensure t
+  :init
+  (global-completion-preview-mode)
+)
+
 ;; corfu for improved completion UI
 (use-package corfu :ensure t
   :init
