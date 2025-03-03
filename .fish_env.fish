@@ -54,21 +54,46 @@ if test (uname) = "Darwin"
 end
 
 # Set EDITOR and VISUAL; EDITOR will have only TUI editors, while VISUAL prefers GUI editors and falls back to TUI editors
+set -l tui_editors helix hx nvim vim vi
 if not set -q EDITOR
-  for editor in 'emacsclient -t' 'helix' 'hx' 'nvim' 'vim' 'vi'
-    set -l cmd (string split ' ' $editor)[1]
-    if type -q $cmd
-      set -Ux EDITOR $editor
-      break
+  if type -q emacsclient
+    set -Ux EDITOR 'emacsclient -t'
+    # In case Emacs server is not running
+    for editor in $tui_editors
+      if type -q $editor
+        set -Ux EDITOR "$EDITOR --alternate-editor=\"$editor\""
+        break
+      end
+    end
+  else
+    for editor in $tui_editors
+      set -l cmd (string split ' ' $editor)[1]
+      if type -q $cmd
+        set -Ux EDITOR $editor
+        break
+      end
     end
   end
 end
 if not set -q VISUAL
-  for editor in 'emacsclient -c' 'zed -w' 'helix' 'hx' 'nvim' 'vim' 'vi'
-    set -l cmd (string split ' ' $editor)[1]
-    if type -q $cmd
-      set -Ux VISUAL $editor
-      break
+  set -l zed_exec 'zed -w'
+  if type -q emacsclient
+    set -Ux VISUAL 'emacsclient -c'
+    # In case Emacs server is not running
+    for editor in $zed_exec $tui_editors
+      set -l cmd (string split ' ' $editor)[1]
+      if type -q $cmd
+        set -Ux VISUAL "$VISUAL --alternate-editor=\"$editor\""
+        break
+      end
+    end
+  else
+    for editor in $zed_exec $tui_editors
+      set -l cmd (string split ' ' $editor)[1]
+      if type -q $cmd
+        set -Ux VISUAL $editor
+        break
+      end
     end
   end
 end
