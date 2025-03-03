@@ -25,10 +25,7 @@
 (use-package project :ensure t)
 
 ;; completion-preview for minimal completion suggestions (built-in)
-(use-package completion-preview :ensure t
-  :init
-  (global-completion-preview-mode)
-)
+(global-completion-preview-mode)
 
 ;; corfu for improved completion UI
 (use-package corfu :ensure t
@@ -95,6 +92,9 @@
   ;; Do not allow the cursor in the minibuffer prompt
   (minibuffer-prompt-properties '(read-only t cursor-intangible t face minibuffer-prompt))
 )
+
+;; vterm
+(use-package vterm :ensure t)
 
 ;; magit
 (use-package magit :ensure t)
