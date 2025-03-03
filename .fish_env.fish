@@ -66,7 +66,9 @@ else if type -q emacsclient
 end
 
 if not set -q ignore_editor
-  if type -q hx
+  if type -q helix
+    set -Ux EDITOR helix
+  else if type -q hx
     set -Ux EDITOR hx
   else if type -q nvim
     set -Ux EDITOR nvim
