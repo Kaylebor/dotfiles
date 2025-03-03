@@ -53,34 +53,30 @@ if test (uname) = "Darwin"
   end
 end
 
-if type -q zed
-  set -Ux VISUAL 'zed -w'
-  set ignore_visual true
-else if type -q emacsclient
-  set -Ux EDITOR 'emacsclient -t'
-  set ignore_editor true
-  if not set -q ignore_visual
-    set -Ux VISUAL 'emacsclient -c'
-    set ignore_visual true
+# Set EDITOR and VISUAL; EDITOR will have only TUI editors, while VISUAL prefers GUI editors and falls back to TUI editors
+if not set -q EDITOR
+  for editor in 'emacsclient -t' 'helix' 'hx' 'nvim' 'vim' 'vi'
+    set -l cmd (string split ' ' $editor)[1]
+    if type -q $cmd
+      set -Ux EDITOR $editor
+      break
+    end
+  end
+end
+if not set -q VISUAL
+  for editor in 'emacsclient -c' 'zed -w' 'helix' 'hx' 'nvim' 'vim' 'vi'
+    set -l cmd (string split ' ' $editor)[1]
+    if type -q $cmd
+      set -Ux VISUAL $editor
+      break
+    end
   end
 end
 
-if not set -q ignore_editor
-  if type -q helix
-    set -Ux EDITOR helix
-  else if type -q hx
-    set -Ux EDITOR hx
-  else if type -q nvim
-    set -Ux EDITOR nvim
-  else if type -q vim
-    set -Ux EDITOR vim
-  else if type -q vi
-    set -Ux EDITOR vi
-  end
-end
-
+# I prefer using TUI editors for GIT commits; an exception would be something like Magit, which ignores these environment variables anyway
 set -Ux GIT_EDITOR $EDITOR
 
+# Add Doom to PATH; may delete this later as I am migrating to bare Emacs with a custom init.el
 if not type -q doom and test -d $HOME/.config/emacs/bin
   fish_add_path -Upm $HOME/.config/emacs/bin
 end
