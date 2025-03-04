@@ -27,6 +27,7 @@ set -l paths \
       ~/.rd/bin \
       ~/.deno/bin \
       ~/.bun/bin \
+      ~/.mix/escripts \
       ~/.local/bin
 
 for path in $paths
