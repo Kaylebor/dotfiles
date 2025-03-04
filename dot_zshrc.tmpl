@@ -5,29 +5,36 @@ export LC_ALL=en_US.UTF-8
 
 ## PATH
 # Add each of the specified directories to PATH if they exist
-{{- if (gt (len (glob "$HOME/.local/bin")) 0) }}
+{{- if stat (printf "%s/.local/bin" .chezmoi.homeDir) }}
 PATH="$HOME/.local/bin:$PATH" # User-installed binaries
 {{- end }}
-{{- if (gt (len (glob "$HOME/.mix/escripts")) 0) }}
+{{- if stat (printf "%s/.mix/escripts" .chezmoi.homeDir) }}
 PATH="$HOME/.mix/escripts:$PATH" # Mix escripts (Elixir)
 {{- end }}
-{{- if (gt (len (glob "$HOME/.bun/bin")) 0) }}
+{{- if stat (printf "%s/.bun/bin" .chezmoi.homeDir) }}
 PATH="$HOME/.bun/bin:$PATH" # Bun JavaScript runtime
 {{- end }}
-{{- if (gt (len (glob "$HOME/.deno/bin")) 0) }}
+{{- if stat (printf "%s/.deno/bin" .chezmoi.homeDir) }}
 PATH="$HOME/.deno/bin:$PATH" # Deno JavaScript runtime
 {{- end }}
-{{- if (gt (len (glob "$HOME/.rd/bin")) 0) }}
+{{- if stat (printf "%s/.rd/bin" .chezmoi.homeDir) }}
 PATH="$HOME/.rd/bin:$PATH" # Rancher Desktop for Docker management
 {{- end }}
-{{- if (gt (len (glob "$HOME/.local/share/yabridge")) 0) }}
+{{- if stat (printf "%s/.local/share/yabridge" .chezmoi.homeDir) }}
 PATH="$HOME/.local/share/yabridge:$PATH" # Yabridge for VST plugins
 {{- end }}
-{{- if (gt (len (glob "${XDG_DATA_HOME:-$HOME/.local/share}/google-cloud-sdk/bin")) 0) }}
+{{- $xdgDataHome := env "XDG_DATA_HOME" }}
+{{- if not $xdgDataHome }}
+{{-   $xdgDataHome = printf "%s/.local/share" .chezmoi.homeDir }}
+{{- end }}
+{{- if stat (printf "%s/google-cloud-sdk/bin" $xdgDataHome) }}
 PATH="${XDG_DATA_HOME:-$HOME/.local/share}/google-cloud-sdk/bin:$PATH" # Google Cloud SDK
 {{- end }}
-{{- if (gt (len (glob "$HOMEBREW_PREFIX/opt/libpq/bin")) 0) }}
+{{- if env "HOMEBREW_PREFIX" }}
+{{-   $homebrewPrefix := env "HOMEBREW_PREFIX" }}
+{{-   if stat (printf "%s/opt/libpq/bin" $homebrewPrefix) }}
 PATH="$HOMEBREW_PREFIX/opt/libpq/bin:$PATH" # PostgreSQL
+{{-   end }}
 {{- end }}
 {{- if eq .chezmoi.os "darwin" }}
 PATH="$(brew --prefix sqlite)/bin:$PATH" # Sqlite from Homebrew instead of MacOS built-in
@@ -96,9 +103,18 @@ source <(starship init zsh)
 {{- end }}
 
 # Load antidote plugin manager
-source "$HOMEBREW_PREFIX/opt/antidote/share/antidote/antidote.zsh"
+{{- $antidoteFiles := list
+    (printf "%s/opt/antidote/share/antidote/antidote.zsh" (env "HOMEBREW_PREFIX" | default ""))
+    "/usr/share/zsh-antidote/antidote.zsh"
+}}
+{{- range $antidoteFile := $antidoteFiles }}
+{{-   if stat $antidoteFile }}
+source "{{ $antidoteFile }}"
 # initialize plugins statically with ${ZDOTDIR:-~}/.zsh_plugins.txt
 antidote load
+{{-     break }}
+{{-   end }}
+{{- end }}
 
 ## Envs
 
@@ -117,7 +133,7 @@ export LDFLAGS="${LDFLAGS+"$LDFLAGS "}-L${UNIXODBCHOME}/lib"
 export KERL_CONFIGURE_OPTIONS="--with-odbc=${UNIXODBCHOME}"
 {{- end }}
 
-{{- if (gt (len (glob ".config/op/plugins.sh")) 0) }}
+{{- if stat (printf "%s/.config/op/plugins.sh" .chezmoi.homeDir) }}
 source $HOME/.config/op/plugins.sh
 {{- end }}
 
@@ -138,7 +154,7 @@ vterm_printf() {
 # Set up aliases
 [[ $- == *i* ]] && source $HOME/.config/zsh/aliases.zsh
 
-{{- if (gt (len (glob ".config/zsh/.zshrc.local")) 0) }}
+{{- if stat (printf "%s/.config/zsh/.zshrc.local" .chezmoi.homeDir) }}
 # Per-machine configuration
 source $HOME/.config/zsh/.zshrc.local
 {{- end }}
