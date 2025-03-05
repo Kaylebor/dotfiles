@@ -5,12 +5,5 @@ source /usr/share/cachyos-fish-config/cachyos-config.fish
 {{- end }}
 
 # overwrite greeting
-# potentially disabling fastfetch
 function fish_greeting
-  if test "$TERM_PROGRAM" != "zed" && test "$TERM_PROGRAM" != "vscode"
-    set -l fastfetch_path (command -v fastfetch)
-    if test -n "$fastfetch_path"
-      fastfetch
-    end
-  end
 end
