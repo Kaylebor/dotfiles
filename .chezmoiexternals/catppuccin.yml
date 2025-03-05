@@ -1,0 +1,24 @@
+".config/bat/themes/Catppuccin Frappe.tmTheme":
+  type: "archive-file"
+  url: "https://github.com/catppuccin/bat/archive/refs/heads/main.tar.gz"
+  path: "bat-main/themes/Catppuccin Frappe.tmTheme"
+
+".config/btop/themes/catppuccin_frappe.theme":
+  type: "archive-file"
+  url: "https://github.com/catppuccin/btop/archive/refs/heads/main.tar.gz"
+  path: "btop-main/themes/catppuccin_frappe.theme"
+
+".config/ghostty/themes/catppuccin-frappe.conf":
+  type: "archive-file"
+  url: "https://github.com/catppuccin/ghostty/archive/refs/heads/main.tar.gz"
+  path: "ghostty-main/themes/catppuccin-frappe.conf"
+
+".config/mpv/mpv.conf":
+  type: "archive-file"
+  url: "https://github.com/catppuccin/mpv/archive/refs/heads/main.tar.gz"
+  path: "mpv-main/themes/frappe/sapphire.conf"
+
+".local/share/delta/catppuccin.gitconfig":
+  type: "archive-file"
+  url: "https://github.com/catppuccin/delta/archive/refs/heads/main.tar.gz"
+  path: "delta-main/catppuccin.gitconfig"

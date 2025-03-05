@@ -13,10 +13,12 @@ Plug 'vim-airline/vim-airline-themes'                                        " a
 Plug 'scrooloose/nerdtree'                                                   " NERDTree
 Plug 'Xuyuanp/nerdtree-git-plugin'                                           " git plugin for NERDTree
 Plug 'mtdl9/vim-log-highlighting'                                            " Log highlighting
-Plug 'dracula/vim', { 'as': 'dracula' }                                      " Dracula theme
+Plug 'catppuccin/nvim', { 'as': 'catppuccin' }                               " Catppuccin theme
 
 " Initialize plugin system
 call plug#end()
+
+colorscheme catppuccin " catppuccin-latte, catppuccin-frappe, catppuccin-macchiato, catppuccin-mocha
 
 " Setting airline theme
 let g:airline_theme='luna'

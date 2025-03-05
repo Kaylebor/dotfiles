@@ -17,6 +17,8 @@
   signingkey = {{ onepasswordRead "op://Private/Personal Key/public key" "my.1password.com" }}
 [github]
   user = "Kaylebor"
+[include]
+  path = ~/.local/share/delta/catppuccin.gitconfig
 [includeIf "gitdir/i:~/work/"]
   path = ~/work/.gitconfig
 [push]
@@ -29,8 +31,9 @@
 [delta]
   navigate = true
   side-by-side = true
+  features = catppuccin-frappe
 [merge]
-  conflictStyle = diff3
+  conflictStyle = zdiff3
 [diff]
   colorMoved = default
 [alias]

@@ -114,4 +114,15 @@ set -Ux MANPAGER "sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -
 curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher update
 
 # Eza variables from (eza fish plugin)[https://github.com/plttn/fish-eza?tab=readme-ov-file#-configuration]
-set -U EZA_STANDARD_OPTIONS --smart-group --header --group-directories-first --hyperlink --time-style=long-iso --icons=always
+set -Ux EZA_STANDARD_OPTIONS --header --group-directories-first --hyperlink --time-style=long-iso --icons=always
+
+# https://github.com/catppuccin/fzf
+set -Ux FZF_DEFAULT_OPTS "\
+--color=bg+:#414559,bg:#303446,spinner:#f2d5cf,hl:#e78284 \
+--color=fg:#c6d0f5,header:#e78284,info:#ca9ee6,pointer:#f2d5cf \
+--color=marker:#babbf1,fg+:#c6d0f5,prompt:#ca9ee6,hl+:#e78284 \
+--color=selected-bg:#51576d \
+--color=border:#414559,label:#c6d0f5"
+
+# https://github.com/catppuccin/fish
+fish_config theme save "Catppuccin Frappe"
