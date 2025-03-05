@@ -7,7 +7,7 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
-  "icon_theme": "Material Icon Theme",
+  "icon_theme": "Catppuccin Frappé",
   "vim_mode": false,
   "features": {
     "edit_prediction_provider": "zed",
@@ -15,8 +15,8 @@
   },
   "assistant": {
     "default_model": {
-      "provider": "zed.dev",
-      "model": "claude-3-7-sonnet-latest"
+      "provider": "google",
+      "model": "gemini-2.0-pro-exp-02-05"
     },
     "version": "2",
     "enable_experimental_live_diffs": true
@@ -73,7 +73,7 @@
   "theme": {
     "mode": "system",
     "light": "One Light",
-    "dark": "One Dark Pro"
+    "dark": "Catppuccin Frappé"
   },
   "languages": {
     "Ruby": {
