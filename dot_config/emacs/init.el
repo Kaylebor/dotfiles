@@ -94,7 +94,10 @@
 )
 
 ;; vterm
-(use-package vterm :ensure t)
+(use-package vterm :ensure t
+  :bind
+  (("C-c t" . vterm))
+)
 
 ;; magit
 (use-package magit :ensure t)
