@@ -172,9 +172,12 @@
 )
 
 ;; Theme
-(use-package dracula-theme :ensure t
+(use-package dracula-theme :ensure t) ;; Needed, as catppuccin-theme depends on it
+(use-package catppuccin-theme :ensure t
+  :custom
+  (catppuccin-flavor 'frappe)
   :init
-  (load-theme 'dracula t)
+  (load-theme 'catppuccin :no-confirm)
 )
 
 ;; Keybindings go here

@@ -15,9 +15,9 @@
     ;; (vertical-scroll-bars . nil)
     ;; (horizontal-scroll-bars . nil)
 
-    ;; Set as same values from Dracula theme to avoid flashes of color during theme activation
-    (background-color . "#282a36")
-    (foreground-color . "#f8f8f2")
+    ;; Set as same values from Catppuccin theme to avoid flashes of color during theme activation
+    (background-color . "#303446")
+    (foreground-color . "#c6d0f5")
     (ns-appearance . dark)
     (ns-transparent-titlebar . t)
   )
