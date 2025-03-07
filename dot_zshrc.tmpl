@@ -106,7 +106,9 @@ source <(op completion zsh)
 
 {{- if lookPath "starship" }}
 # Load starship prompt
-source <(starship init zsh)
+if [[ "$TERM" != "dumb" ]]; then
+  source <(starship init zsh)
+fi
 {{- end }}
 
 # Load antidote plugin manager

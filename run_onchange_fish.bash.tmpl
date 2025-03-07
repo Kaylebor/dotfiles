@@ -15,12 +15,6 @@ echo 'end' >>.config/fish/conf.d/mise.fish
 fzf --fish >.config/fish/conf.d/0fzf_key_bindings.fish
 {{- end }}
 
-{{/* Prompt */}}
-{{- if lookPath "starship" }}
-# Integrate starship
-starship init fish --print-full-init >.config/fish/conf.d/starship.fish
-{{- end }}
-
 fish -c "source {{ .chezmoi.sourceDir }}/.fish_env.fish"
 
 {{- if eq .chezmoi.os "darwin" }}

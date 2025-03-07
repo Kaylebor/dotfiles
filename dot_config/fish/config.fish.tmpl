@@ -4,6 +4,13 @@ source /usr/share/cachyos-fish-config/cachyos-config.fish
 {{- end }}
 {{- end }}
 
+{{/* Prompt */}}
+{{- if lookPath "starship" }}
+if test "$TERM" != "dumb"
+  starship init fish | source
+end
+{{- end }}
+
 # overwrite greeting
 function fish_greeting
 end
