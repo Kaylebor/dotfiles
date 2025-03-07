@@ -16,6 +16,7 @@
 (with-eval-after-load 'evil
   ;; Replace M-: with pp-eval-expression
   (keymap-set evil-normal-state-map "M-:" #'pp-eval-expression)
+  (keymap-set evil-normal-state-map "z a" #'treesit-fold-toggle)
 )
 
 ;; Keybinds for completion-preview
