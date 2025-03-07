@@ -1,5 +1,3 @@
-#!/usr/bin/env zsh
-
 # Force en_US.UTF-8 locale
 export LC_ALL=en_US.UTF-8
 
@@ -42,11 +40,11 @@ PATH="$(brew --prefix sqlite)/bin:$PATH" # Sqlite from Homebrew instead of MacOS
 export PATH
 
 # Activate mise
-source <(mise activate zsh)
+source <(mise activate bash)
 
 {{- if lookPath "fzf" }}
 # Integrate fzf
-source <(fzf --zsh)
+source <(fzf --bash)
 export FZF_COMPLETION_OPTS='--border --info=inline'
 export FZF_DEFAULT_OPTS='--height 60% --tmux=center,80% --layout=reverse --border --info=inline'
 # https://github.com/catppuccin/fzf
@@ -58,69 +56,18 @@ export FZF_DEFAULT_OPTS=" \
 --color=border:#414559,label:#c6d0f5"
 {{- end }}
 
-## HISTORY
-export HISTFILE=~/.zsh_history
-export HISTSIZE=500000
-export SAVEHIST=500000
-setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
-setopt INC_APPEND_HISTORY        # Write to the history file immediately, not when the shell exits.
-setopt SHARE_HISTORY             # Share history between all sessions.
-setopt HIST_FIND_NO_DUPS         # Do not display a line previously found.
-setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history file.
-setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording entry.
-
-## COMPLETIONS
-zstyle ':completion:*' menu yes select
-zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
-{{- if lookPath "eza" }}
-# eza styles https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/eza#configuration
-zstyle ':omz:plugins:eza' 'dirs-first' 'yes'
-zstyle ':omz:plugins:eza' 'git-status' 'yes'
-zstyle ':omz:plugins:eza' 'header' 'yes'
-zstyle ':omz:plugins:eza' 'show-group' 'yes'
-zstyle ':omz:plugins:eza' 'icons' 'yes'
-zstyle ':omz:plugins:eza' 'size-prefix' 'si'
-zstyle ':omz:plugins:eza' 'time-style' 'long-iso'
-zstyle ':omz:plugins:eza' 'hyperlink' 'yes'
-{{- end }}
-# Configure builtin completions
-zmodload -a colors
-zmodload -a autocomplete
-zmodload -a complist
-autoload -Uz compinit && compinit
 {{- if lookPath "carapace" }}
 # Load carapace completions
 # It includes completions for: aws, gcloud, docker, git, kubectl, terraform, and more
 source <(carapace _carapace)
 {{- end }}
 
-{{- if lookPath "op" }}
-# Load op completions
-source <(op completion zsh)
-{{- end }}
-
 {{- if lookPath "starship" }}
 # Load starship prompt
 if [[ "$TERM" != "dumb" ]]; then
-  source <(starship init zsh)
+  source <(starship init bash)
 fi
 {{- end }}
-
-# Load antidote plugin manager
-{{- $antidoteFiles := list
-    (printf "%s/opt/antidote/share/antidote/antidote.zsh" (env "HOMEBREW_PREFIX" | default ""))
-    "/usr/share/zsh-antidote/antidote.zsh"
-}}
-{{- range $antidoteFile := $antidoteFiles }}
-{{-   if stat $antidoteFile }}
-source "{{ $antidoteFile }}"
-# initialize plugins statically with ${ZDOTDIR:-~}/.zsh_plugins.txt
-antidote load
-{{-     break }}
-{{-   end }}
-{{- end }}
-
-## Envs
 
 {{- if lookPath "bat" }}
 # Bat as man pager
@@ -157,8 +104,3 @@ vterm_printf() {
 
 # Set up aliases
 [[ $- == *i* ]] && source $HOME/.config/zsh/aliases.zsh
-
-{{- if stat (printf "%s/.config/zsh/.zshrc.local" .chezmoi.homeDir) }}
-# Per-machine configuration
-source $HOME/.config/zsh/.zshrc.local
-{{- end }}
