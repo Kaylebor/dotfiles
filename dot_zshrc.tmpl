@@ -3,6 +3,9 @@
 # Force en_US.UTF-8 locale
 export LC_ALL=en_US.UTF-8
 
+# Activate Mise on interactive
+eval "$(mise hook-env -s zsh)"
+
 ## PATH
 # Add each of the specified directories to PATH if they exist
 {{- if stat (printf "%s/.local/bin" .chezmoi.homeDir) }}
@@ -40,9 +43,6 @@ PATH="$HOMEBREW_PREFIX/opt/libpq/bin:$PATH" # PostgreSQL
 PATH="$(brew --prefix sqlite)/bin:$PATH" # Sqlite from Homebrew instead of MacOS built-in
 {{- end }}
 export PATH
-
-# Activate mise
-source <(mise activate zsh)
 
 {{- if lookPath "fzf" }}
 # Integrate fzf
