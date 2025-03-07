@@ -22,3 +22,17 @@
   type: "archive-file"
   url: "https://github.com/catppuccin/delta/archive/refs/heads/main.tar.gz"
   path: "delta-main/catppuccin.gitconfig"
+
+".var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/themes/":
+  type: "archive"
+  url: "https://github.com/catppuccin/prismlauncher/archive/refs/heads/main.tar.gz"
+  exact: true
+  stripComponents: 2
+  include: ["prismlauncher-main/themes/Frappe/**"]
+
+".local/share/PrismLauncher/themes/":
+  type: "archive"
+  url: "https://github.com/catppuccin/prismlauncher/archive/refs/heads/main.tar.gz"
+  exact: true
+  stripComponents: 2
+  include: ["prismlauncher-main/themes/Frappe/**"]
