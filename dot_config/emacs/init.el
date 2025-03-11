@@ -123,6 +123,11 @@
   (global-treesit-fold-indicators-mode)
 )
 
+(use-package grip-mode
+  :ensure t
+  :config (setq grip-command 'go-grip) ;; auto, grip, go-grip or mdopen
+  :hook ((markdown-ts-mode org-mode) . grip-mode))
+
 ;; Better mise integration with Emacs
 (use-package mise :ensure t
   :init
