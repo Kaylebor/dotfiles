@@ -10,7 +10,7 @@
 {{- template "brew_eval" . }}
 
 # Install Homebrew packages
-brew bundle --no-lock --file=- <<EOF
+brew bundle --file=- <<EOF
 {{ if eq .chezmoi.os "darwin" -}}
 {{ range .packages.darwin.brews -}}
 brew {{ . | quote }}

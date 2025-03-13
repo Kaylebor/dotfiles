@@ -1,4 +1,5 @@
 debug
+os
 pry
 rails
 rubocop

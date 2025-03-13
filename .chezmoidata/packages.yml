@@ -152,6 +152,7 @@ packages:
       - "font-iosevka"
       - "font-iosevka-nerd-font"
       - "font-iosevka-term-nerd-font"
+      - "iina"
       - "libreoffice"
       - "libreoffice-language-pack"
       - "mos"
