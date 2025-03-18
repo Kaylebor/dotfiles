@@ -114,7 +114,8 @@ set -Ux MANPAGER "sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -
 curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher update
 
 # Eza variables from (eza fish plugin)[https://github.com/plttn/fish-eza?tab=readme-ov-file#-configuration]
-set -Ux EZA_STANDARD_OPTIONS --header --group-directories-first --hyperlink --time-style=long-iso --icons=always
+set -e EZA_STANDARD_OPTIONS # fisher seems to set a global variable always, which breaks stuff
+set -Ux EZA_STANDARD_OPTIONS --smart-group --header --group-directories-first --hyperlink --time-style=long-iso --icons=always
 
 # https://github.com/catppuccin/fzf
 set -Ux FZF_DEFAULT_OPTS "\
