@@ -3,6 +3,5 @@ os
 pry
 rails
 rubocop
-ruby-lsp
 solargraph
 yard
