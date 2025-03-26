@@ -21,8 +21,13 @@
 ;; transient
 (use-package transient :ensure t)
 
-;; project.el
-(use-package project :ensure t)
+;; projectile
+(use-package projectile :ensure t
+  :custom
+  (projectile-project-search-path '("~/projects/" "~/work/" "~/playground"))
+  :config
+  (projectile-mode)
+)
 
 ;; completion-preview for minimal completion suggestions (built-in)
 (global-completion-preview-mode)
@@ -36,7 +41,7 @@
 ;; vertico for improved completion UI https://github.com/minad/vertico
 (use-package vertico :ensure t
   :config
-  (vertico-mode)
+  (vertico-mode +1)
   (vertico-mouse-mode)
 )
 
@@ -50,7 +55,10 @@
     ("C-x p b" . consult-project-buffer)
     ("M-g g" . consult-goto-line)
     ("M-g i" . consult-imenu)
-  )
+    )
+  :config
+  (autoload 'projectile-project-root "projectile")
+  (setq consult-project-function (lambda (_) (projectile-project-root)))
 )
 
 ;; Marginalia to add completion information https://github.com/minad/marginalia
