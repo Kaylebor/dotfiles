@@ -2,7 +2,7 @@
 ruby = "3"
 node = "latest"
 go = "latest"
-python = "3.13.1"
+python = "latest"
 java = "graalvm-community-23"
 elixir = "latest"
 erlang = "latest"
@@ -33,10 +33,10 @@ bun = "latest"
 "npm:nx" = "latest"
 "npm:typescript-language-server" = "latest"
 "npm:vscode-langservers-extracted" = "latest"
+"pipx:aider-chat" = "latest"
 
 [settings]
 experimental = true
-disable_tools = ["python"]
 
 [env]
 {{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.idLike "arch") }}

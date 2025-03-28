@@ -21,9 +21,22 @@
 ;; transient
 (use-package transient :ensure t)
 
+;; ripgrep
+(use-package rg :ensure t
+  :init
+  (rg-enable-menu)
+)
+
 ;; projectile
 (use-package projectile :ensure t
+  ;; :bind (:map
+  ;;  ("C-x p p" . projectile-switch-project)
+  ;;  ("C-x p b" . projectile-switch-to-buffer)
+  ;;  ("C-x p D" . projectile-dired)
+  ;;  ("C-x p c" . projectile-compile-project)
+  ;; )
   :custom
+  (projectile-keymap-prefix (kbd "C-x p"))
   (projectile-project-search-path '("~/projects/" "~/work/" "~/playground"))
   :config
   (projectile-mode)
@@ -83,6 +96,14 @@
   (completion-category-defaults nil)
   (completion-category-overrides '((file (styles partial-completion))))
   (orderless-matching-styles '(orderless-literal orderless-regexp orderless-flex))
+)
+
+;; eldoc-box shows documentation in a floating box
+(use-package eldoc-box :ensure t
+  :bind
+  (("C-x K" . eldoc-box-help-at-point))
+  :config
+  (eldoc-box-hover-at-point-mode)
 )
 
 ;; Turns grep searches into writable buffers https://github.com/mhayashi1120/Emacs-wgrep
