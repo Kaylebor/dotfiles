@@ -16,7 +16,7 @@
   "assistant": {
     "default_model": {
       "provider": "google",
-      "model": "gemini-2.0-pro-exp-02-05"
+      "model": "gemini-2.5-pro-exp-03-25"
     },
     "version": "2",
     "enable_experimental_live_diffs": true
@@ -49,11 +49,6 @@
         {
           "name": "gemini-2.0-flash-lite-preview-02-05",
           "display_name": "Gemini 2.0 Flash Lite Preview 02-05",
-          "max_tokens": 1048576
-        },
-        {
-          "name": "gemini-2.5-pro-exp-03-25",
-          "display_name": "Gemini 2.5 Pro Experimental 03-25",
           "max_tokens": 1048576
         }
       ]

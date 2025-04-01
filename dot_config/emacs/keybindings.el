@@ -1,9 +1,15 @@
 ;; -*- lexical-binding: t; -*-
 
+(use-package undo-tree :ensure t
+  :init
+  (global-undo-tree-mode)
+)
+
 (use-package evil :ensure t
   :custom
   (evil-want-keybinding nil)
   (evil-want-integration t)
+  (evil-undo-system 'undo-tree)
   :init
   (evil-mode 1)
 )

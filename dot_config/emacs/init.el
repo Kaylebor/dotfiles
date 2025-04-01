@@ -29,12 +29,6 @@
 
 ;; projectile
 (use-package projectile :ensure t
-  ;; :bind (:map
-  ;;  ("C-x p p" . projectile-switch-project)
-  ;;  ("C-x p b" . projectile-switch-to-buffer)
-  ;;  ("C-x p D" . projectile-dired)
-  ;;  ("C-x p c" . projectile-compile-project)
-  ;; )
   :custom
   (projectile-keymap-prefix (kbd "C-x p"))
   (projectile-project-search-path '("~/projects/" "~/work/" "~/playground"))
@@ -172,7 +166,7 @@
 ;; GPT and family
 (use-package gptel :ensure t
   :custom
-  (gptel-model 'google/gemini-2.0-pro-exp-02-05:free)
+  (gptel-model 'google/gemini-2.0-flash-exp)
   (gptel-backend
     (gptel-make-openai "OpenRouter"
       :host "openrouter.ai"
@@ -181,13 +175,11 @@
       :key (lambda () (auth-source-pick-first-password :host "OpenRouter" :user "API Token"))
       :models '(deepseek/deepseek-r1:free
                 deepseek/deepseek-r1
-                openai/gpt-3.5-turbo
-                mistralai/mixtral-8x7b-instruct
-                meta-llama/codellama-34b-instruct
-                codellama/codellama-70b-instruct
+                google/gemini-2.0-flash-exp
                 google/gemini-2.0-pro-exp-02-05:free
                 google/gemini-2.0-flash-thinking-exp:free
-                google/gemini-2.0-flash-lite-preview-02-05:free)
+                google/gemini-2.0-flash-lite-preview-02-05:free
+                google/gemini-2.5-pro-exp-03-25:free)
     )
   )
 )
