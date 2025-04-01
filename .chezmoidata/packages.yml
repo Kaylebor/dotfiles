@@ -111,6 +111,7 @@ packages:
       - "libpq"
       - "libxslt"
       - "libyaml"
+      - "libvterm"
       - "lima"
       - "little-cms2"
       - "make"
