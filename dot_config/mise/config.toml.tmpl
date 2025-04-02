@@ -35,7 +35,7 @@ bun = "latest"
 "npm:vscode-langservers-extracted" = "latest"
 "pipx" = "latest"
 "uv" = "latest"
-"pipx:aider-chat" = "latest"
+"pipx:aider-chat" = { version = "latest", uvx_args = "--force --python python3.12" }
 
 [settings]
 experimental = true
@@ -43,4 +43,13 @@ experimental = true
 [env]
 {{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.idLike "arch") }}
 KERL_CONFIGURE_OPTIONS="--with-odbc=/var/lib/pacman/local/unixodbc-{{ output "pacman" "-Q" "unixodbc" | trim | splitList " " | last }}"
+{{- end }}
+{{- if (eq .chezmoi.os "darwin") }}
+LDFLAGS="-L{{ env "HOMEBREW_PREFIX" }}/opt/llvm/lib -L{{ env "HOMEBREW_PREFIX" }}/opt/openblas/lib -L{{ env "HOMEBREW_PREFIX" }}/opt/lapack/lib {{ env "LDFLAGS" }}"
+CPPFLAGS="-I{{ env "HOMEBREW_PREFIX" }}/opt/llvm/include -I{{ env "HOMEBREW_PREFIX" }}/opt/openblas/include -I{{ env "HOMEBREW_PREFIX" }}/opt/lapack/include {{ env "CPPFLAGS" }}"
+PKG_CONFIG_PATH="-L{{ env "HOMEBREW_PREFIX" }}/opt/openblas/lib/pkgconfig -L{{ env "HOMEBREW_PREFIX" }}/opt/lapack/lib/pkgconfig {{ env "PKG_CONFIG_PATH" }}"
+LAPACK="{{- first (glob (joinPath (env "HOMEBREW_PREFIX") "opt" "lapack" "lib" "liblapack*.dylib")) }}"
+BLAS="{{- first (glob (joinPath (env "HOMEBREW_PREFIX") "opt" "openblas" "lib" "libopenblasp-r*.dylib")) }}"
+## tell compiler not to error out for implicit function declarations
+CFLAGS="-Wno-error=implicit-function-declaration"
 {{- end }}

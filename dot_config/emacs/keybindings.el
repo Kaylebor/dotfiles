@@ -23,6 +23,7 @@
   ;; Replace M-: with pp-eval-expression
   (keymap-set evil-normal-state-map "M-:" #'pp-eval-expression)
   (keymap-set evil-normal-state-map "z a" #'treesit-fold-toggle)
+  (keymap-set evil-normal-state-map "g l g" #'aidermacs-transient-menu)
   (keymap-set evil-normal-state-map "g l l" #'gptel-menu)
   (keymap-set evil-normal-state-map "g l s" #'gptel-send)
   (keymap-set evil-normal-state-map "g l a" #'gptel-add)
