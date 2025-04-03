@@ -26,7 +26,7 @@
   )
 )
 
-(use-package aidermacs
+(use-package aidermacs :ensure t
   :bind (("C-c g" . aidermacs-transient-menu))
   :custom
   (aidermacs-use-architect-mode t)
