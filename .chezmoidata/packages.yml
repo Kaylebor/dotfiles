@@ -3,6 +3,7 @@ packages:
     aur:
       - "1password"
       - "1password-cli"
+      - "age"
       - "autoconf"
       - "bat"
       - "biome"
@@ -64,6 +65,7 @@ packages:
       - "zsh-antidote"
   darwin:
     brews:
+      - "age"
       - "antidote"
       - "autoconf"
       - "bat"
