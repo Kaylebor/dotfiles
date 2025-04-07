@@ -102,11 +102,6 @@ end
 # I prefer using TUI editors for GIT commits; an exception would be something like Magit, which ignores these environment variables anyway
 set -Ux GIT_EDITOR $EDITOR
 
-# Add Doom to PATH; may delete this later as I am migrating to bare Emacs with a custom init.el
-if not type -q doom and test -d $HOME/.config/emacs/bin
-  fish_add_path -Upm $HOME/.config/emacs/bin
-end
-
 # Bat as man pager
 set -Ux MANPAGER "sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p -lman'"
 
