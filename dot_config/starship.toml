@@ -7,15 +7,12 @@ $directory\
 $git_branch\
 $git_state\
 $cmd_duration\
-$line_break\
-$python\
-$character"""
-
-right_format = """
 $ruby\
 $golang\
-$nodejs
-"""
+$nodejs\
+$python\
+$line_break\
+$character"""
 
 command_timeout = 650
 

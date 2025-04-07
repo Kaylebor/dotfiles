@@ -7,7 +7,11 @@ source /usr/share/cachyos-fish-config/cachyos-config.fish
 {{/* Prompt */}}
 {{- if lookPath "starship" }}
 if test "$TERM" != "dumb"
+  function starship_transient_prompt_func
+    starship module character
+  end
   starship init fish | source
+  enable_transience # Enable transience for prompt, so it can remove/modify previous prompt lines
 end
 {{- end }}
 
