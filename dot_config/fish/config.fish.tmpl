@@ -4,6 +4,11 @@ source /usr/share/cachyos-fish-config/cachyos-config.fish
 {{- end }}
 {{- end }}
 
+# Force EZA variables here, since the fish-eza plugin INSISTS on overriding my values on shell load
+# with invalid ones
+set -e EZA_STANDARD_OPTIONS
+set -Ux EZA_STANDARD_OPTIONS --smart-group --header --group-directories-first --hyperlink --time-style=long-iso --icons=always
+
 {{/* Prompt */}}
 {{- if lookPath "starship" }}
 if test "$TERM" != "dumb"
