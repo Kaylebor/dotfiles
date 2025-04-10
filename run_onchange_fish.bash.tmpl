@@ -4,21 +4,22 @@
 {{/* Version management */}}
 {{- if lookPath "mise" }}
 # Activate mise
-echo 'if status --is-interactive' >.config/fish/conf.d/mise.fish
-mise activate fish >>.config/fish/conf.d/mise.fish
-echo 'end' >>.config/fish/conf.d/mise.fish
+echo 'if status --is-interactive' > ~/.config/fish/conf.d/mise.fish
+mise activate fish >> ~/.config/fish/conf.d/mise.fish
+echo 'end' >> ~/.config/fish/conf.d/mise.fish
 {{- end }}
 
 {{/* Completions via Carapace */}}
 {{- if lookPath "carapace" }}
 # Source carapace into .config/fish/conf.d
-carapace _carapace > ~/.config/fish/conf.d/carapace.fish
+echo "Carapace for some reason breaks when sourced automatically in this script; please run this manually:"
+echo "carapace _carapace > ~/.config/fish/conf.d/carapace.fish"
 {{- end }}
 
 {{/* History lookup */}}
 {{- if lookPath "fzf" }}
 # Integrate fzf
-fzf --fish >.config/fish/conf.d/0fzf_key_bindings.fish
+fzf --fish > ~/.config/fish/conf.d/0fzf_key_bindings.fish
 {{- end }}
 
 fish -c "source {{ .chezmoi.sourceDir }}/.fish_env.fish"

@@ -6,7 +6,7 @@
    ("C-c l a" . gptel-add)
    ("C-c l f" . gptel-add-file))
   :custom
-  (gptel-model 'google/gemini-2.0-flash-exp)
+  (gptel-model 'google/gemini-2.0-flash-exp:free)
   (gptel-backend
     (gptel-make-openai "OpenRouter"
       :host "openrouter.ai"
@@ -15,11 +15,12 @@
       :key (lambda () (auth-source-pick-first-password :host "OpenRouter" :user "API Token"))
       :models '(deepseek/deepseek-r1:free
                 deepseek/deepseek-r1
-                google/gemini-2.0-flash-exp
-                google/gemini-2.0-pro-exp-02-05:free
+                google/gemini-2.0-flash-exp:free
                 google/gemini-2.0-flash-thinking-exp:free
-                google/gemini-2.0-flash-lite-preview-02-05:free
-                google/gemini-2.5-pro-exp-03-25:free))))
+                google/gemini-2.0-flash-001
+                google/gemini-2.0-flash-lite-001
+                google/gemini-2.5-pro-exp-03-25:free
+                google/gemini-2.5-pro-preview-03-25))))
 
 (use-package aidermacs :ensure t
   :bind (("C-c g" . aidermacs-transient-menu))
@@ -49,6 +50,4 @@
   (add-to-list 'copilot-major-mode-alist '("markdown-ts-mode" . "markdown"))
   (add-to-list 'copilot-major-mode-alist '("bash-ts-mode" . "shellscript"))
   (add-to-list 'copilot-major-mode-alist '("sh-mode" . "shellscript"))
-  (add-to-list 'copilot-major-mode-alist '("go-ts-mode" . "go"))
-  :hook
-  (prog-mode . copilot-mode))
+  (add-to-list 'copilot-major-mode-alist '("go-ts-mode" . "go")))
