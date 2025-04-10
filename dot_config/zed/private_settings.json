@@ -10,7 +10,7 @@
   "icon_theme": "Catppuccin Frappé",
   "vim_mode": true,
   "features": {
-    "edit_prediction_provider": "zed",
+    "edit_prediction_provider": "copilot",
     "copilot": true
   },
   "assistant": {
