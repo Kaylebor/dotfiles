@@ -33,6 +33,15 @@
   :config
   (projectile-mode))
 
+;; dired-sidebar for visual navigation
+(use-package dired-sidebar :ensure t
+  :bind
+  ("C-x t" . dired-sidebar-toggle-sidebar)
+  :config
+  (if (display-graphic-p)
+      (setopt dired-sidebar-theme 'icons)
+    (setopt dired-sidebar-theme 'nerd)))
+
 ;; completion-preview for minimal completion suggestions (built-in)
 (global-completion-preview-mode)
 
@@ -153,7 +162,8 @@
 (load-file (expand-file-name "gptel-init.el" user-emacs-directory))
 
 ;; icons
-(when (display-graphic-p) (use-package all-the-icons :ensure t))
+(use-package all-the-icons :ensure t)
+(use-package all-the-icons-dired :ensure t :hook (dired-sidebar-mode . all-the-icons-dired-mode))
 ;; Run all-the-icons-install-fonts afterwards
 
 ;; Emojis

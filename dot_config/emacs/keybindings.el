@@ -24,7 +24,8 @@
   (keymap-set evil-normal-state-map "g l l" #'gptel-menu)
   (keymap-set evil-normal-state-map "g l s" #'gptel-send)
   (keymap-set evil-normal-state-map "g l a" #'gptel-add)
-  (keymap-set evil-normal-state-map "g l f" #'gptel-add-file))
+  (keymap-set evil-normal-state-map "g l f" #'gptel-add-file)
+  (keymap-set evil-normal-state-map "M-?" #'which-key-show-top-level))
 
 ;; Keybinds for completion-preview
 (with-eval-after-load 'completion-preview
