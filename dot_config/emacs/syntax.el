@@ -27,26 +27,35 @@
                                          (yaml "https://github.com/ikatyang/tree-sitter-yaml" "v0.5.0")
                                          (hcl "https://github.com/tree-sitter-grammars/tree-sitter-hcl" "v1.1.0")))
   ;; Map file extensions to tree-sitter modes
-  (add-to-list 'major-mode-remap-alist '(ruby-mode . ruby-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\.\\(ex\\|exs\\|eex\\|leex\\|heex\\)\\'" . elixir-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\.html\\'" . html-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\.css\\'" . css-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\.js\\'" . javascript-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\.jsx\\'" . js-jsx-mode))
-  (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\(\\.go\\|/go\\.mod\\|/go\\.sum\\)\\'" . go-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\.toml\\'" . toml-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\.sql\\'" . sql-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\.dbml\\'" . dbml-mode))
-  (add-to-list 'auto-mode-alist '("\\.el\\'" . emacs-lisp-mode))
-  (add-to-list 'auto-mode-alist '("\\.\\(sh\\|bash\\(rc\\)?\\|zsh\\(rc\\)?\\|rc\\)\\'" . bash-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\.fish\\(rc\\)?\\'" . sh-mode))
-  (add-to-list 'auto-mode-alist '("\\.json\\(?:\\(?:c\\|ld\\|5\\|net\\)\\)?\\'" . json-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\.\\(ya?ml\\)\\(?:-cpp\\)?\\'" . yaml-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\.hcl[2-4]?\\'" . hcl-ts-mode)))
+  (add-to-list 'major-mode-remap-alist '(ruby-mode . ruby-ts-mode)))
+
+(use-package emacs-lisp-mode :mode ("\\.el\\'" . emacs-lisp-mode))
+
+(use-package bash-ts-mode :mode ("\\.\\(sh\\|bash\\(rc\\)?\\|zsh\\(rc\\)?\\|rc\\)\\'" . bash-ts-mode))
+(use-package sh-mode :mode ("\\.fish\\(rc\\)?\\'" . sh-mode))
+
+(use-package json-ts-mode :mode ("\\.json\\(?:\\(?:c\\|ld\\|5\\|net\\)\\)?\\'" . json-ts-mode))
+(use-package yaml-ts-mode :mode ("\\.\\(ya?ml\\)\\(?:-cpp\\)?\\'" . yaml-ts-mode))
+(use-package toml-ts-mode :mode ("\\.toml\\'" . toml-ts-mode))
+
+(use-package sql-ts-mode :mode ("\\.sql\\'" . sql-ts-mode))
+(use-package dbml-mode :mode ("\\.dbml\\'" . dbml-mode))
+
+(use-package hcl-ts-mode :mode ("\\.hcl[2-4]?\\'" . hcl-ts-mode))
+
+(use-package markdown-ts-mode :mode ("\\.md\\'" . markdown-ts-mode))
+
+(use-package html-ts-mode :mode ("\\.html\\'" . html-ts-mode))
+(use-package css-ts-mode :mode ("\\.css\\'" . css-ts-mode))
+(use-package javascript-ts-mode :mode ("\\.js\\'" . javascript-ts-mode))
+
+(use-package typescript-ts-mode :mode ("\\.ts\\'" . typescript-ts-mode))
+(use-package tsx-ts-mode :mode ("\\.tsx\\'" . tsx-ts-mode))
+(use-package js-jsx-mode :mode ("\\.jsx\\'" . js-jsx-mode))
+
+(use-package elixir-ts-mode :mode ("\\.\\(ex\\|exs\\|eex\\|leex\\|heex\\)\\'" . elixir-ts-mode))
+(use-package python-ts-mode :mode ("\\.py\\'" . python-ts-mode))
+(use-package go-ts-mode :mode ("\\(\\.go\\|/go\\.mod\\|/go\\.sum\\)\\'" . go-ts-mode))
 
 ;; eglot configurations
 (use-package eglot :ensure t
@@ -55,11 +64,12 @@
   (typescript-ts-mode . eglot-ensure)
   (json-ts-mode . eglot-ensure)
   (go-ts-mode . eglot-ensure)
-  :custom
-  (eglot-server-programs `(ruby-ts-mode . ("solargraph" "stdio"))
-                         `(typescript-ts-mode . ("typescript-language-server" "--stdio" :initializationOptions '(:importModuleSpecifierPreference "project-relative")))
-                         `(json-ts-mode . ("vscode-json-language-server"))
-                         `(go-ts-mode . ("gopls"))))
+  :config
+  (add-to-list 'eglot-server-programs `(ruby-ts-mode . ("solargraph" "stdio")))
+  (add-to-list 'eglot-server-programs `(typescript-ts-mode . ("typescript-language-server" "--stdio" :initializationOptions '(:importModuleSpecifierPreference "relative"))))
+  (add-to-list 'eglot-server-programs `(json-ts-mode . ("vscode-json-language-server")))
+  (add-to-list 'eglot-server-programs `(go-ts-mode . ("gopls")))
+  (add-to-list 'eglot-server-programs `(elixir-ts-mode . ("elixir-ls"))))
 
 ;; breadcrumbs
 (use-package breadcrumb :ensure t

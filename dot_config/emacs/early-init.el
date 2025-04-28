@@ -1,5 +1,10 @@
 ;; -*- lexical-binding: t; -*-
 
+;; Always precompile packages on install instead of on load
+(setq-default package-native-compile t)
+(setq-default native-comp-jit-compilation t)
+
+
 (setq ns-use-proxy-icon nil)         ;; Remove icon from title bar
 
 (setq package-enable-at-startup nil) ;; Disable package startup as we will use elpaca instead
