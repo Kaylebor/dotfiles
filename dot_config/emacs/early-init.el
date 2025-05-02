@@ -13,7 +13,7 @@
 
 (setq default-frame-alist '((width . (text-pixels . 800))
                             (height . (text-pixels . 600))
-                            (font . "Iosevka Nerd Font-12:weight=semi-light")
+                            (font . "Iosevka Nerd Font-10:weight=semi-light")
                             ;; You can turn off scroll bars by uncommenting these lines:
                             ;; (vertical-scroll-bars . nil)
                             ;; (horizontal-scroll-bars . nil)

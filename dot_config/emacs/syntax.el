@@ -12,6 +12,7 @@
                                          (go "https://github.com/tree-sitter/tree-sitter-go" "v0.23.4")
                                          (gomod "https://github.com/camdencheek/tree-sitter-go-mod" "v1.1.0")
                                          (gosum "https://github.com/tree-sitter-grammars/tree-sitter-go-sum" "v1.0.0")
+                                         (gdscript "https://github.com/PrestonKnopp/tree-sitter-gdscript" "v2.0.0")
                                          (ruby "https://github.com/tree-sitter/tree-sitter-ruby" "v0.23.1")
                                          (sql "https://github.com/DerekStride/tree-sitter-sql" "gh-pages")
                                          (html "https://github.com/tree-sitter/tree-sitter-html" "v0.23.2")
@@ -57,6 +58,8 @@
 (use-package python-ts-mode :mode ("\\.py\\'" . python-ts-mode))
 (use-package go-ts-mode :mode ("\\(\\.go\\|/go\\.mod\\|/go\\.sum\\)\\'" . go-ts-mode))
 
+(use-package gdscript-mode :ensure (:host github :repo "godotengine/emacs-gdscript-mode") :mode ("\\.gd\\'" . gdscript-ts-mode))
+
 ;; eglot configurations
 (use-package eglot :ensure t
   :hook
@@ -64,12 +67,15 @@
   (typescript-ts-mode . eglot-ensure)
   (json-ts-mode . eglot-ensure)
   (go-ts-mode . eglot-ensure)
+  (gdscript-ts-mode . eglot-ensure)
   :config
   (add-to-list 'eglot-server-programs `(ruby-ts-mode . ("solargraph" "stdio")))
   (add-to-list 'eglot-server-programs `(typescript-ts-mode . ("typescript-language-server" "--stdio" :initializationOptions '(:importModuleSpecifierPreference "relative"))))
   (add-to-list 'eglot-server-programs `(json-ts-mode . ("vscode-json-language-server")))
   (add-to-list 'eglot-server-programs `(go-ts-mode . ("gopls")))
-  (add-to-list 'eglot-server-programs `(elixir-ts-mode . ("elixir-ls"))))
+  (add-to-list 'eglot-server-programs `(elixir-ts-mode . ("elixir-ls")))
+  (add-to-list 'eglot-server-programs `(gdscript-ts-mode . ("localhost" 6005)))
+  (add-to-list 'eglot-server-programs `(gdscript-ts-mode . gdscript-eglot-contact)))
 
 ;; breadcrumbs
 (use-package breadcrumb :ensure t
