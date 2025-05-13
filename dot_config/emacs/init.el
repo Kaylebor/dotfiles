@@ -146,6 +146,9 @@
   (grip-command 'go-grip) ;; auto, grip, go-grip or mdopen
   :hook ((markdown-ts-mode org-mode) . grip-mode))
 
+;; Spelling
+(use-package jinx :ensure t)
+
 ;; Better mise integration with Emacs
 (use-package mise :ensure t
   :init
@@ -191,107 +194,6 @@
 
 ;; Disable menu bar
 (menu-bar-mode -1)
-
-;; Allow for shorter responses: "y" for yes and "n" for no.
-(setopt read-answer-short t)
-(setopt use-short-answers t)
-(advice-add 'yes-or-no-p :override #'y-or-n-p)
-
-;; Allow nested minibuffers
-(setopt enable-recursive-minibuffers t)
-
-;; Keep the cursor out of the read-only portions of the.minibuffer
-(setopt minibuffer-prompt-properties
-      '(read-only t intangible t cursor-intangible t face minibuffer-prompt))
-(add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
-
-;; By default, Emacs "updates" its ui more often than it needs to
-(setopt idle-update-delay 1.0)
-
-(setopt ring-bell-function #'ignore)
-
-;; Can be activated with `display-line-numbers-mode'
-(setq-default display-line-numbers-width 3)
-(setq-default display-line-numbers-widen t)
-
-(setopt truncate-string-ellipsis "…")
-
-;; Delete by moving to trash in interactive mode
-(setopt delete-by-moving-to-trash (not noninteractive)
-        remote-file-name-inhibit-delete-by-moving-to-trash t)
-
-;; Ignoring this is acceptable since it will redirect to the buffer regardless.
-(setopt find-file-suppress-same-file-warnings t)
-
-;; Resolve symlinks so that operations are conducted from the file's directory
-(setopt find-file-visit-truename t
-        vc-follow-symlinks t)
-
-;; Prefer vertical splits over horizontal ones
-(setopt split-width-threshold 170
-        split-height-threshold nil)
-
-;; Buffers
-(setopt uniquify-buffer-name-style 'forward
-        comint-prompt-read-only t
-        comint-buffer-maximum-size 2048)
-
-;; Backups
-(setopt backup-directory-alist
-        `(("." . ,(expand-file-name "backup" user-emacs-directory)))
-        tramp-backup-directory-alist backup-directory-alist
-        backup-by-copying-when-linked t
-        backup-by-copying t
-        delete-old-versions t
-        version-control t
-        kept-new-versions 5
-        kept-old-versions 5)
-
-;; VC
-(setopt vc-git-print-log-follow t
-        vc-make-backup-files nil)
-
-;;; Auto revert
-;; Auto-revert in Emacs is a feature that automatically updates the contents of
-;; a buffer to reflect changes made to the underlying file.
-(setopt revert-without-query (list ".")  ; Do not prompt
-        auto-revert-stop-on-user-input nil
-        auto-revert-verbose t)
-
-;; Revert other buffers (e.g, Dired)
-(setopt global-auto-revert-non-file-buffers t
-        global-auto-revert-ignore-modes '(Buffer-menu-mode)) 
-
-;; Enables Emacs to remember a list of recently accessed files.
-(setopt recentf-max-saved-items 300 ; default is 20
-        recentf-max-menu-items 15
-        recentf-auto-cleanup (if (daemonp) 300 'never)
-        recentf-exclude (list "^/\\(?:ssh\\|su\\|sudo\\)?:"))
-
-;; Enables Emacs to remember the last location within a file upon reopening.
-(setopt save-place-file (expand-file-name "saveplace" user-emacs-directory)
-        save-place-limit 600)
-
-;; Enables Emacs to preserve the minibuffer history between sessions.
-(setopt history-length 300
-        savehist-save-minibuffer-history t ;; Default
-        savehist-additional-variables
-        '(kill-ring                        ; clipboard
-          register-alist                   ; macros
-          mark-ring global-mark-ring       ; marks
-          search-ring regexp-search-ring)) ; searches
-
-;;; Scrolling
-(setopt fast-but-imprecise-scrolling t
-        scroll-error-top-bottom t
-        scroll-preserve-screen-position t
-        scroll-margin 0
-        hscroll-margin 2
-        hscroll-step 1)
-
-;;; Mouse
-(when (and (display-graphic-p) (fboundp 'context-menu-mode))
-    (add-hook 'after-init-hook #'context-menu-mode))
 
 ;; Customization
 (setopt custom-file (expand-file-name "custom.el" user-emacs-directory))
