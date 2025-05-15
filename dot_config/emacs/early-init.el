@@ -73,8 +73,8 @@
                             (height . (text-pixels . 600))
                             (font . "Iosevka Nerd Font-10:weight=semi-light")
                             ;; You can turn off scroll bars by uncommenting these lines:
-                            ;; (vertical-scroll-bars . nil)
-                            ;; (horizontal-scroll-bars . nil)
+                            (vertical-scroll-bars . nil)
+                            (horizontal-scroll-bars . nil)
 
                             ;; Set as same values from Catppuccin theme to avoid flashes of color during theme activation
                             (background-color . "#303446")
