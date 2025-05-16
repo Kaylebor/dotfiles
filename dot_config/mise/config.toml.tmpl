@@ -1,5 +1,5 @@
 [tools]
-ruby = "3.4.2"
+ruby = "3"
 node = "latest"
 go = "latest"
 python = "latest"
@@ -45,9 +45,9 @@ idiomatic_version_file_enable_tools = ["ruby"]
 KERL_CONFIGURE_OPTIONS="--with-odbc=/var/lib/pacman/local/unixodbc-{{ output "pacman" "-Q" "unixodbc" | trim | splitList " " | last }}"
 {{- end }}
 {{- if (eq .chezmoi.os "darwin") }}
-LDFLAGS="{{ "{{get_env(name='LDFLAGS', default='')}}" }} -L{{ env "HOMEBREW_PREFIX" }}/opt/llvm/lib -L{{ env "HOMEBREW_PREFIX" }}/opt/openblas/lib -L{{ env "HOMEBREW_PREFIX" }}/opt/lapack/lib"
-CPPFLAGS="{{ "{{get_env(name='CPPFLAGS', default='')}}" }} -I{{ env "HOMEBREW_PREFIX" }}/opt/llvm/include -I{{ env "HOMEBREW_PREFIX" }}/opt/openblas/include -I{{ env "HOMEBREW_PREFIX" }}/opt/lapack/include"
-PKG_CONFIG_PATH="{{ "{{get_env(name='PKG_CONFIG_PATH', default='')}}" }} -L{{ env "HOMEBREW_PREFIX" }}/opt/openblas/lib/pkgconfig -L{{ env "HOMEBREW_PREFIX" }}/opt/lapack/lib/pkgconfig"
+LDFLAGS="{{ "{{get_env(name='LDFLAGS', default='')}}" }} -L{{ env "HOMEBREW_PREFIX" }}/opt/llvm/lib -L{{ env "HOMEBREW_PREFIX" }}/opt/openblas/lib -L{{ env "HOMEBREW_PREFIX" }}/opt/lapack/lib -L{{ env "HOMEBREW_PREFIX" }}/opt/libpq/lib"
+CPPFLAGS="{{ "{{get_env(name='CPPFLAGS', default='')}}" }} -I{{ env "HOMEBREW_PREFIX" }}/opt/llvm/include -I{{ env "HOMEBREW_PREFIX" }}/opt/openblas/include -I{{ env "HOMEBREW_PREFIX" }}/opt/lapack/include -I{{ env "HOMEBREW_PREFIX" }}/opt/libpq/include"
+PKG_CONFIG_PATH="{{ "{{get_env(name='PKG_CONFIG_PATH', default='')}}" }}:{{ env "HOMEBREW_PREFIX" }}/opt/openblas/lib/pkgconfig:{{ env "HOMEBREW_PREFIX" }}/opt/lapack/lib/pkgconfig:{{ env "HOMEBREW_PREFIX" }}/opt/libpq/lib/pkgconfig"
 LAPACK="{{- first (glob (joinPath (env "HOMEBREW_PREFIX") "opt" "lapack" "lib" "liblapack*.dylib")) }}"
 BLAS="{{- first (glob (joinPath (env "HOMEBREW_PREFIX") "opt" "openblas" "lib" "libopenblasp-r*.dylib")) }}"
 ## tell compiler not to error out for implicit function declarations
