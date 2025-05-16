@@ -69,7 +69,7 @@
   (go-ts-mode . eglot-ensure)
   (gdscript-ts-mode . eglot-ensure)
   :config
-  (add-to-list 'eglot-server-programs `(ruby-ts-mode . ("solargraph" "stdio")))
+  (add-to-list 'eglot-server-programs `(ruby-ts-mode . ("ruby-lsp")))
   (add-to-list 'eglot-server-programs `(typescript-ts-mode . ("typescript-language-server" "--stdio" :initializationOptions '(:importModuleSpecifierPreference "relative"))))
   (add-to-list 'eglot-server-programs `(json-ts-mode . ("vscode-json-language-server")))
   (add-to-list 'eglot-server-programs `(go-ts-mode . ("gopls")))
