@@ -48,11 +48,11 @@
 
 (use-package html-ts-mode :mode ("\\.html\\'" . html-ts-mode))
 (use-package css-ts-mode :mode ("\\.css\\'" . css-ts-mode))
-(use-package javascript-ts-mode :mode ("\\.js\\'" . javascript-ts-mode))
+(use-package javascript-ts-mode :mode (("\\.js\\'" . javascript-ts-mode)
+                                       ("\\.jsx\\'" . js-jsx-mode)))
 
-(use-package typescript-ts-mode :mode ("\\.ts\\'" . typescript-ts-mode))
-(use-package tsx-ts-mode :mode ("\\.tsx\\'" . tsx-ts-mode))
-(use-package js-jsx-mode :mode ("\\.jsx\\'" . js-jsx-mode))
+(use-package typescript-ts-mode :mode (("\\.ts\\'" . typescript-ts-mode)
+                                       ("\\.tsx\\'" . tsx-ts-mode)))
 
 (use-package elixir-ts-mode :mode ("\\.\\(ex\\|exs\\|eex\\|leex\\|heex\\)\\'" . elixir-ts-mode))
 (use-package python-ts-mode :mode ("\\.py\\'" . python-ts-mode))
