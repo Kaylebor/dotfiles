@@ -6,6 +6,12 @@
 (setq-default native-comp-deferred-compilation t)
 (setq-default native-comp-jit-compilation t)
 
+;; Increase garbage collection threshold
+(setq gc-cons-threshold 100000000)
+
+;; For lsp-mode: use plists
+(setenv "LSP_USE_PLISTS" "true")
+
 ;; Increase how much is read from processes in a single chunk
 (setq read-process-output-max (* 2 1024 1024))  ; 1024kb
 

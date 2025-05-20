@@ -1,4 +1,7 @@
 ;; -*- lexical-binding: t; -*-
+(setopt evil-want-keybinding nil)
+
+(use-package hydra :ensure t)
 
 (use-package undo-tree :ensure t
   :init
@@ -6,7 +9,6 @@
 
 (use-package evil :ensure t
   :custom
-  (evil-want-keybinding nil)
   (evil-want-integration t)
   (evil-undo-system 'undo-tree)
   :init

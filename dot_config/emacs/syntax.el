@@ -60,26 +60,33 @@
 
 (use-package gdscript-mode :ensure (:host github :repo "godotengine/emacs-gdscript-mode") :mode ("\\.gd\\'" . gdscript-ts-mode))
 
-;; eglot configurations
-(use-package eglot :ensure t
-  :hook
-  (ruby-ts-mode . eglot-ensure)
-  (typescript-ts-mode . eglot-ensure)
-  (json-ts-mode . eglot-ensure)
-  (go-ts-mode . eglot-ensure)
-  (gdscript-ts-mode . eglot-ensure)
-  :config
-  (add-to-list 'eglot-server-programs `(ruby-ts-mode . ("ruby-lsp")))
-  (add-to-list 'eglot-server-programs `(typescript-ts-mode . ("typescript-language-server" "--stdio" :initializationOptions '(:importModuleSpecifierPreference "relative"))))
-  (add-to-list 'eglot-server-programs `(json-ts-mode . ("vscode-json-language-server")))
-  (add-to-list 'eglot-server-programs `(go-ts-mode . ("gopls")))
-  (add-to-list 'eglot-server-programs `(elixir-ts-mode . ("elixir-ls")))
-  (add-to-list 'eglot-server-programs `(gdscript-ts-mode . ("localhost" 6005)))
-  (add-to-list 'eglot-server-programs `(gdscript-ts-mode . gdscript-eglot-contact)))
-
-;; breadcrumbs
-(use-package breadcrumb :ensure t
-  :bind
-  (("C-c o" . breadcrumb-jump))
+;; Linting
+(use-package flycheck :ensure t
   :init
-  (breadcrumb-mode 1))
+  (global-flycheck-mode))
+
+;; LSP support
+(use-package lsp-mode :ensure t
+  :init
+  (setopt lsp-keymap-prefix "C-c l")
+  :hook
+  (ruby-ts-mode . lsp)
+  (typescript-ts-mode . lsp)
+  (json-ts-mode . lsp)
+  (go-ts-mode . lsp)
+  (elixir-ts-mode . lsp)
+  (gdscript-ts-mode . lsp)
+  (lsp-mode . lsp-enable-which-key-integration))
+(use-package lsp-treemacs :ensure t
+  :custom
+  (lsp-treemacs-theme "nerd-icons"))
+(use-package lsp-ui :ensure t)
+(use-package helm-lsp :ensure t)
+
+;; DAP debugging
+(use-package dap-mode :ensure t)
+
+;; Better projectile integration for Rails
+(use-package projectile-rails :ensure t
+  :init
+  (projectile-rails-global-mode))

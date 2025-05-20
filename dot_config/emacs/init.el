@@ -1,4 +1,8 @@
 ;; -*- lexical-binding: t; -*-
+
+;; Suppress warnings
+(setopt warning-minimum-level :error)
+
 ;; Setup elpaca package manager https://github.com/progfolio/elpaca/blob/master/doc/manual.md#usage
 (load-file (expand-file-name "elpaca-init.el" user-emacs-directory))
 
@@ -14,7 +18,7 @@
   :init
   (yas-global-mode 1))
 
-;; tree-sitter and eglot
+;; TreeSitter and lsp
 (load-file (expand-file-name "syntax.el" user-emacs-directory))
 
 ;; transient
@@ -33,74 +37,43 @@
   :config
   (projectile-mode))
 
-;; dired-sidebar for visual navigation
-(use-package dired-sidebar :ensure t
+;; icons
+(use-package all-the-icons :ensure t)
+;; Run all-the-icons-install-fonts afterwards
+
+;; treemacs for visual navigation
+(use-package treemacs :ensure t)
+(use-package treemacs-evil :ensure t)
+(use-package treemacs-projectile :ensure t)
+(use-package treemacs-magit :ensure t)
+(use-package treemacs-nerd-icons :ensure t
+  :config
+  (treemacs-load-theme "nerd-icons"))
+
+;; helm for incremental completion
+(use-package helm :ensure t
   :bind
-  ("C-x t" . dired-sidebar-toggle-sidebar)
+  (("C-x C-f" . helm-find-files)
+   ("C-x b" . helm-buffers-list)
+   ("M-x" . helm-M-x))
+  :custom
+  (completions-detailed t)
+  (helm-mode-fuzzy-match t)
+  (helm-completion-in-region-fuzzy-match t)
   :config
-  (if (display-graphic-p)
-      (setopt dired-sidebar-theme 'icons)
-    (setopt dired-sidebar-theme 'nerd)))
-
-;; completion-preview for minimal completion suggestions (built-in)
-(global-completion-preview-mode)
-
-;; corfu for improved completion UI
-(use-package corfu :ensure t
-  :init
-  (global-corfu-mode))
-
-;; vertico for improved completion UI https://github.com/minad/vertico
-(use-package vertico :ensure t
-  :config
-  (vertico-mode +1)
-  (vertico-mouse-mode))
-
-;; consult provides a bunch of search commands to vertico https://github.com/minad/consult
-(use-package consult
+  (helm-mode 1)
+  (helm-popup-tip-mode)
+  (helm-ff-icon-mode))
+(use-package helm-projectile :ensure t
   :bind
-  (:map consult-mode-map
-    ("C-x f" . consult-find)
-    ("C-x ." . consult-ripgrep)
-    ("C-x C-b" . consult-buffer) ;; Show buffer list
-    ("C-x p b" . consult-project-buffer)
-    ("M-g g" . consult-goto-line)
-    ("M-g i" . consult-imenu)
-    )
-  :custom
-  (consult-project-function (lambda (_) (projectile-project-root)))
+  (("C-x p p" . helm-projectile-switch-project)
+   ("C-x p f" . helm-projectile-find-file)
+   ("C-x p b" . helm-projectile-list-buffers)))
+
+;; company for completion UI
+(use-package company :ensure t
   :config
-  (autoload 'projectile-project-root "projectile"))
-
-;; Marginalia to add completion information https://github.com/minad/marginalia
-(use-package marginalia :ensure t
-  :config (marginalia-mode))
-
-;; embark provides contextual actions to vertico https://github.com/oantolin/embark
-(use-package embark :ensure t
-  :custom
-  (prefix-help-command #'embark-prefix-help-command))
-(use-package embark-consult :ensure t
-  :after embark
-  :hook (embark-collect-mode . consult-preview-at-point-mode))
-
-;; orderless for improved completion matching https://github.com/oantolin/orderless
-(use-package orderless :ensure t
-  :custom
-  (completion-styles '(partial-completion orderless basic))
-  (completion-category-defaults nil)
-  (completion-category-overrides '((file (styles partial-completion))))
-  (orderless-matching-styles '(orderless-literal orderless-regexp orderless-flex)))
-
-;; eldoc-box shows documentation in a floating box
-(use-package eldoc-box :ensure t
-  :bind
-  (("C-x K" . eldoc-box-help-at-point))
-  :config
-  (eldoc-box-hover-at-point-mode))
-
-;; Turns grep searches into writable buffers https://github.com/mhayashi1120/Emacs-wgrep
-(use-package wgrep :ensure t)
+  (global-company-mode))
 
 ;; Emacs minibuffer configurations.
 (use-package emacs
@@ -154,20 +127,12 @@
   :init
   (global-mise-mode))
 
-;; DAP debugging
-(use-package dape :ensure t)
-
 ;; 1Password integration
 (elpaca (auth-source-1password :host github :repo "dlobraico/auth-source-1password" :build t)
   (auth-source-1password-enable))
 
 ;; GPT and family
 (load-file (expand-file-name "gptel-init.el" user-emacs-directory))
-
-;; icons
-(use-package all-the-icons :ensure t)
-(use-package all-the-icons-dired :ensure t :hook (dired-sidebar-mode . all-the-icons-dired-mode))
-;; Run all-the-icons-install-fonts afterwards
 
 ;; Emojis
 (use-package emojify :ensure t

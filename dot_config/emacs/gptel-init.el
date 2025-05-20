@@ -1,10 +1,10 @@
 ;; -*- lexical-binding: t; -*-
 (use-package gptel :ensure t
   :bind
-  (("C-c l l" . gptel-menu)
-   ("C-c l s" . gptel-send)
-   ("C-c l a" . gptel-add)
-   ("C-c l f" . gptel-add-file))
+  (("C-c C-l l" . gptel-menu)
+   ("C-c C-l s" . gptel-send)
+   ("C-c C-l a" . gptel-add)
+   ("C-c C-l f" . gptel-add-file))
   :custom
   (gptel-model 'deepseek/deepseek-chat-v3-0324:free)
   (gptel-backend
