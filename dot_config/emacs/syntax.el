@@ -71,6 +71,7 @@
   (setopt lsp-keymap-prefix "C-c l")
   :hook
   (ruby-ts-mode . lsp)
+  (html-ts-mode . lsp)
   (typescript-ts-mode . lsp)
   (json-ts-mode . lsp)
   (go-ts-mode . lsp)
