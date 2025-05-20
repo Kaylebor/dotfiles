@@ -58,6 +58,7 @@
    ("M-x" . helm-M-x))
   :custom
   (completions-detailed t)
+  (elm-M-x-show-short-doc t)
   (helm-mode-fuzzy-match t)
   (helm-completion-in-region-fuzzy-match t)
   :config
