@@ -35,25 +35,3 @@
   (aidermacs-default-model "deepseek/deepseek-chat-v3-0324:free")
   :hook
   (aidermacs-before-run-backend . (lambda () (setenv "OPENROUTER_API_KEY" (auth-source-pick-first-password :host "OpenRouter" :user "API Token")))))
-
-(use-package copilot
-  :ensure (:host github :repo "copilot-emacs/copilot.el")
-  :bind
-  (:map copilot-completion-map
-        ("<tab>" . copilot-accept-completion)
-        ("TAB" . copilot-accept-completion))
-  :config
-  (add-to-list 'copilot-major-mode-alist '("ruby-ts-mode" . "ruby"))
-  (add-to-list 'copilot-major-mode-alist '("python-ts-mode" . "python"))
-  (add-to-list 'copilot-major-mode-alist '("javascript-ts-mode" . "javascript"))
-  (add-to-list 'copilot-major-mode-alist '("js-jsx-mode" . "javascriptreact"))
-  (add-to-list 'copilot-major-mode-alist '("typescript-ts-mode" . "typescript"))
-  (add-to-list 'copilot-major-mode-alist '("tsx-ts-mode" . "typescriptreact"))
-  (add-to-list 'copilot-major-mode-alist '("json-ts-mode" . "json"))
-  (add-to-list 'copilot-major-mode-alist '("html-ts-mode" . "html"))
-  (add-to-list 'copilot-major-mode-alist '("css-ts-mode" . "css"))
-  (add-to-list 'copilot-major-mode-alist '("yaml-ts-mode" . "yaml"))
-  (add-to-list 'copilot-major-mode-alist '("markdown-ts-mode" . "markdown"))
-  (add-to-list 'copilot-major-mode-alist '("bash-ts-mode" . "shellscript"))
-  (add-to-list 'copilot-major-mode-alist '("sh-mode" . "shellscript"))
-  (add-to-list 'copilot-major-mode-alist '("go-ts-mode" . "go")))

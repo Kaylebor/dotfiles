@@ -67,8 +67,9 @@
 
 ;; LSP support
 (use-package lsp-mode :ensure t
-  :init
-  (setopt lsp-keymap-prefix "C-c l")
+  :custom
+  (lsp-keymap-prefix "C-c l")
+  (lsp-copilot-enabled t)
   :hook
   (ruby-ts-mode . lsp)
   (html-ts-mode . lsp)
