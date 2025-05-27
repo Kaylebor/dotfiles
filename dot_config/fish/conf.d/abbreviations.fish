@@ -1,4 +1,5 @@
 abbr -a -- gg 'git status'
+abbr -a -- gd 'git diff'
 abbr -a -- gl 'git pull'
 abbr -a -- gf 'git fetch'
 abbr -a -- gr 'git rebase'
