@@ -68,8 +68,9 @@
 ;; LSP support
 (use-package lsp-mode :ensure t
   :custom
-  (lsp-keymap-prefix "C-c l")
+  (setopt lsp-keymap-prefix "C-c l")
   (lsp-copilot-enabled t)
+  (lsp-keep-workspace-alive nil) ;; close LSP servers after last buffer is closed
   :hook
   (ruby-ts-mode . lsp)
   (html-ts-mode . lsp)

@@ -69,7 +69,11 @@
   :bind
   (("C-x p p" . helm-projectile-switch-project)
    ("C-x p f" . helm-projectile-find-file)
-   ("C-x p b" . helm-projectile-list-buffers)))
+   ("C-x p b l" . helm-projectile-list-buffers)
+   ("C-x p b b" . helm-projectile-switch-to-buffer)
+   ("C-x b s" . helm-projectile-grep))
+  :config
+  (helm-projectile-on))
 
 ;; company for completion UI
 (use-package company :ensure t
