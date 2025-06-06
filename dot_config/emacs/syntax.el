@@ -30,43 +30,45 @@
   ;; Map file extensions to tree-sitter modes
   (add-to-list 'major-mode-remap-alist '(ruby-mode . ruby-ts-mode)))
 
-(use-package emacs-lisp-mode :mode ("\\.el\\'" . emacs-lisp-mode))
+(use-package emacs-lisp-mode :delight :mode ("\\.el\\'" . emacs-lisp-mode))
 
-(use-package bash-ts-mode :mode ("\\.\\(sh\\|bash\\(rc\\)?\\|zsh\\(rc\\)?\\|rc\\)\\'" . bash-ts-mode))
-(use-package sh-mode :mode ("\\.fish\\(rc\\)?\\'" . sh-mode))
+(use-package bash-ts-mode :delight :mode ("\\.\\(sh\\|bash\\(rc\\)?\\|zsh\\(rc\\)?\\|rc\\)\\'" . bash-ts-mode))
+(use-package sh-mode :delight :mode ("\\.fish\\(rc\\)?\\'" . sh-mode))
 
-(use-package json-ts-mode :mode ("\\.json\\(?:\\(?:c\\|ld\\|5\\|net\\)\\)?\\'" . json-ts-mode))
-(use-package yaml-ts-mode :mode ("\\.\\(ya?ml\\)\\(?:-cpp\\)?\\'" . yaml-ts-mode))
-(use-package toml-ts-mode :mode ("\\.toml\\'" . toml-ts-mode))
+(use-package json-ts-mode :delight :mode ("\\.json\\(?:\\(?:c\\|ld\\|5\\|net\\)\\)?\\'" . json-ts-mode))
+(use-package yaml-ts-mode :delight :mode ("\\.\\(ya?ml\\)\\(?:-cpp\\)?\\'" . yaml-ts-mode))
+(use-package toml-ts-mode :delight :mode ("\\.toml\\'" . toml-ts-mode))
 
-(use-package sql-ts-mode :mode ("\\.sql\\'" . sql-ts-mode))
-(use-package dbml-mode :mode ("\\.dbml\\'" . dbml-mode))
+(use-package sql-ts-mode :delight :mode ("\\.sql\\'" . sql-ts-mode))
+(use-package dbml-mode :delight :mode ("\\.dbml\\'" . dbml-mode))
 
-(use-package hcl-ts-mode :mode ("\\.hcl[2-4]?\\'" . hcl-ts-mode))
+(use-package hcl-ts-mode :delight :mode ("\\.hcl[2-4]?\\'" . hcl-ts-mode))
 
-(use-package markdown-ts-mode :mode ("\\.md\\'" . markdown-ts-mode))
+(use-package markdown-ts-mode :delight :mode ("\\.md\\'" . markdown-ts-mode))
 
-(use-package html-ts-mode :mode ("\\.html\\'" . html-ts-mode))
-(use-package css-ts-mode :mode ("\\.css\\'" . css-ts-mode))
-(use-package javascript-ts-mode :mode (("\\.js\\'" . javascript-ts-mode)
+(use-package html-ts-mode :delight :mode ("\\.html\\'" . html-ts-mode))
+(use-package css-ts-mode :delight :mode ("\\.css\\'" . css-ts-mode))
+(use-package javascript-ts-mode :delight :mode (("\\.js\\'" . javascript-ts-mode)
                                        ("\\.jsx\\'" . js-jsx-mode)))
 
-(use-package typescript-ts-mode :mode (("\\.ts\\'" . typescript-ts-mode)
+(use-package typescript-ts-mode :delight :mode (("\\.ts\\'" . typescript-ts-mode)
                                        ("\\.tsx\\'" . tsx-ts-mode)))
 
-(use-package elixir-ts-mode :mode ("\\.\\(ex\\|exs\\|eex\\|leex\\|heex\\)\\'" . elixir-ts-mode))
-(use-package python-ts-mode :mode ("\\.py\\'" . python-ts-mode))
-(use-package go-ts-mode :mode ("\\(\\.go\\|/go\\.mod\\|/go\\.sum\\)\\'" . go-ts-mode))
+(use-package elixir-ts-mode :delight :mode ("\\.\\(ex\\|exs\\|eex\\|leex\\|heex\\)\\'" . elixir-ts-mode))
+(use-package python-ts-mode :delight :mode ("\\.py\\'" . python-ts-mode))
+(use-package go-ts-mode :delight :mode ("\\(\\.go\\|/go\\.mod\\|/go\\.sum\\)\\'" . go-ts-mode))
 
-(use-package gdscript-mode :ensure (:host github :repo "godotengine/emacs-gdscript-mode") :mode ("\\.gd\\'" . gdscript-ts-mode))
+(use-package gdscript-mode :ensure (:host github :repo "godotengine/emacs-gdscript-mode") :delight :mode ("\\.gd\\'" . gdscript-ts-mode))
 
 ;; Linting
 (use-package flycheck :ensure t
+  :delight
   :init
   (global-flycheck-mode))
 
 ;; LSP support
 (use-package lsp-mode :ensure t
+  :delight
   :custom
   (setopt lsp-keymap-prefix "C-c l")
   (lsp-copilot-enabled t)

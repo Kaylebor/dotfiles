@@ -13,8 +13,12 @@
 ;; Improves some MacOS defaults
 (when (or (daemonp) (memq window-system '(mac ns))) (elpaca exec-path-from-shell (exec-path-from-shell-initialize)))
 
+;; delight to hide or replace modeline information per-package
+(use-package delight :ensure t)
+
 ;; yasnippet
 (use-package yasnippet :ensure t
+  :delight yas-global-mode
   :init
   (yas-global-mode 1))
 
@@ -31,6 +35,7 @@
 
 ;; projectile
 (use-package projectile :ensure t
+  :delight
   :custom
   (projectile-keymap-prefix (kbd "C-x p"))
   (projectile-project-search-path '("~/projects/" "~/work/" "~/playground"))
@@ -41,8 +46,15 @@
 (use-package all-the-icons :ensure t)
 ;; Run all-the-icons-install-fonts afterwards
 
+;; Alternative modeline; may change or build my own later
+(use-package simple-modeline :ensure t
+  :init
+  (simple-modeline-mode))
+
 ;; treemacs for visual navigation
-(use-package treemacs :ensure t)
+(use-package treemacs :ensure t
+  :bind
+  (("C-x t" . treemacs)))
 (use-package treemacs-evil :ensure t)
 (use-package treemacs-projectile :ensure t)
 (use-package treemacs-magit :ensure t)
@@ -52,6 +64,7 @@
 
 ;; helm for incremental completion
 (use-package helm :ensure t
+  :delight
   :bind
   (("C-x C-f" . helm-find-files)
    ("C-x b" . helm-buffers-list)
@@ -69,14 +82,15 @@
   :bind
   (("C-x p p" . helm-projectile-switch-project)
    ("C-x p f" . helm-projectile-find-file)
-   ("C-x p b l" . helm-projectile-list-buffers)
-   ("C-x p b b" . helm-projectile-switch-to-buffer)
-   ("C-x b s" . helm-projectile-grep))
+   ("C-x p g" . helm-projectile-grep)
+   ("C-x p b" . helm-projectile-switch-to-buffer)
+   ("C-x p g" . helm-projectile-grep))
   :config
   (helm-projectile-on))
 
 ;; company for completion UI
 (use-package company :ensure t
+  :delight
   :config
   (global-company-mode))
 
@@ -102,11 +116,13 @@
 
 ;; which-key for command discovery
 (use-package which-key :ensure t
+  :delight
   :init
   (which-key-mode))
 
 ;; Code folding based on newer treesit.el
 (use-package treesit-fold :ensure t
+  :delight
   :bind
   (:map treesit-fold-mode-map
     ("C-c C-f" . treesit-fold-toggle)
@@ -118,17 +134,17 @@
   (global-treesit-fold-mode)
   (global-treesit-fold-indicators-mode))
 
-(use-package grip-mode
-  :ensure t
+(use-package grip-mode :ensure t
   :custom
   (grip-command 'go-grip) ;; auto, grip, go-grip or mdopen
-  :hook ((markdown-ts-mode org-mode) . grip-mode))
+  :hook (markdown-ts-mode . grip-mode))
 
 ;; Spelling
 (use-package jinx :ensure t)
 
 ;; Better mise integration with Emacs
 (use-package mise :ensure t
+  :delight
   :init
   (global-mise-mode))
 
@@ -161,6 +177,9 @@
 ;; Manually process elpaca queues now before loading customizations
 ;; Keybindings may go above this line if they depend on extra packages
 (elpaca-process-queues)
+
+;; Hide some Emacs-native modes from modeline
+(delight '((eldoc-mode nil "eldoc")))
 
 ;; Disable menu bar
 (menu-bar-mode -1)

@@ -4,10 +4,12 @@
 (use-package hydra :ensure t)
 
 (use-package undo-tree :ensure t
+  :delight
   :init
   (global-undo-tree-mode))
 
 (use-package evil :ensure t
+  :delight
   :custom
   (evil-want-integration t)
   (evil-undo-system 'undo-tree)
@@ -15,6 +17,7 @@
   (evil-mode 1))
 
 (use-package evil-collection :ensure t
+  :delight evil-collection-unimpaired-mode
   :init
   (evil-collection-init))
 
