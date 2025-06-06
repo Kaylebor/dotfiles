@@ -13,18 +13,18 @@
     "edit_prediction_provider": "copilot",
     "copilot": true
   },
-  "assistant": {
+  "agent": {
+    "default_profile": "write",
     "default_model": {
-      "provider": "google",
-      "model": "gemini-2.5-pro-exp-03-25"
+      "provider": "copilot_chat",
+      "model": "claude-3.5-sonnet"
     },
-    "version": "2",
-    "enable_experimental_live_diffs": true
+    "version": "2"
   },
   "context_servers": {
     "postgres-context-server": {
       "settings": {
-        "database_url": "postgresql://kay:@localhost:5432/loyal_guru"
+        "database_url": "postgresql://kay@localhost:5432/loyal_guru"
       }
     }
   },
@@ -78,8 +78,8 @@
   "languages": {
     "Ruby": {
       "language_servers": [
-        "!ruby-lsp",
-        "solargraph",
+        "!solargraph",
+        "ruby-lsp",
         "rubocop"
       ]
     },
