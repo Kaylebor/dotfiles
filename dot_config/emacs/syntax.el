@@ -71,17 +71,31 @@
   :delight
   :custom
   (setopt lsp-keymap-prefix "C-c l")
-  (lsp-copilot-enabled t)
   (lsp-keep-workspace-alive nil) ;; close LSP servers after last buffer is closed
   :hook
   (ruby-ts-mode . lsp)
   (html-ts-mode . lsp)
   (typescript-ts-mode . lsp)
-  (json-ts-mode . lsp)
   (go-ts-mode . lsp)
   (elixir-ts-mode . lsp)
   (gdscript-ts-mode . lsp)
-  (lsp-mode . lsp-enable-which-key-integration))
+  (lsp-mode . lsp-enable-which-key-integration)
+  :config
+  (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
+    "Prepend emacs-lsp-booster command to lsp CMD."
+    (let ((orig-result (funcall old-fn cmd test?)))
+      (if (and (not test?)                             ;; for check lsp-server-present?
+               (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
+               lsp-use-plists
+               (not (functionp 'json-rpc-connection))  ;; native json-rpc
+               (executable-find "emacs-lsp-booster"))
+          (progn
+            (when-let* ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
+              (setcar orig-result command-from-exec-path))
+            (message "Using emacs-lsp-booster for %s!" orig-result)
+            (append '("emacs-lsp-booster" "--disable-bytecode" "--") orig-result))
+        orig-result)))
+  (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command))
 (use-package lsp-treemacs :ensure t
   :custom
   (lsp-treemacs-theme "nerd-icons"))
