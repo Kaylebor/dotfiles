@@ -15,6 +15,7 @@ packages:
       - "curl"
       - "curlie"
       - "difftastic"
+      - "dysk"
       - "erlang"
       - "elixir-ls"
       - "enchant"
