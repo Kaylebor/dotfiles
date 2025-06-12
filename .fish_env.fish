@@ -102,6 +102,9 @@ end
 # I prefer using TUI editors for GIT commits; an exception would be something like Magit, which ignores these environment variables anyway
 set -Ux GIT_EDITOR $EDITOR
 
+# Same for PSQL
+set -Ux PSQL_EDITOR $EDITOR
+
 # Bat as man pager
 set -Ux MANPAGER "sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p -lman'"
 
