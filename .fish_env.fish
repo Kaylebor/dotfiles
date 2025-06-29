@@ -117,7 +117,15 @@ set -Ux FZF_DEFAULT_OPTS "\
 --color=fg:#c6d0f5,header:#e78284,info:#ca9ee6,pointer:#f2d5cf \
 --color=marker:#babbf1,fg+:#c6d0f5,prompt:#ca9ee6,hl+:#e78284 \
 --color=selected-bg:#51576d \
---color=border:#414559,label:#c6d0f5"
+--color=border:#414559,label:#c6d0f5 \
+--style minimal \
+--preview='preview-smart {}' \
+--height 60% --layout reverse --border"
+
+# Also change default fzf find command to use fd instead
+set -Ux FZF_DEFAULT_COMMAND "fd -u ."
+set -Ux FZF_CTRL_T_COMMAND "$FZF_DEFAULT_COMMAND"
+set -Ux FZF_ALT_C_COMMAND "fd -u -t d ."
 
 # https://github.com/catppuccin/fish
 fish_config theme save "Catppuccin Frappe"
