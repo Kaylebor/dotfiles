@@ -11,6 +11,9 @@ deno = "latest"
 bun = "latest"
 pipx = "latest"
 uv = "latest"
+{{- if (eq .chezmoi.os "linux") }}
+protonge = "GE-Proton10-4"
+{{- end }}
 "cargo:mdopen" = "latest"
 "cargo:emacs-lsp-booster" = "latest"
 "go:github.com/chrishrb/go-grip" = "latest"
