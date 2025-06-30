@@ -124,7 +124,8 @@ set -Ux FZF_DEFAULT_OPTS "\
 
 # Also change default fzf find command to use fd instead
 set -Ux FZF_DEFAULT_COMMAND "fd -u ."
-set -Ux FZF_CTRL_T_COMMAND "$FZF_DEFAULT_COMMAND"
+set -Ux FZF_CTRL_T_COMMAND 'git-aware-files'
+set -Ux FZF_CTRL_T_OPTS '--ansi'
 set -Ux FZF_ALT_C_COMMAND "fd -u -t d ."
 
 # https://github.com/catppuccin/fish

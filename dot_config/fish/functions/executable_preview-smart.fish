@@ -1,6 +1,13 @@
 function preview-smart
     set target $argv[1]
     
+    # Check if target exists as a file/directory
+    if not test -e "$target"
+        # Probably a command from history, just echo it
+        echo "$target"
+        return 0
+    end
+    
     # Check if it's a directory
     if test -d "$target"
         tree -C "$target"
@@ -11,6 +18,19 @@ function preview-smart
     if test -f "$target"
         # Calculate line limit
         set line_limit (math $LINES - 5)
+        
+        # Check if file is modified by git and use difftastic
+        if git status --porcelain "$target" 2>/dev/null | grep -q "^.M\|^M"
+            # Create temp file with HEAD version for comparison
+            set temp_file (mktemp --suffix="-$(basename "$target")")
+            if git show HEAD:"$target" > "$temp_file" 2>/dev/null
+                if difft --color=always --display=inline "$temp_file" "$target" 2>/dev/null
+                    rm -f "$temp_file"
+                    return 0
+                end
+                rm -f "$temp_file"
+            end
+        end
         
         # Get file extension (lowercase)
         set ext (string lower (path extension "$target"))
@@ -28,10 +48,6 @@ function preview-smart
         end
     end
     
-    # Default fallback
-    if tree -C "$target" 2>/dev/null
-        return 0
-    else
-        echo "Cannot preview: $target"
-    end
+    # Default fallback - just echo the input
+    echo "$target"
 end
