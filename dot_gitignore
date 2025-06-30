@@ -134,6 +134,8 @@ $RECYCLE.BIN/
 
 # Aider
 .aider*
+# Claude Code
+.claude/
 # Zed
 .zed
 

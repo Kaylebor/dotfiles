@@ -1,2 +1,3 @@
 font-family = "IosevkaTerm NFM"
 theme = "catppuccin-frappe.conf"
+keybind = shift+enter=text:\n
