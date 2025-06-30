@@ -21,3 +21,6 @@ alias cat="bat"
 {{- if lookPath "delta" }}
 alias diff="delta"
 {{- end }}
+{{- if lookPath "lima" }}
+alias nerdctl="lima nerdctl"
+{{- end }}

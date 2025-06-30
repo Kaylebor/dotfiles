@@ -29,4 +29,13 @@ fish -c "source {{ .chezmoi.sourceDir }}/.fish_env.fish"
 fish -l -c "fish_add_path -Uam (brew --prefix sqlite)/bin"
 {{- end }}
 
+{{- if and (lookPath "lima") (not (lookPath "nerdctl")) }}
+# Create nerdctl function when lima is present but nerdctl is not
+cat > ~/.config/fish/functions/nerdctl.fish << 'EOF'
+function nerdctl --description 'alias nerdctl lima nerdctl'
+  lima nerdctl $argv
+end
+EOF
+{{- end }}
+
 {{- end }}
