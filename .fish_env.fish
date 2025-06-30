@@ -37,7 +37,7 @@ for path in $paths
 end
 
 # Add GNU utils to path on MacOS
-if test (uname) = Darwin
+if test (uname) = Darwin; and command -q brew
     # Add GNU utils to path on MacOS
     set -l core_utils coreutils findutils gnu-sed gawk grep
     for util in $core_utils
