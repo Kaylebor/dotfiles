@@ -64,7 +64,10 @@
 (use-package flycheck :ensure t
   :delight
   :init
-  (global-flycheck-mode))
+  (global-flycheck-mode)
+  :config
+  ;; Disable Ruby checkers that overlap with Ruby LSP
+  (setq-default flycheck-disabled-checkers '(ruby-rubocop ruby-standard)))
 
 ;; LSP support
 (use-package lsp-mode :ensure t
@@ -72,6 +75,7 @@
   :custom
   (setopt lsp-keymap-prefix "C-c l")
   (lsp-keep-workspace-alive nil) ;; close LSP servers after last buffer is closed
+  (lsp-ruby-lsp-use-bundler nil) ;; use global ruby-lsp with composed bundle
   :hook
   (ruby-ts-mode . lsp)
   (html-ts-mode . lsp)
@@ -81,6 +85,20 @@
   (gdscript-ts-mode . lsp)
   (lsp-mode . lsp-enable-which-key-integration)
   :config
+  ;; Disable TypeProf and default ruby-lsp to avoid conflicts
+  (add-to-list 'lsp-disabled-clients 'typeprof-ls)
+  (add-to-list 'lsp-disabled-clients 'ruby-lsp-ls)
+  ;; Register custom ruby-lsp client with launcher for dependency handling
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection 
+                     (lambda () 
+                       (let ((default-directory (or (lsp-workspace-root) default-directory)))
+                         (list (my-mise-which "ruby-lsp") "--use-launcher"))))
+    :activation-fn (lsp-activate-on "ruby")
+    :priority 10
+    :server-id 'ruby-lsp-mise))
+  
   (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
     "Prepend emacs-lsp-booster command to lsp CMD."
     (let ((orig-result (funcall old-fn cmd test?)))
