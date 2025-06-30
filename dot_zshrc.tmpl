@@ -91,7 +91,7 @@ autoload -Uz compinit && compinit
 {{- if lookPath "carapace" }}
 # Load carapace completions
 # It includes completions for: aws, gcloud, docker, git, kubectl, terraform, and more
-source <(carapace _carapace)
+source <(carapace _carapace zsh)
 {{- end }}
 
 {{- if lookPath "op" }}

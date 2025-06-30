@@ -12,8 +12,7 @@ echo 'end' >> ~/.config/fish/conf.d/mise.fish
 {{/* Completions via Carapace */}}
 {{- if lookPath "carapace" }}
 # Source carapace into .config/fish/conf.d
-echo "Carapace for some reason breaks when sourced automatically in this script; please run this manually:"
-echo "carapace _carapace > ~/.config/fish/conf.d/carapace.fish"
+carapace _carapace fish > ~/.config/fish/conf.d/carapace.fish
 {{- end }}
 
 {{/* History lookup */}}
