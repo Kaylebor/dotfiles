@@ -18,6 +18,7 @@ packages:
       - "dysk"
       - "erlang"
       - "elixir-ls"
+      - "emacs"
       - "enchant"
       - "eza"
       - "fd"
@@ -67,6 +68,8 @@ packages:
       - "zsh"
       - "zsh-antidote"
   darwin:
+    taps:
+      - "d12frosted/emacs-plus"
     brews:
       - "age"
       - "antidote"
@@ -84,6 +87,7 @@ packages:
       - "difftastic"
       - "diffutils"
       - "elixir-ls"
+      - "emacs-plus@31 --with-imagemagick --with-dbus --with-mailutils --with-memeplex-slim-icon --with-xwidgets"
       - "enchant"
       - "eza"
       - "fd"

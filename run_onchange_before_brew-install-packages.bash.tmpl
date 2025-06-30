@@ -9,16 +9,30 @@
 {{- end }}
 {{- template "brew_eval" . }}
 
+# Install Homebrew taps first
+{{- if .packages.darwin.taps }}
+{{ range .packages.darwin.taps -}}
+brew tap {{ . }}
+{{ end -}}
+{{- end }}
+
 # Install Homebrew packages
 brew bundle --file=- <<EOF
-{{ if eq .chezmoi.os "darwin" -}}
 {{ range .packages.darwin.brews -}}
+{{- if not (contains " --" .) }}
 brew {{ . | quote }}
+{{- end }}
 {{ end -}}
 {{ range .packages.darwin.casks -}}
 cask {{ . | quote }}
 {{ end -}}
 EOF
+
+# Install packages with arguments separately
+{{ range .packages.darwin.brews -}}
+{{- if contains " --" . }}
+brew install {{ . }}
+{{- end }}
 {{ end -}}
 {{ end -}}
 
@@ -43,7 +57,7 @@ rm -rf paru
 {{- end }}
 
 # Install packages defined in the configuration file
-paru -S --needed --noconfirm {{ range .packages.arch.aur -}} {{ . | quote }} {{ end }}
+paru -S --needed --noconfirm {{ range .packages.arch.aur -}} {{ . }} {{ end }}
 
 {{- end }}
 
