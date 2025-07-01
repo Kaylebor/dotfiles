@@ -61,6 +61,31 @@
     (with-current-buffer buf
       (setq mode-line-format nil))))
 
+;;; macOS-specific libgcc fix for native compilation
+(when (eq system-type 'darwin)
+  (defun my-append-env-var (var-name value)
+    "Append VALUE to the beginning of current value of env variable VAR-NAME."
+    (setenv var-name (if (getenv var-name)
+                         (format "%s:%s" value (getenv var-name))
+                       value)))
+
+  ;; Use 'current' symlink to be robust across Homebrew GCC upgrades
+  ;; Need to include the actual GCC subdirectory where libemutls_w.a lives
+  (let* ((gcc-base "/opt/homebrew/lib/gcc/current")
+         (gcc-lib-base (concat gcc-base "/gcc"))
+         (gcc-subdir (when (file-directory-p gcc-lib-base)
+                      (car (directory-files gcc-lib-base t "^aarch64-apple-darwin"))))
+         (gcc-version-dir (when gcc-subdir
+                           (car (directory-files gcc-subdir t "^[0-9]+$"))))
+         (gccjitpath (if gcc-version-dir
+                        (format "%s:%s:%s:/opt/homebrew/lib" 
+                                gcc-version-dir gcc-base "/opt/homebrew/lib/gcc/current")
+                      "/opt/homebrew/lib/gcc/current:/opt/homebrew/lib")))
+    (when (file-directory-p "/opt/homebrew/lib/gcc/current")
+      (mapc (lambda (var-name)
+              (my-append-env-var var-name gccjitpath))
+            '("LIBRARY_PATH" "LD_LIBRARY_PATH")))))
+
 ;;; Security
 (setq gnutls-verify-error t)  ; Prompts user if there are certificate issues
 (setq tls-checktrust t)  ; Ensure SSL/TLS connections undergo trust verification
