@@ -18,10 +18,10 @@ Plug 'catppuccin/nvim', { 'as': 'catppuccin' }                               " C
 " Initialize plugin system
 call plug#end()
 
-colorscheme catppuccin " catppuccin-latte, catppuccin-frappe, catppuccin-macchiato, catppuccin-mocha
+colorscheme catppuccin-frappe " catppuccin-latte, catppuccin-frappe, catppuccin-macchiato, catppuccin-mocha
 
 " Setting airline theme
-let g:airline_theme='luna'
+let g:airline_theme='catppuccin'
 
 " Fixing
 let g:ale_fixers = {
