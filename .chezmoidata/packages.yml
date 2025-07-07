@@ -99,6 +99,7 @@ packages:
       - "fd"
       - "ffmpegthumbnailer"
       - "findutils"
+      - "fish"
       - "flex"
       - "fop"
       - "fzf"
