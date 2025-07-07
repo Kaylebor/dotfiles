@@ -8,41 +8,41 @@ eval "$(mise hook-env -s zsh)"
 
 ## PATH
 # Add each of the specified directories to PATH if they exist
-{{- if stat (printf "%s/.local/bin" .chezmoi.homeDir) }}
+{{- if stat (joinPath .chezmoi.homeDir ".local" "bin") }}
 PATH="$HOME/.local/bin:$PATH" # User-installed binaries
 {{- end }}
-{{- if stat (printf "%s/.mix/escripts" .chezmoi.homeDir) }}
+{{- if stat (joinPath .chezmoi.homeDir ".mix" "escripts") }}
 PATH="$HOME/.mix/escripts:$PATH" # Mix escripts (Elixir)
 {{- end }}
-{{- if stat (printf "%s/.bun/bin" .chezmoi.homeDir) }}
+{{- if stat (joinPath .chezmoi.homeDir ".bun" "bin") }}
 PATH="$HOME/.bun/bin:$PATH" # Bun JavaScript runtime
 {{- end }}
-{{- if stat (printf "%s/.deno/bin" .chezmoi.homeDir) }}
+{{- if stat (joinPath .chezmoi.homeDir ".deno" "bin") }}
 PATH="$HOME/.deno/bin:$PATH" # Deno JavaScript runtime
 {{- end }}
-{{- if stat (printf "%s/.rd/bin" .chezmoi.homeDir) }}
+{{- if stat (joinPath .chezmoi.homeDir ".rd" "bin") }}
 PATH="$HOME/.rd/bin:$PATH" # Rancher Desktop for Docker management
 {{- end }}
-{{- if stat (printf "%s/.local/share/yabridge" .chezmoi.homeDir) }}
+{{- if stat (joinPath .chezmoi.homeDir ".local" "share" "yabridge") }}
 PATH="$HOME/.local/share/yabridge:$PATH" # Yabridge for VST plugins
 {{- end }}
 {{- $xdgDataHome := env "XDG_DATA_HOME" }}
 {{- if not $xdgDataHome }}
-{{-   $xdgDataHome = printf "%s/.local/share" .chezmoi.homeDir }}
+{{-   $xdgDataHome = joinPath .chezmoi.homeDir ".local" "share" }}
 {{- end }}
-{{- if stat (printf "%s/google-cloud-sdk/bin" $xdgDataHome) }}
+{{- if stat (joinPath $xdgDataHome "google-cloud-sdk" "bin") }}
 PATH="${XDG_DATA_HOME:-$HOME/.local/share}/google-cloud-sdk/bin:$PATH" # Google Cloud SDK
 {{- end }}
 {{- if eq .chezmoi.os "darwin" }}
 {{-   $brewPrefix := "" }}
-{{-   if stat (print .chezmoi.homeDir "/.homebrew") }}
-{{-     $brewPrefix = print .chezmoi.homeDir "/.homebrew" }}
+{{-   if stat (joinPath .chezmoi.homeDir ".homebrew") }}
+{{-     $brewPrefix = joinPath .chezmoi.homeDir ".homebrew" }}
 {{-   else if stat "/opt/homebrew" }}
 {{-     $brewPrefix = "/opt/homebrew" }}
 {{-   else if stat "/usr/local/Homebrew" }}
 {{-     $brewPrefix = "/usr/local" }}
 {{-   end }}
-{{-   if and $brewPrefix (stat (printf "%s/opt/libpq/bin" $brewPrefix)) }}
+{{-   if and $brewPrefix (stat (joinPath $brewPrefix "opt" "libpq" "bin")) }}
 PATH="{{ $brewPrefix }}/opt/libpq/bin:$PATH" # PostgreSQL
 {{-   end }}
 {{- end }}
@@ -117,15 +117,15 @@ fi
 {{- $antidoteFiles := list }}
 {{- if eq .chezmoi.os "darwin" }}
 {{-   $brewPrefix := "" }}
-{{-   if stat (print .chezmoi.homeDir "/.homebrew") }}
-{{-     $brewPrefix = print .chezmoi.homeDir "/.homebrew" }}
+{{-   if stat (joinPath .chezmoi.homeDir ".homebrew") }}
+{{-     $brewPrefix = joinPath .chezmoi.homeDir ".homebrew" }}
 {{-   else if stat "/opt/homebrew" }}
 {{-     $brewPrefix = "/opt/homebrew" }}
 {{-   else if stat "/usr/local/Homebrew" }}
 {{-     $brewPrefix = "/usr/local" }}
 {{-   end }}
 {{-   if $brewPrefix }}
-{{-     $antidoteFiles = append $antidoteFiles (printf "%s/opt/antidote/share/antidote/antidote.zsh" $brewPrefix) }}
+{{-     $antidoteFiles = append $antidoteFiles (joinPath $brewPrefix "opt" "antidote" "share" "antidote" "antidote.zsh") }}
 {{-   end }}
 {{- end }}
 {{- $antidoteFiles = append $antidoteFiles "/usr/share/zsh-antidote/antidote.zsh" }}
@@ -150,22 +150,22 @@ export MANPAGER="sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p
 
 # Erlang install fixes
 {{- $brewPrefix := "" }}
-{{- if stat (print .chezmoi.homeDir "/.homebrew") }}
-{{-   $brewPrefix = print .chezmoi.homeDir "/.homebrew" }}
+{{- if stat (joinPath .chezmoi.homeDir ".homebrew") }}
+{{-   $brewPrefix = joinPath .chezmoi.homeDir ".homebrew" }}
 {{- else if stat "/opt/homebrew" }}
 {{-   $brewPrefix = "/opt/homebrew" }}
 {{- else if stat "/usr/local/Homebrew" }}
 {{-   $brewPrefix = "/usr/local" }}
 {{- end }}
 {{- if $brewPrefix }}
-UNIXODBCHOME="{{ $brewPrefix }}/opt/unixodbc"
+UNIXODBCHOME="{{ joinPath $brewPrefix "opt" "unixodbc" }}"
 export CPPFLAGS="${CPPFLAGS+"$CPPFLAGS "}-I${UNIXODBCHOME}/include"
 export LDFLAGS="${LDFLAGS+"$LDFLAGS "}-L${UNIXODBCHOME}/lib"
 export KERL_CONFIGURE_OPTIONS="--with-odbc=${UNIXODBCHOME}"
 {{- end }}
 {{- end }}
 
-{{- if stat (printf "%s/.config/op/plugins.sh" .chezmoi.homeDir) }}
+{{- if stat (joinPath .chezmoi.homeDir ".config" "op" "plugins.sh") }}
 source $HOME/.config/op/plugins.sh
 {{- end }}
 
@@ -186,7 +186,7 @@ vterm_printf() {
 # Set up aliases
 [[ $- == *i* ]] && source $HOME/.config/zsh/aliases.zsh
 
-{{- if stat (printf "%s/.config/zsh/.zshrc.local" .chezmoi.homeDir) }}
+{{- if stat (joinPath .chezmoi.homeDir ".config" "zsh" ".zshrc.local") }}
 # Per-machine configuration
 source $HOME/.config/zsh/.zshrc.local
 {{- end }}

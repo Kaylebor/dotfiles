@@ -45,17 +45,17 @@ KERL_CONFIGURE_OPTIONS="--with-odbc=/var/lib/pacman/local/unixodbc-{{ output "pa
 {{- end }}
 {{- if (eq .chezmoi.os "darwin") }}
 {{- $brewPrefix := "" }}
-{{- if stat (print .chezmoi.homeDir "/.homebrew") }}
-{{-   $brewPrefix = print .chezmoi.homeDir "/.homebrew" }}
+{{- if stat (joinPath .chezmoi.homeDir ".homebrew") }}
+{{-   $brewPrefix = joinPath .chezmoi.homeDir ".homebrew" }}
 {{- else if stat "/opt/homebrew" }}
 {{-   $brewPrefix = "/opt/homebrew" }}
 {{- else if stat "/usr/local/Homebrew" }}
 {{-   $brewPrefix = "/usr/local" }}
 {{- end }}
 {{- if $brewPrefix }}
-LDFLAGS="{{ "{{get_env(name='LDFLAGS', default='')}}" }} -L{{ $brewPrefix }}/opt/llvm/lib -L{{ $brewPrefix }}/opt/openblas/lib -L{{ $brewPrefix }}/opt/lapack/lib -L{{ $brewPrefix }}/opt/libpq/lib"
-CPPFLAGS="{{ "{{get_env(name='CPPFLAGS', default='')}}" }} -I{{ $brewPrefix }}/opt/llvm/include -I{{ $brewPrefix }}/opt/openblas/include -I{{ $brewPrefix }}/opt/lapack/include -I{{ $brewPrefix }}/opt/libpq/include"
-PKG_CONFIG_PATH="{{ "{{get_env(name='PKG_CONFIG_PATH', default='')}}" }}:{{ $brewPrefix }}/opt/openblas/lib/pkgconfig:{{ $brewPrefix }}/opt/lapack/lib/pkgconfig:{{ $brewPrefix }}/opt/libpq/lib/pkgconfig"
+LDFLAGS="{{ "{{get_env(name='LDFLAGS', default='')}}" }} -L{{ joinPath $brewPrefix "opt" "llvm" "lib" }} -L{{ joinPath $brewPrefix "opt" "openblas" "lib" }} -L{{ joinPath $brewPrefix "opt" "lapack" "lib" }} -L{{ joinPath $brewPrefix "opt" "libpq" "lib" }}"
+CPPFLAGS="{{ "{{get_env(name='CPPFLAGS', default='')}}" }} -I{{ joinPath $brewPrefix "opt" "llvm" "include" }} -I{{ joinPath $brewPrefix "opt" "openblas" "include" }} -I{{ joinPath $brewPrefix "opt" "lapack" "include" }} -I{{ joinPath $brewPrefix "opt" "libpq" "include" }}"
+PKG_CONFIG_PATH="{{ "{{get_env(name='PKG_CONFIG_PATH', default='')}}" }}:{{ joinPath $brewPrefix "opt" "openblas" "lib" "pkgconfig" }}:{{ joinPath $brewPrefix "opt" "lapack" "lib" "pkgconfig" }}:{{ joinPath $brewPrefix "opt" "libpq" "lib" "pkgconfig" }}"
 LAPACK="{{- first (glob (joinPath $brewPrefix "opt" "lapack" "lib" "liblapack*.dylib")) }}"
 BLAS="{{- first (glob (joinPath $brewPrefix "opt" "openblas" "lib" "libopenblasp-r*.dylib")) }}"
 {{- end }}
