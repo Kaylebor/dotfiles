@@ -13,7 +13,13 @@ if not command -q brew
 
     for path in $brew_paths
         if test -x $path
-            eval (parse_shellenv $path shellenv | string replace -- ' --path' '' | string replace -- --global -U | source)
+            # Call brew shellenv and convert global exports to universal exports
+            # Handle both 'set --global --export'/'set -gx' and 'fish_add_path --global' formats
+            eval ($path shellenv \
+                | string replace --all -- 'set --global --export' 'set -Ux' \
+                | string replace --all -- 'set -gx' 'set -Ux' \
+                | string replace --all -- 'fish_add_path --global --move --path' 'fish_add_path -Um' \
+                | string replace --all -- 'fish_add_path --global' 'fish_add_path -U')
             break
         end
     end
