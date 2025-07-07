@@ -44,11 +44,21 @@ idiomatic_version_file_enable_tools = ["ruby"]
 KERL_CONFIGURE_OPTIONS="--with-odbc=/var/lib/pacman/local/unixodbc-{{ output "pacman" "-Q" "unixodbc" | trim | splitList " " | last }}"
 {{- end }}
 {{- if (eq .chezmoi.os "darwin") }}
-LDFLAGS="{{ "{{get_env(name='LDFLAGS', default='')}}" }} -L{{ env "HOMEBREW_PREFIX" }}/opt/llvm/lib -L{{ env "HOMEBREW_PREFIX" }}/opt/openblas/lib -L{{ env "HOMEBREW_PREFIX" }}/opt/lapack/lib -L{{ env "HOMEBREW_PREFIX" }}/opt/libpq/lib"
-CPPFLAGS="{{ "{{get_env(name='CPPFLAGS', default='')}}" }} -I{{ env "HOMEBREW_PREFIX" }}/opt/llvm/include -I{{ env "HOMEBREW_PREFIX" }}/opt/openblas/include -I{{ env "HOMEBREW_PREFIX" }}/opt/lapack/include -I{{ env "HOMEBREW_PREFIX" }}/opt/libpq/include"
-PKG_CONFIG_PATH="{{ "{{get_env(name='PKG_CONFIG_PATH', default='')}}" }}:{{ env "HOMEBREW_PREFIX" }}/opt/openblas/lib/pkgconfig:{{ env "HOMEBREW_PREFIX" }}/opt/lapack/lib/pkgconfig:{{ env "HOMEBREW_PREFIX" }}/opt/libpq/lib/pkgconfig"
-LAPACK="{{- first (glob (joinPath (env "HOMEBREW_PREFIX") "opt" "lapack" "lib" "liblapack*.dylib")) }}"
-BLAS="{{- first (glob (joinPath (env "HOMEBREW_PREFIX") "opt" "openblas" "lib" "libopenblasp-r*.dylib")) }}"
+{{- $brewPrefix := "" }}
+{{- if stat (print .chezmoi.homeDir "/.homebrew") }}
+{{-   $brewPrefix = print .chezmoi.homeDir "/.homebrew" }}
+{{- else if stat "/opt/homebrew" }}
+{{-   $brewPrefix = "/opt/homebrew" }}
+{{- else if stat "/usr/local/Homebrew" }}
+{{-   $brewPrefix = "/usr/local" }}
+{{- end }}
+{{- if $brewPrefix }}
+LDFLAGS="{{ "{{get_env(name='LDFLAGS', default='')}}" }} -L{{ $brewPrefix }}/opt/llvm/lib -L{{ $brewPrefix }}/opt/openblas/lib -L{{ $brewPrefix }}/opt/lapack/lib -L{{ $brewPrefix }}/opt/libpq/lib"
+CPPFLAGS="{{ "{{get_env(name='CPPFLAGS', default='')}}" }} -I{{ $brewPrefix }}/opt/llvm/include -I{{ $brewPrefix }}/opt/openblas/include -I{{ $brewPrefix }}/opt/lapack/include -I{{ $brewPrefix }}/opt/libpq/include"
+PKG_CONFIG_PATH="{{ "{{get_env(name='PKG_CONFIG_PATH', default='')}}" }}:{{ $brewPrefix }}/opt/openblas/lib/pkgconfig:{{ $brewPrefix }}/opt/lapack/lib/pkgconfig:{{ $brewPrefix }}/opt/libpq/lib/pkgconfig"
+LAPACK="{{- first (glob (joinPath $brewPrefix "opt" "lapack" "lib" "liblapack*.dylib")) }}"
+BLAS="{{- first (glob (joinPath $brewPrefix "opt" "openblas" "lib" "libopenblasp-r*.dylib")) }}"
+{{- end }}
 ## tell compiler not to error out for implicit function declarations
 CFLAGS="-Wno-error=implicit-function-declaration"
 {{- end }}

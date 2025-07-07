@@ -33,10 +33,17 @@ PATH="$HOME/.local/share/yabridge:$PATH" # Yabridge for VST plugins
 {{- if stat (printf "%s/google-cloud-sdk/bin" $xdgDataHome) }}
 PATH="${XDG_DATA_HOME:-$HOME/.local/share}/google-cloud-sdk/bin:$PATH" # Google Cloud SDK
 {{- end }}
-{{- if env "HOMEBREW_PREFIX" }}
-{{-   $homebrewPrefix := env "HOMEBREW_PREFIX" }}
-{{-   if stat (printf "%s/opt/libpq/bin" $homebrewPrefix) }}
-PATH="$HOMEBREW_PREFIX/opt/libpq/bin:$PATH" # PostgreSQL
+{{- if eq .chezmoi.os "darwin" }}
+{{-   $brewPrefix := "" }}
+{{-   if stat (print .chezmoi.homeDir "/.homebrew") }}
+{{-     $brewPrefix = print .chezmoi.homeDir "/.homebrew" }}
+{{-   else if stat "/opt/homebrew" }}
+{{-     $brewPrefix = "/opt/homebrew" }}
+{{-   else if stat "/usr/local/Homebrew" }}
+{{-     $brewPrefix = "/usr/local" }}
+{{-   end }}
+{{-   if and $brewPrefix (stat (printf "%s/opt/libpq/bin" $brewPrefix)) }}
+PATH="{{ $brewPrefix }}/opt/libpq/bin:$PATH" # PostgreSQL
 {{-   end }}
 {{- end }}
 {{- if and (lookPath "brew") (eq .chezmoi.os "darwin") }}
@@ -80,10 +87,20 @@ export MANPAGER="sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p
 ## MacOS-specific fixes
 
 # Erlang install fixes
-UNIXODBCHOME="$HOMEBREW_PREFIX/opt/unixodbc"
+{{- $brewPrefix := "" }}
+{{- if stat (print .chezmoi.homeDir "/.homebrew") }}
+{{-   $brewPrefix = print .chezmoi.homeDir "/.homebrew" }}
+{{- else if stat "/opt/homebrew" }}
+{{-   $brewPrefix = "/opt/homebrew" }}
+{{- else if stat "/usr/local/Homebrew" }}
+{{-   $brewPrefix = "/usr/local" }}
+{{- end }}
+{{- if $brewPrefix }}
+UNIXODBCHOME="{{ $brewPrefix }}/opt/unixodbc"
 export CPPFLAGS="${CPPFLAGS+"$CPPFLAGS "}-I${UNIXODBCHOME}/include"
 export LDFLAGS="${LDFLAGS+"$LDFLAGS "}-L${UNIXODBCHOME}/lib"
 export KERL_CONFIGURE_OPTIONS="--with-odbc=${UNIXODBCHOME}"
+{{- end }}
 {{- end }}
 
 {{- if stat (printf "%s/.config/op/plugins.sh" .chezmoi.homeDir) }}
