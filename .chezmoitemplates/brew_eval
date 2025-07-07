@@ -1,5 +1,7 @@
 # Initialize brew [https://brew.sh]
-{{- if stat "/opt/homebrew/bin/brew" }}
+{{- if stat (print .chezmoi.homeDir "/.homebrew/bin/brew") }}
+eval "$({{print .chezmoi.homeDir}}/.homebrew/bin/brew shellenv)"
+{{- else if stat "/opt/homebrew/bin/brew" }}
 eval "$(/opt/homebrew/bin/brew shellenv)"
 {{- else if stat "/home/linuxbrew/.linuxbrew/bin/brew" }}
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"

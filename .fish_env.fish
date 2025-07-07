@@ -6,6 +6,7 @@ mkdir -p ~/.config/fish/functions
 if not command -q brew
     # Activate brew
     set -l brew_paths \
+        $HOME/.homebrew/bin/brew \
         /opt/homebrew/bin/brew \
         /usr/local/bin/brew \
         /home/linuxbrew/.linuxbrew/bin/brew
