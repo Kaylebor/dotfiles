@@ -1,3 +1,4 @@
 urls:
   homebrew:
     install: https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+    tarball: https://github.com/Homebrew/brew/tarball/main

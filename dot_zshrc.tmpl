@@ -3,7 +3,7 @@
 # Force en_US.UTF-8 locale
 export LC_ALL=en_US.UTF-8
 
-{{- if eq .chezmoi.os "darwin" }}
+{{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
 # Switch to Fish shell if available in non-standard Homebrew path (for MDM setups)
 if [[ $- == *i* ]] && [[ -x "$HOME/.homebrew/bin/fish" ]]; then
     exec "$HOME/.homebrew/bin/fish"
@@ -42,12 +42,16 @@ PATH="${XDG_DATA_HOME:-$HOME/.local/share}/google-cloud-sdk/bin:$PATH" # Google 
 {{- end }}
 {{- if eq .chezmoi.os "darwin" }}
 {{-   $brewPrefix := "" }}
-{{-   if stat (joinPath .chezmoi.homeDir ".homebrew") }}
-{{-     $brewPrefix = joinPath .chezmoi.homeDir ".homebrew" }}
-{{-   else if stat "/opt/homebrew" }}
-{{-     $brewPrefix = "/opt/homebrew" }}
-{{-   else if stat "/usr/local/Homebrew" }}
-{{-     $brewPrefix = "/usr/local" }}
+{{-   if eq .homebrewInstallType "alternative" }}
+{{-     if stat (joinPath .chezmoi.homeDir ".homebrew") }}
+{{-       $brewPrefix = joinPath .chezmoi.homeDir ".homebrew" }}
+{{-     end }}
+{{-   else }}
+{{-     if stat "/opt/homebrew" }}
+{{-       $brewPrefix = "/opt/homebrew" }}
+{{-     else if stat "/usr/local/Homebrew" }}
+{{-       $brewPrefix = "/usr/local" }}
+{{-     end }}
 {{-   end }}
 {{-   if and $brewPrefix (stat (joinPath $brewPrefix "opt" "libpq" "bin")) }}
 PATH="{{ $brewPrefix }}/opt/libpq/bin:$PATH" # PostgreSQL
@@ -124,12 +128,16 @@ fi
 {{- $antidoteFiles := list }}
 {{- if eq .chezmoi.os "darwin" }}
 {{-   $brewPrefix := "" }}
-{{-   if stat (joinPath .chezmoi.homeDir ".homebrew") }}
-{{-     $brewPrefix = joinPath .chezmoi.homeDir ".homebrew" }}
-{{-   else if stat "/opt/homebrew" }}
-{{-     $brewPrefix = "/opt/homebrew" }}
-{{-   else if stat "/usr/local/Homebrew" }}
-{{-     $brewPrefix = "/usr/local" }}
+{{-   if eq .homebrewInstallType "alternative" }}
+{{-     if stat (joinPath .chezmoi.homeDir ".homebrew") }}
+{{-       $brewPrefix = joinPath .chezmoi.homeDir ".homebrew" }}
+{{-     end }}
+{{-   else }}
+{{-     if stat "/opt/homebrew" }}
+{{-       $brewPrefix = "/opt/homebrew" }}
+{{-     else if stat "/usr/local/Homebrew" }}
+{{-       $brewPrefix = "/usr/local" }}
+{{-     end }}
 {{-   end }}
 {{-   if $brewPrefix }}
 {{-     $antidoteFiles = append $antidoteFiles (joinPath $brewPrefix "opt" "antidote" "share" "antidote" "antidote.zsh") }}
@@ -157,12 +165,16 @@ export MANPAGER="sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p
 
 # Erlang install fixes
 {{- $brewPrefix := "" }}
-{{- if stat (joinPath .chezmoi.homeDir ".homebrew") }}
-{{-   $brewPrefix = joinPath .chezmoi.homeDir ".homebrew" }}
-{{- else if stat "/opt/homebrew" }}
-{{-   $brewPrefix = "/opt/homebrew" }}
-{{- else if stat "/usr/local/Homebrew" }}
-{{-   $brewPrefix = "/usr/local" }}
+{{- if eq .homebrewInstallType "alternative" }}
+{{-   if stat (joinPath .chezmoi.homeDir ".homebrew") }}
+{{-     $brewPrefix = joinPath .chezmoi.homeDir ".homebrew" }}
+{{-   end }}
+{{- else }}
+{{-   if stat "/opt/homebrew" }}
+{{-     $brewPrefix = "/opt/homebrew" }}
+{{-   else if stat "/usr/local/Homebrew" }}
+{{-     $brewPrefix = "/usr/local" }}
+{{-   end }}
 {{- end }}
 {{- if $brewPrefix }}
 UNIXODBCHOME="{{ joinPath $brewPrefix "opt" "unixodbc" }}"

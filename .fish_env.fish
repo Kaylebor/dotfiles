@@ -4,7 +4,7 @@ mkdir -p ~/.config/fish/conf.d
 mkdir -p ~/.config/fish/functions
 
 if not command -q brew
-    # Activate brew
+    # Activate brew - check alternative path first, then standard locations
     set -l brew_paths \
         $HOME/.homebrew/bin/brew \
         /opt/homebrew/bin/brew \

@@ -45,12 +45,16 @@ KERL_CONFIGURE_OPTIONS="--with-odbc=/var/lib/pacman/local/unixodbc-{{ output "pa
 {{- end }}
 {{- if (eq .chezmoi.os "darwin") }}
 {{- $brewPrefix := "" }}
-{{- if stat (joinPath .chezmoi.homeDir ".homebrew") }}
-{{-   $brewPrefix = joinPath .chezmoi.homeDir ".homebrew" }}
-{{- else if stat "/opt/homebrew" }}
-{{-   $brewPrefix = "/opt/homebrew" }}
-{{- else if stat "/usr/local/Homebrew" }}
-{{-   $brewPrefix = "/usr/local" }}
+{{- if eq .homebrewInstallType "alternative" }}
+{{-   if stat (joinPath .chezmoi.homeDir ".homebrew") }}
+{{-     $brewPrefix = joinPath .chezmoi.homeDir ".homebrew" }}
+{{-   end }}
+{{- else }}
+{{-   if stat "/opt/homebrew" }}
+{{-     $brewPrefix = "/opt/homebrew" }}
+{{-   else if stat "/usr/local/Homebrew" }}
+{{-     $brewPrefix = "/usr/local" }}
+{{-   end }}
 {{- end }}
 {{- if $brewPrefix }}
 LDFLAGS="{{ "{{get_env(name='LDFLAGS', default='')}}" }} -L{{ joinPath $brewPrefix "opt" "llvm" "lib" }} -L{{ joinPath $brewPrefix "opt" "openblas" "lib" }} -L{{ joinPath $brewPrefix "opt" "lapack" "lib" }} -L{{ joinPath $brewPrefix "opt" "libpq" "lib" }}"
