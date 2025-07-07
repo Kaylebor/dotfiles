@@ -16,5 +16,30 @@ Within Emacs, you may want to run this to install the tree sitter grammars:
 (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
 ```
 
+## Package Management
+
+### Reinstalling Packages
+
+When updating packages (especially those with custom build options like `emacs-plus`), you can use environment variables to control reinstallation:
+
+#### Quick Reinstall (preserves options)
+```bash
+CHEZMOI_REINSTALL_PACKAGES="neovim,tmux" chezmoi apply
+```
+- Uses `brew reinstall` under the hood
+- Preserves installation options
+- Good for fixing corrupted installations
+
+#### Force Reinstall (clean installation)
+```bash
+CHEZMOI_FORCE_REINSTALL_PACKAGES="emacs-plus@31" chezmoi apply
+```
+- Uninstalls then reinstalls the package
+- Removes all options, permissions, and metadata
+- Required when changing installation options
+- Recommended for packages like `emacs-plus` that need complete removal on updates
+
+You can specify multiple packages separated by commas, and use both variables together if needed.
+
 ## Extras
 - Fonts: [Iosevka and Iosevka Term](https://typeof.net/Iosevka/)

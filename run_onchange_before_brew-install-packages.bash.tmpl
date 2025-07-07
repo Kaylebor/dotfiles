@@ -1,5 +1,15 @@
 #!/bin/bash
 {{/* Script to check OS and install packages based on OS */}}
+{{/* 
+  Environment variables for package reinstallation:
+  - CHEZMOI_REINSTALL_PACKAGES: comma-separated list of packages to reinstall using 'brew reinstall'
+    Example: CHEZMOI_REINSTALL_PACKAGES="neovim,tmux" chezmoi apply
+    Use when: Quick fix for corrupted installations, preserves installation options
+  
+  - CHEZMOI_FORCE_REINSTALL_PACKAGES: comma-separated list of packages to uninstall then install
+    Example: CHEZMOI_FORCE_REINSTALL_PACKAGES="emacs-plus@31" chezmoi apply  
+    Use when: Need clean installation, changing installation options, or package requires full removal
+*/}}
 
 {{/* MacOS setup commands */}}
 {{ if eq .chezmoi.os "darwin" -}}
@@ -16,24 +26,46 @@ brew tap {{ . }}
 {{ end -}}
 {{- end }}
 
+# Handle package reinstalls
+# CHEZMOI_REINSTALL_PACKAGES: comma-separated list of packages to reinstall (uses brew reinstall)
+# CHEZMOI_FORCE_REINSTALL_PACKAGES: comma-separated list of packages to uninstall then install
+if [ -n "$CHEZMOI_REINSTALL_PACKAGES" ]; then
+  echo "Reinstalling packages (brew reinstall): $CHEZMOI_REINSTALL_PACKAGES"
+  IFS=',' read -ra PACKAGES <<< "$CHEZMOI_REINSTALL_PACKAGES"
+  for pkg in "${PACKAGES[@]}"; do
+    pkg=$(echo "$pkg" | tr -d ' ')  # Trim whitespace
+    if brew list --formula | grep -q "^${pkg}$"; then
+      echo "Reinstalling $pkg..."
+      brew reinstall "$pkg"
+    fi
+  done
+fi
+
+if [ -n "$CHEZMOI_FORCE_REINSTALL_PACKAGES" ]; then
+  echo "Force reinstalling packages (uninstall + install): $CHEZMOI_FORCE_REINSTALL_PACKAGES"
+  IFS=',' read -ra PACKAGES <<< "$CHEZMOI_FORCE_REINSTALL_PACKAGES"
+  for pkg in "${PACKAGES[@]}"; do
+    pkg=$(echo "$pkg" | tr -d ' ')  # Trim whitespace
+    if brew list --formula | grep -q "^${pkg}$"; then
+      echo "Uninstalling $pkg for clean reinstall..."
+      brew uninstall --ignore-dependencies "$pkg"
+    fi
+  done
+fi
+
 # Install Homebrew packages
 brew bundle --file=- <<EOF
 {{ range .packages.darwin.brews -}}
-{{- if not (contains " --" .) }}
+{{- if kindIs "string" . }}
 brew {{ . | quote }}
+{{- else if kindIs "map" . }}
+brew {{ .name | quote }}{{- if .args }}, args: [{{ range $i, $arg := .args }}{{if $i}}, {{end}}{{ $arg | quote }}{{ end }}]{{- end }}
 {{- end }}
 {{ end -}}
 {{ range .packages.darwin.casks -}}
 cask {{ . | quote }}
 {{ end -}}
 EOF
-
-# Install packages with arguments separately
-{{ range .packages.darwin.brews -}}
-{{- if contains " --" . }}
-brew install {{ . }}
-{{- end }}
-{{ end -}}
 {{ end -}}
 
 {{/* Linux setup commands */}}
