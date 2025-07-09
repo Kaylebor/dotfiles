@@ -1,5 +1,5 @@
 model: gemini/gemini-2.5-pro-exp-03-25
 api-key:
-  - gemini={{ onepasswordRead "op://Private/kvupxk4odcrfhpzy7pi5sfmqnu/credential" "my.1password.com" }}
-  - openrouter={{ onepasswordRead "op://Private/OpenRouter/API Token" "my.1password.com" }}
-  - deepseek={{ onepasswordRead "op://Private/uwefkotil3tiviesvltifiokmm/credential" "my.1password.com" }}
+  - gemini={{ template "onepassword_safe" dict "opPath" "op://Private/kvupxk4odcrfhpzy7pi5sfmqnu/credential" "envVar" "CHEZMOI_GEMINI_API_KEY" "context" . }}
+  - openrouter={{ template "onepassword_safe" dict "opPath" "op://Private/OpenRouter/API Token" "envVar" "CHEZMOI_OPENROUTER_API_KEY" "context" . }}
+  - deepseek={{ template "onepassword_safe" dict "opPath" "op://Private/uwefkotil3tiviesvltifiokmm/credential" "envVar" "CHEZMOI_DEEPSEEK_API_KEY" "context" . }}

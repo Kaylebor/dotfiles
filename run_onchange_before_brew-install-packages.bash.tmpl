@@ -64,13 +64,45 @@ if [ -n "$CHEZMOI_FORCE_REINSTALL_PACKAGES" ]; then
   done
 fi
 
-# Install Homebrew packages
+# Install packages with environment variables first (individual installs)
+{{ range .packages.darwin.brews -}}
+{{- if kindIs "map" . }}
+{{- $hasEnv := false }}
+{{- $hasAlternativeEnv := false }}
+{{- if hasKey . "env" }}
+{{- $hasEnv = true }}
+{{- end }}
+{{- if hasKey . "alternative_only" }}
+{{- if hasKey .alternative_only "env" }}
+{{- $hasAlternativeEnv = true }}
+{{- end }}
+{{- end }}
+{{- if or $hasEnv $hasAlternativeEnv }}
+# Install {{ .name }} with environment variables in isolated subshell
+({{- if $hasEnv }}{{- range $key, $value := .env }} {{ $key }}={{ $value | quote }}{{- end }}{{- end }}{{- if and $hasAlternativeEnv (and (hasKey $ "homebrewInstallType") (eq $.homebrewInstallType "alternative")) }}{{- range $key, $value := .alternative_only.env }} {{ $key }}={{ $value | quote }}{{- end }}{{- end }}; brew install {{ .name | quote }}{{- if hasKey . "args" }} {{ range .args }} --{{ . }}{{ end }}{{- end }}{{- if and (hasKey . "alternative_only") (and (hasKey $ "homebrewInstallType") (eq $.homebrewInstallType "alternative")) }}{{- if hasKey .alternative_only "args" }} {{ range .alternative_only.args }} --{{ . }}{{ end }}{{- end }}{{- end }})
+{{- end }}
+{{- end }}
+{{ end -}}
+
+# Install remaining packages with brew bundle
 brew bundle --file=- <<EOF
 {{ range .packages.darwin.brews -}}
 {{- if kindIs "string" . }}
 brew {{ . | quote }}
 {{- else if kindIs "map" . }}
-brew {{ .name | quote }}{{- if .args }}, args: [{{ range $i, $arg := .args }}{{if $i}}, {{end}}{{ $arg | quote }}{{ end }}]{{- end }}
+{{- $hasEnv := false }}
+{{- $hasAlternativeEnv := false }}
+{{- if hasKey . "env" }}
+{{- $hasEnv = true }}
+{{- end }}
+{{- if hasKey . "alternative_only" }}
+{{- if hasKey .alternative_only "env" }}
+{{- $hasAlternativeEnv = true }}
+{{- end }}
+{{- end }}
+{{- if not (or $hasEnv $hasAlternativeEnv) }}
+brew {{ .name | quote }}{{- if hasKey . "args" }}, args: [{{ range $i, $arg := .args }}{{if $i}}, {{end}}{{ $arg | quote }}{{ end }}]{{- end }}{{- if and (hasKey . "alternative_only") (and (hasKey $ "homebrewInstallType") (eq $.homebrewInstallType "alternative")) }}{{- if hasKey .alternative_only "args" }}, args: [{{ range $i, $arg := .alternative_only.args }}{{if $i}}, {{end}}{{ $arg | quote }}{{ end }}]{{- end }}{{- end }}
+{{- end }}
 {{- end }}
 {{ end -}}
 {{ range .packages.darwin.casks -}}

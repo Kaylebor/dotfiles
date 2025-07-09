@@ -7,7 +7,17 @@
 {{-   end }}
 {{- end }}
 
+{{- $skip1Password := false }}
+{{- if hasKey . "skip1Password" }}
+{{-   $skip1Password = .skip1Password }}
+{{- else if env "CHEZMOI_SKIP_1PASSWORD" }}
+{{-   $skip1Password = true }}
+{{- else }}
+{{-   $skip1Password = false }}
+{{- end }}
+
 data:
 {{- if eq .chezmoi.os "darwin" }}
   homebrewInstallType: {{ $homebrewInstallType | quote }}
 {{- end }}
+  skip1Password: {{ $skip1Password }}

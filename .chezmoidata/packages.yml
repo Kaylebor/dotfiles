@@ -105,8 +105,11 @@ packages:
       - "fzf"
       - "gawk"
       - name: "gcc"
-        args:
-          - "build-from-source"
+        alternative_only:
+          args:
+            - "build-from-source"
+          env:
+            LDFLAGS: "-Wl,-headerpad_max_install_names"
       - "gh"
       - "git"
       - "git-delta"

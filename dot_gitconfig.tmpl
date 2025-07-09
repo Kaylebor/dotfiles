@@ -15,7 +15,7 @@
 [user]
   name = "Ender Veiga Bueno"
   email = "letstalk@ender.codes"
-  signingkey = {{ onepasswordRead "op://Private/Personal Key/public key" "my.1password.com" }}
+  signingkey = {{ template "onepassword_safe" dict "opPath" "op://Private/Personal Key/public key" "envVar" "CHEZMOI_GIT_SIGNING_KEY" "context" . }}
 [github]
   user = "Kaylebor"
 [include]
