@@ -19,7 +19,6 @@ packages:
       - "erlang"
       - "elixir-ls"
       - "emacs"
-      - "enchant"
       - "eza"
       - "fd"
       - "firefox-developer-edition"
@@ -110,6 +109,10 @@ packages:
             - "build-from-source"
           env:
             LDFLAGS: "-Wl,-headerpad_max_install_names"
+            BOOT_LDFLAGS: "-Wl,-headerpad_max_install_names"
+            CFLAGS_FOR_TARGET: "-headerpad_max_install_names"
+            CXXFLAGS_FOR_TARGET: "-headerpad_max_install_names"
+            HOMEBREW_NO_INSTALL_CLEANUP: "1"
       - "gh"
       - "git"
       - "git-delta"

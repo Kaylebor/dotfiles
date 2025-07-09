@@ -41,6 +41,31 @@ Scripts are automatically run by chezmoi:
 - **Development tools**: mise (formerly rtx) manages language runtimes
 - **Editor plugins**: Neovim via vim-plug, Emacs via elpaca
 
+#### Homebrew Package Configuration
+The `packages.yml` file supports advanced package configurations:
+- **Global configurations**: Apply to all Homebrew installation types
+- **Alternative-specific configurations**: Only applied when using alternative Homebrew prefix (`~/.homebrew`)
+- **Environment variables**: Set per-package for complex builds (e.g., gcc with header padding flags)
+- **Build arguments**: Custom compilation flags and options
+
+Example package with alternative-specific configuration:
+```yaml
+- name: "gcc"
+  alternative_only:
+    args:
+      - "build-from-source"
+    env:
+      LDFLAGS: "-Wl,-headerpad_max_install_names"
+      BOOT_LDFLAGS: "-Wl,-headerpad_max_install_names"
+      CFLAGS_FOR_TARGET: "-Wl,-headerpad_max_install_names"
+      CXXFLAGS_FOR_TARGET: "-Wl,-headerpad_max_install_names"
+      HOMEBREW_NO_INSTALL_CLEANUP: "1"
+```
+
+#### Known Limitations
+- **GCC with Alternative Homebrew**: May show dylib fixing errors during post-install but compiles and runs correctly
+- **Alternative installation**: All packages built from source, significantly longer installation times
+
 ### Key Tools and Languages
 Development environment includes:
 - **Languages**: Ruby, Node.js, Go, Python, Java (GraalVM), Elixir, Erlang, Rust, Deno, Bun
@@ -54,6 +79,15 @@ Uses 1Password for:
 - SSH key signing (configured in git)
 - Secure storage of signing keys and tokens
 - Template data injection via `onepasswordRead` function
+
+#### 1Password CLI Bypass
+For environments where 1Password CLI is broken (e.g., MDM setups), the repository includes bypass mechanisms:
+- **Configuration flag**: Set `skip1Password: true` in chezmoi config or use `CHEZMOI_SKIP_1PASSWORD=true`
+- **Environment variable fallbacks**:
+  - `CHEZMOI_GIT_SIGNING_KEY` - SSH signing key for git commits
+  - `CHEZMOI_GEMINI_API_KEY` - Gemini API key for aider
+  - `CHEZMOI_OPENROUTER_API_KEY` - OpenRouter API key for aider
+  - `CHEZMOI_DEEPSEEK_API_KEY` - DeepSeek API key for aider
 
 ### Templating System
 chezmoi templates use:

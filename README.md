@@ -5,6 +5,20 @@ This is my dotfiles repository. It is managed by [chezmoi](https://www.chezmoi.i
 - Install [1Password](https://1password.com/downloads) and sign in (avoid Flatpak/Snap versions for now).
 - Install [1Password CLI](https://support.1password.com/command-line-getting-started/) and configure it.
 
+### Alternative: Skip 1Password (for MDM environments)
+If 1Password CLI is not available or broken (common in MDM setups), you can skip it entirely:
+
+```bash
+# Option 1: Set environment variable
+export CHEZMOI_SKIP_1PASSWORD=true
+sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply Kaylebor
+
+# Option 2: Provide manual keys
+export CHEZMOI_GIT_SIGNING_KEY="ssh-ed25519 AAAAC3..."
+export CHEZMOI_GEMINI_API_KEY="your-api-key"
+chezmoi apply
+```
+
 ## Installation
 Execute this command to install chezmoi and apply the dotfiles:
 ```bash
@@ -17,6 +31,23 @@ Within Emacs, you may want to run this to install the tree sitter grammars:
 ```
 
 ## Package Management
+
+### Homebrew Installation Types
+This repository supports two Homebrew installation approaches:
+
+#### Standard Installation
+- **Location**: `/opt/homebrew` (Apple Silicon) or `/usr/local` (Intel)
+- **Benefits**: Uses pre-built bottles, faster installation
+- **Use case**: Normal environments without restrictions
+
+#### Alternative Installation  
+- **Location**: `~/.homebrew` 
+- **Benefits**: Works in MDM environments where system directories are restricted
+- **Trade-offs**: All packages built from source, longer installation times
+- **Special handling**: Some packages (like gcc) require additional build flags for compatibility
+- **Known issues**: GCC may show post-install dylib fixing errors but functions correctly
+
+The installation type is configured during `chezmoi init` and affects package compilation and paths automatically.
 
 ### Reinstalling Packages
 
