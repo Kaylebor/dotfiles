@@ -1,0 +1,30 @@
+#!/bin/bash
+{{/* Prime Emacs native compilation on macOS with alternative Homebrew */}}
+
+{{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
+# Prime Emacs native compilation for alternative Homebrew setup
+# This addresses libgccjit issues by running initial native compilation in terminal mode
+
+if command -v emacs >/dev/null 2>&1; then
+    echo "Priming Emacs native compilation for alternative Homebrew setup..."
+    echo "This may take several minutes to complete..."
+    
+    # Start Emacs in terminal mode briefly to trigger native compilation setup
+    # This allows libgccjit to complete its initial compilation successfully
+    # Use a longer timeout since native compilation can take 5-10 minutes
+    timeout 600 emacs -nw --batch --eval "(progn
+        (message \"Priming native compilation...\")
+        (when (featurep 'native-compile)
+            (message \"Native compilation is available\")
+            ;; Force a simple native compilation to prime the system
+            (when (fboundp 'native-compile)
+                (condition-case err
+                    (native-compile '(lambda () \"test\"))
+                  (error (message \"Native compilation primer completed with: %s\" err)))))
+        (message \"Native compilation primer finished\"))" 2>/dev/null || true
+    
+    echo "Emacs native compilation primer completed"
+else
+    echo "Emacs not found, skipping native compilation primer"
+fi
+{{- end }}
