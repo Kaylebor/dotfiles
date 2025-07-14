@@ -1,0 +1,54 @@
+#!/bin/bash
+{{/* Create a patched aspell formula for alternative Homebrew */}}
+
+{{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
+# Create a local aspell formula with C++ compatibility patches
+echo "Creating patched aspell formula for alternative Homebrew..."
+
+# Create local Formula directory
+mkdir -p ~/.homebrew/Library/Taps/homebrew/homebrew-core/Formula/a
+
+# Copy the original formula and add our patches
+ORIGINAL_FORMULA="$(brew --repository homebrew/core)/Formula/a/aspell.rb"
+PATCHED_FORMULA="$HOME/.homebrew/Library/Taps/homebrew/homebrew-core/Formula/a/aspell.rb"
+
+if [[ -f "$ORIGINAL_FORMULA" ]]; then
+    echo "Creating patched aspell formula..."
+    
+    # Copy original formula
+    cp "$ORIGINAL_FORMULA" "$PATCHED_FORMULA"
+    
+    # Add our C++ compatibility patches to the formula
+    # Insert the patch code before the 'def install' line
+    sed -i '' '/def install/i\
+\
+  # Apply C++ compatibility patches for modern compilers\
+  def patches\
+    DATA\
+  end\
+' "$PATCHED_FORMULA"
+    
+    # Add the patch data at the end of the file
+    cat >> "$PATCHED_FORMULA" << 'EOF'
+
+__END__
+--- a/modules/speller/default/vector_hash-t.hpp
++++ b/modules/speller/default/vector_hash-t.hpp
+@@ -183,7 +183,7 @@ template <class Parms>
+   void VectorHashTable<Parms>::recalc_size()
+   {
+     size_ = 0;
+-    for (iterator i = begin(); i != this->e; ++i, ++this->_size);
++    for (iterator i = begin(); i != this->end(); ++i, ++this->size_);
+   }
+ 
+   template <class Parms>
+EOF
+
+    echo "✅ Patched aspell formula created"
+    echo "Now you can install aspell with: brew install aspell"
+else
+    echo "ERROR: Could not find original aspell formula at $ORIGINAL_FORMULA"
+    exit 1
+fi
+{{- end }}

@@ -83,8 +83,9 @@ Uses 1Password for:
 #### 1Password CLI Bypass
 For environments where 1Password CLI is broken (e.g., MDM setups), the repository includes bypass mechanisms:
 - **Configuration flag**: Set `skip1Password: true` in chezmoi config or use `CHEZMOI_SKIP_1PASSWORD=true`
+- **Git signing**: Automatically disables SSH signing when 1Password is skipped (prevents commit failures)
 - **Environment variable fallbacks**:
-  - `CHEZMOI_GIT_SIGNING_KEY` - SSH signing key for git commits
+  - `CHEZMOI_GIT_SIGNING_KEY` - SSH signing key for git commits (used in gitconfig but signing disabled when skipped)
   - `CHEZMOI_GEMINI_API_KEY` - Gemini API key for aider
   - `CHEZMOI_OPENROUTER_API_KEY` - OpenRouter API key for aider
   - `CHEZMOI_DEEPSEEK_API_KEY` - DeepSeek API key for aider

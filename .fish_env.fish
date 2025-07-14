@@ -137,3 +137,29 @@ set -Ux FZF_ALT_C_COMMAND "fd -u -t d ."
 
 # https://github.com/catppuccin/fish
 fish_config theme save "Catppuccin Frappe"
+
+# Set up gcc paths for alternative Homebrew installations
+{{- if eq .chezmoi.os "darwin" }}
+{{- if eq .homebrewInstallType "alternative" }}
+{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "opt" "gcc") }}
+# Library paths
+{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "opt" "gcc" "lib" "gcc" "current") }}
+set -Ux LIBRARY_PATH "$HOME/.homebrew/opt/gcc/lib/gcc/current:$LIBRARY_PATH"
+{{- end }}
+
+# C/C++ include paths
+{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "opt" "gcc" "include") }}
+set -Ux C_INCLUDE_PATH "$HOME/.homebrew/opt/gcc/include:$C_INCLUDE_PATH"
+{{- end }}
+{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "opt" "gcc" "include" "c++" "15") }}
+set -Ux CPLUS_INCLUDE_PATH "$HOME/.homebrew/opt/gcc/include/c++/15:$CPLUS_INCLUDE_PATH"
+{{- end }}
+
+# Set CC and CXX to use the Homebrew gcc
+{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "bin" "gcc-15") }}
+set -Ux CC gcc-15
+set -Ux CXX g++-15
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

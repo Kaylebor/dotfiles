@@ -1,3 +1,9 @@
+# Formula patches configuration for alternative Homebrew installations
+formula_patches:
+  aspell:
+    expected_hash: "746699427e648a7851e06ea193e0ba1575ff4487d1d76e59ea7c56a9648cf179"
+    description: "Fix VectorHashTable template compilation errors with modern Clang (members 'e' and '_size' not found in vector_hash-t.hpp)"
+
 packages:
   arch:
     aur:
@@ -19,6 +25,7 @@ packages:
       - "erlang"
       - "elixir-ls"
       - "emacs"
+      - "enchant"
       - "eza"
       - "fd"
       - "firefox-developer-edition"
@@ -72,6 +79,10 @@ packages:
     brews:
       - "age"
       - "antidote"
+      - name: "aspell"
+        alternative_only:
+          env:
+            HOMEBREW_MAKE_JOBS: "1"
       - "autoconf"
       - "bat"
       - "binutils"
@@ -110,8 +121,8 @@ packages:
           env:
             LDFLAGS: "-Wl,-headerpad_max_install_names"
             BOOT_LDFLAGS: "-Wl,-headerpad_max_install_names"
-            CFLAGS_FOR_TARGET: "-headerpad_max_install_names"
-            CXXFLAGS_FOR_TARGET: "-headerpad_max_install_names"
+            CFLAGS_FOR_TARGET: "-Wl,-headerpad_max_install_names"
+            CXXFLAGS_FOR_TARGET: "-Wl,-headerpad_max_install_names"
             HOMEBREW_NO_INSTALL_CLEANUP: "1"
       - "gh"
       - "git"
@@ -133,7 +144,7 @@ packages:
       - "gzip"
       - "hunspell"
       - "ijq"
-      - "imagemagick"
+      - "imagemagick@6"
       - "jc"
       - "lapack"
       - "less"

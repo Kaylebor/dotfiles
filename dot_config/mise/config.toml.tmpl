@@ -58,11 +58,17 @@ KERL_CONFIGURE_OPTIONS="--with-odbc=/var/lib/pacman/local/unixodbc-{{ output "pa
 {{- end }}
 {{- if $brewPrefix }}
 LDFLAGS="{{ "{{get_env(name='LDFLAGS', default='')}}" }} -L{{ joinPath $brewPrefix "opt" "llvm" "lib" }} -L{{ joinPath $brewPrefix "opt" "openblas" "lib" }} -L{{ joinPath $brewPrefix "opt" "lapack" "lib" }} -L{{ joinPath $brewPrefix "opt" "libpq" "lib" }}"
-CPPFLAGS="{{ "{{get_env(name='CPPFLAGS', default='')}}" }} -I{{ joinPath $brewPrefix "opt" "llvm" "include" }} -I{{ joinPath $brewPrefix "opt" "openblas" "include" }} -I{{ joinPath $brewPrefix "opt" "lapack" "include" }} -I{{ joinPath $brewPrefix "opt" "libpq" "include" }}"
-PKG_CONFIG_PATH="{{ "{{get_env(name='PKG_CONFIG_PATH', default='')}}" }}:{{ joinPath $brewPrefix "opt" "openblas" "lib" "pkgconfig" }}:{{ joinPath $brewPrefix "opt" "lapack" "lib" "pkgconfig" }}:{{ joinPath $brewPrefix "opt" "libpq" "lib" "pkgconfig" }}"
+PKG_CONFIG_PATH="{{ "{{get_env(name='PKG_CONFIG_PATH', default='')}}" }}:{{ joinPath $brewPrefix "opt" "openblas" "lib" "pkgconfig" }}:{{ joinPath $brewPrefix "opt" "lapack" "lib" "pkgconfig" }}:{{ joinPath $brewPrefix "opt" "libpq" "lib" "pkgconfig" }}:{{ joinPath $brewPrefix "opt" "imagemagick@6" "lib" "pkgconfig" }}"
 LAPACK="{{- first (glob (joinPath $brewPrefix "opt" "lapack" "lib" "liblapack*.dylib")) }}"
 BLAS="{{- first (glob (joinPath $brewPrefix "opt" "openblas" "lib" "libopenblasp-r*.dylib")) }}"
 {{- end }}
 ## tell compiler not to error out for implicit function declarations
 CFLAGS="-Wno-error=implicit-function-declaration"
+## Ruby-specific environment variables for alternative Homebrew
+CC="/usr/bin/clang"
+CXX="/usr/bin/clang++"
+CPLUS_INCLUDE_PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1"
+C_INCLUDE_PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"
+USE_IMAGEMAGICK_6="1"
 {{- end }}
+

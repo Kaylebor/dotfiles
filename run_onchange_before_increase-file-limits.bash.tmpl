@@ -1,0 +1,77 @@
+#!/bin/bash
+
+{{- if eq .chezmoi.os "darwin" }}
+# Increase file descriptor limits for development work (macOS only)
+# This is particularly important for applications like Sidekiq that handle many connections
+
+set -euo pipefail
+
+echo "🔧 Configuring macOS file descriptor limits..."
+
+# Check current limits
+echo "Current limits:"
+echo "   System maxfiles: $(launchctl limit maxfiles)"
+echo "   Session ulimit: $(ulimit -n)"
+
+# Check if user has admin privileges (can use sudo)
+if groups $(whoami) | grep -q admin; then
+    echo "✅ User has admin privileges, using system-wide configuration"
+    
+    # Simple approach: Set system-wide limits directly
+    if sudo launchctl limit maxfiles 65536 200000 2>/dev/null; then
+        echo "✅ Successfully set system-wide maxfiles limit"
+    else
+        echo "⚠️  Could not set system-wide maxfiles limit (unexpected error)"
+    fi
+else
+    echo "ℹ️  User lacks admin privileges, using user-level configuration"
+    
+    # Fallback: Create per-user launchd configuration
+    USER_LAUNCHD_DIR="$HOME/Library/LaunchAgents"
+    PLIST_FILE="$USER_LAUNCHD_DIR/limit.maxfiles.plist"
+    
+    mkdir -p "$USER_LAUNCHD_DIR"
+    
+    cat > "$PLIST_FILE" << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>limit.maxfiles</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>launchctl</string>
+        <string>limit</string>
+        <string>maxfiles</string>
+        <string>65536</string>
+        <string>200000</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>ServiceIPC</key>
+    <false/>
+</dict>
+</plist>
+EOF
+    
+    # Load the plist for the current session
+    launchctl load "$PLIST_FILE" 2>/dev/null || {
+        echo "ℹ️  LaunchAgent plist created (will take effect after logout/login)"
+    }
+    
+    echo "✅ Created user-level LaunchAgent for file limits"
+fi
+
+echo "🎉 File descriptor limits configuration complete!"
+echo "Updated limits:"
+echo "   System maxfiles: $(launchctl limit maxfiles)"
+echo "   Session ulimit: $(ulimit -n)"
+echo ""
+echo "ℹ️  If limits haven't increased, you may need to:"
+echo "   1. Restart your terminal"
+echo "   2. Log out and log back in"
+echo "   3. Restart your Mac (for system-wide changes)"
+{{- else }}
+echo "ℹ️  File descriptor limit configuration is only needed on macOS"
+{{- end }}

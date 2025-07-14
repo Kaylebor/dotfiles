@@ -9,15 +9,16 @@ This is my dotfiles repository. It is managed by [chezmoi](https://www.chezmoi.i
 If 1Password CLI is not available or broken (common in MDM setups), you can skip it entirely:
 
 ```bash
-# Option 1: Set environment variable
+# Option 1: Set environment variable (disables 1Password CLI and SSH signing)
 export CHEZMOI_SKIP_1PASSWORD=true
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply Kaylebor
 
-# Option 2: Provide manual keys
-export CHEZMOI_GIT_SIGNING_KEY="ssh-ed25519 AAAAC3..."
+# Option 2: Provide manual keys (API keys only, git signing will be disabled)
 export CHEZMOI_GEMINI_API_KEY="your-api-key"
 chezmoi apply
 ```
+
+**Note**: When 1Password is skipped, git commit signing is automatically disabled to prevent commit failures.
 
 ## Installation
 Execute this command to install chezmoi and apply the dotfiles:

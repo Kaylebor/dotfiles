@@ -1,21 +1,31 @@
 [gpg]
   format = ssh
 [gpg "ssh"]
-  alllowedSignersFile = ~/.ssh/allowed_signers
+  allowedSignersFile = ~/.ssh/allowed_signers
+  {{- if not .skip1Password }}
   {{- if eq .chezmoi.os "darwin" }}
   program = "/Applications/1Password.app/Contents/MacOs/op-ssh-sign"
   {{- else if eq .chezmoi.os "linux" }}
   program = "/opt/1Password/op-ssh-sign"
   {{- end }}
+  {{- end }}
 [init]
   defaultBranch = main
 [commit]
+  {{- if not .skip1Password }}
   gpgSign = true
+  {{- else }}
+  gpgSign = false
+  {{- end }}
   template = ~/.gitmessage
 [user]
   name = "Ender Veiga Bueno"
   email = "letstalk@ender.codes"
+  {{- if not .skip1Password }}
   signingkey = {{ template "onepassword_safe" dict "opPath" "op://Private/Personal Key/public key" "envVar" "CHEZMOI_GIT_SIGNING_KEY" "context" . }}
+  {{- else if env "CHEZMOI_GIT_SIGNING_KEY" }}
+  signingkey = {{ env "CHEZMOI_GIT_SIGNING_KEY" }}
+  {{- end }}
 [github]
   user = "Kaylebor"
 [include]

@@ -1,0 +1,12 @@
+{
+  "erlang.erlangPath": "/Users/eveiga/.local/share/mise/installs/erlang/28.0.1/bin",
+  "go.goroot": "/Users/eveiga/.local/share/mise/installs/go/1.24.4",
+  "debug.javascript.defaultRuntimeExecutable": {
+    "pwa-node": "/Users/eveiga/.local/share/mise/shims/node"
+  },
+  "python.defaultInterpreterPath": "/Users/eveiga/.local/share/mise/installs/python/3.13.5/bin/python",
+  "go.alternateTools": {
+    "go": "/Users/eveiga/.local/share/mise/shims/go",
+    "gopls": "/Users/eveiga/.local/share/mise/shims/gopls"
+  }
+}

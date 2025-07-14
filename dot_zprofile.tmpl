@@ -1,2 +1,32 @@
 {{- template "brew_eval" . }}
 eval "$(mise activate zsh)" # Mise [https://mise.jdx.dev]
+
+{{- if eq .chezmoi.os "darwin" }}
+# Increase file descriptor limit for development work (macOS)
+ulimit -n 65536 2>/dev/null || true
+
+# Set up gcc paths for alternative Homebrew installations
+export LANG=en_US.UTF-8
+{{- if eq .homebrewInstallType "alternative" }}
+{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "opt" "gcc") }}
+# Library paths
+{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "opt" "gcc" "lib" "gcc" "current") }}
+export LIBRARY_PATH="$HOME/.homebrew/opt/gcc/lib/gcc/current:$LIBRARY_PATH"
+{{- end }}
+
+# C/C++ include paths
+{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "opt" "gcc" "include") }}
+export C_INCLUDE_PATH="$HOME/.homebrew/opt/gcc/include:$C_INCLUDE_PATH"
+{{- end }}
+{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "opt" "gcc" "include" "c++" "15") }}
+export CPLUS_INCLUDE_PATH="$HOME/.homebrew/opt/gcc/include/c++/15:$CPLUS_INCLUDE_PATH"
+{{- end }}
+
+# Set CC and CXX to use the Homebrew gcc
+{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "bin" "gcc-15") }}
+export CC=gcc-15
+export CXX=g++-15
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

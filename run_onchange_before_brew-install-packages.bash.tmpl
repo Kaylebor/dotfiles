@@ -1,5 +1,6 @@
 #!/bin/bash
 {{/* Script to check OS and install packages based on OS */}}
+
 {{/* 
   Environment variables for package reinstallation:
   - CHEZMOI_REINSTALL_PACKAGES: comma-separated list of packages to reinstall using 'brew reinstall'
@@ -29,6 +30,48 @@ chmod -R go-w "$(brew --prefix)/share/zsh" 2>/dev/null || true
 {{- end }}
 {{- end }}
 {{- template "brew_eval" . }}
+
+# Apply formula patches for alternative Homebrew
+{{- if eq .homebrewInstallType "alternative" }}
+echo "Applying formula patches for alternative Homebrew..."
+
+{{- if .formula_patches }}
+# Verify formula hashes before patching
+{{- range $formula, $config := .formula_patches }}
+if ! brew list {{ $formula }} &>/dev/null; then
+    echo "Verifying {{ $formula }} formula hash..."
+    FORMULA_PATH="$(brew --repository homebrew/core)/Formula/{{ $formula | substr 0 1 }}/{{ $formula }}.rb"
+    if [[ -f "$FORMULA_PATH" ]]; then
+        ACTUAL_HASH=$(shasum -a 256 "$FORMULA_PATH" | cut -d' ' -f1)
+        EXPECTED_HASH="{{ $config.expected_hash }}"
+        if [[ "$ACTUAL_HASH" != "$EXPECTED_HASH" ]]; then
+            echo "❌ Hash mismatch for {{ $formula }}!"
+            echo "   Expected: $EXPECTED_HASH"
+            echo "   Actual:   $ACTUAL_HASH"
+            echo "   Description: {{ $config.description }}"
+            {{- if hasKey $config "issue_url" }}
+            echo "   Related issue: {{ $config.issue_url }}"
+            {{- end }}
+            echo "   The formula may have been updated upstream."
+            echo "   Please update the patch and expected hash."
+            exit 1
+        else
+            echo "✅ {{ $formula }} formula hash verified"
+            echo "   Patch: {{ $config.description }}"
+        fi
+    else
+        echo "⚠️  Formula not found: $FORMULA_PATH"
+    fi
+fi
+{{- end }}
+{{- end }}
+
+bash "{{ .chezmoi.sourceDir }}/scripts/patch-homebrew-formulas.bash"
+
+# Set environment variable to force Homebrew to use local formulas instead of API
+export HOMEBREW_NO_INSTALL_FROM_API=1
+echo "Set HOMEBREW_NO_INSTALL_FROM_API=1 to use local formula modifications"
+{{- end }}
 
 # Install Homebrew taps first
 {{- if .packages.darwin.taps }}
@@ -64,7 +107,7 @@ if [ -n "$CHEZMOI_FORCE_REINSTALL_PACKAGES" ]; then
   done
 fi
 
-# Install packages with environment variables first (individual installs)
+# Install packages with environment variables and patches first (individual installs)
 {{ range .packages.darwin.brews -}}
 {{- if kindIs "map" . }}
 {{- $hasEnv := false }}
@@ -78,8 +121,14 @@ fi
 {{- end }}
 {{- end }}
 {{- if or $hasEnv $hasAlternativeEnv }}
-# Install {{ .name }} with environment variables in isolated subshell
-({{- if $hasEnv }}{{- range $key, $value := .env }} {{ $key }}={{ $value | quote }}{{- end }}{{- end }}{{- if and $hasAlternativeEnv (and (hasKey $ "homebrewInstallType") (eq $.homebrewInstallType "alternative")) }}{{- range $key, $value := .alternative_only.env }} {{ $key }}={{ $value | quote }}{{- end }}{{- end }}; brew install {{ .name | quote }}{{- if hasKey . "args" }} {{ range .args }} --{{ . }}{{ end }}{{- end }}{{- if and (hasKey . "alternative_only") (and (hasKey $ "homebrewInstallType") (eq $.homebrewInstallType "alternative")) }}{{- if hasKey .alternative_only "args" }} {{ range .alternative_only.args }} --{{ . }}{{ end }}{{- end }}{{- end }})
+
+# Install {{ .name }}{{- if or $hasEnv $hasAlternativeEnv }} with isolated environment{{- end }}
+{{- if or $hasEnv $hasAlternativeEnv }}
+({{- if $hasEnv }}{{- range $key, $value := .env }} {{ $key }}={{ $value | quote }}{{- end }}{{- end }}{{- if and $hasAlternativeEnv (stat (joinPath (env "HOME") ".homebrew")) }}{{- range $key, $value := .alternative_only.env }} {{ $key }}={{ $value | quote }}{{- end }}{{- end }}; brew install {{ .name | quote }}{{- if hasKey . "args" }} {{ range .args }} --{{ . }}{{ end }}{{- end }}{{- if and (hasKey . "alternative_only") (stat (joinPath (env "HOME") ".homebrew")) }}{{- if hasKey .alternative_only "args" }} {{ range .alternative_only.args }} --{{ . }}{{ end }}{{- end }}{{- end }})
+{{- else }}
+brew install {{ .name | quote }}{{- if hasKey . "args" }} {{ range .args }} --{{ . }}{{ end }}{{- end }}{{- if and (hasKey . "alternative_only") (stat (joinPath (env "HOME") ".homebrew")) }}{{- if hasKey .alternative_only "args" }} {{ range .alternative_only.args }} --{{ . }}{{ end }}{{- end }}{{- end }}
+{{- end }}
+
 {{- end }}
 {{- end }}
 {{ end -}}
@@ -101,7 +150,7 @@ brew {{ . | quote }}
 {{- end }}
 {{- end }}
 {{- if not (or $hasEnv $hasAlternativeEnv) }}
-brew {{ .name | quote }}{{- if hasKey . "args" }}, args: [{{ range $i, $arg := .args }}{{if $i}}, {{end}}{{ $arg | quote }}{{ end }}]{{- end }}{{- if and (hasKey . "alternative_only") (and (hasKey $ "homebrewInstallType") (eq $.homebrewInstallType "alternative")) }}{{- if hasKey .alternative_only "args" }}, args: [{{ range $i, $arg := .alternative_only.args }}{{if $i}}, {{end}}{{ $arg | quote }}{{ end }}]{{- end }}{{- end }}
+brew {{ .name | quote }}{{- if hasKey . "args" }}, args: [{{ range $i, $arg := .args }}{{if $i}}, {{end}}{{ $arg | quote }}{{ end }}]{{- end }}{{- if and (hasKey . "alternative_only") (stat (joinPath (env "HOME") ".homebrew")) }}{{- if hasKey .alternative_only "args" }}, args: [{{ range $i, $arg := .alternative_only.args }}{{if $i}}, {{end}}{{ $arg | quote }}{{ end }}]{{- end }}{{- end }}
 {{- end }}
 {{- end }}
 {{ end -}}
