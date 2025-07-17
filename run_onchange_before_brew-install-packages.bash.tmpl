@@ -155,7 +155,29 @@ brew {{ .name | quote }}{{- if hasKey . "args" }}, args: [{{ range $i, $arg := .
 {{- end }}
 {{ end -}}
 {{ range .packages.darwin.casks -}}
+{{- if kindIs "string" . }}
 cask {{ . | quote }}
+{{- else if kindIs "map" . }}
+{{- if hasKey . "skip_if_installed" }}
+{{- $shouldSkip := false }}
+{{- if kindIs "slice" .skip_if_installed }}
+{{- range .skip_if_installed }}
+{{- if stat . }}
+{{- $shouldSkip = true }}
+{{- end }}
+{{- end }}
+{{- else }}
+{{- if stat .skip_if_installed }}
+{{- $shouldSkip = true }}
+{{- end }}
+{{- end }}
+{{- if not $shouldSkip }}
+cask {{ .name | quote }}
+{{- end }}
+{{- else }}
+cask {{ .name | quote }}
+{{- end }}
+{{- end }}
 {{ end -}}
 EOF
 {{ end -}}

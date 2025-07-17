@@ -191,7 +191,12 @@ packages:
       - "zip"
       - "zsh"
     casks:
-      - "1password"
+      - name: "1password"
+        skip_if_installed:
+          - "/Applications/1Password.app"
+          - "/Applications/1Password 7 - Password Manager.app"
+          - "~/Applications/1Password.app"
+          - "~/Applications/1Password 7 - Password Manager.app"
       - "1password-cli"
       - "font-iosevka"
       - "font-iosevka-nerd-font"
