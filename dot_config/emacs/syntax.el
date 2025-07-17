@@ -22,6 +22,7 @@
                                          (make "https://github.com/alemuller/tree-sitter-make" "main")
                                          (markdown "https://github.com/ikatyang/tree-sitter-markdown" "v0.7.1")
                                          (python "https://github.com/tree-sitter/tree-sitter-python" "v0.23.6")
+                                         (rust "https://github.com/tree-sitter/tree-sitter-rust" "v0.24.0")
                                          (toml "https://github.com/tree-sitter/tree-sitter-toml" "v0.5.1")
                                          (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "v0.23.2" "tsx/src")
                                          (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "v0.23.2" "typescript/src")
@@ -56,6 +57,7 @@
 
 (use-package elixir-ts-mode :delight :mode ("\\.\\(ex\\|exs\\|eex\\|leex\\|heex\\)\\'" . elixir-ts-mode))
 (use-package python-ts-mode :delight :mode ("\\.py\\'" . python-ts-mode))
+(use-package rust-ts-mode :delight :mode ("\\.rs\\'" . rust-ts-mode))
 (use-package go-ts-mode :delight :mode ("\\(\\.go\\|/go\\.mod\\|/go\\.sum\\)\\'" . go-ts-mode))
 
 (use-package gdscript-mode :ensure (:host github :repo "godotengine/emacs-gdscript-mode") :delight :mode ("\\.gd\\'" . gdscript-ts-mode))
@@ -83,6 +85,7 @@
   (go-ts-mode . lsp)
   (elixir-ts-mode . lsp)
   (gdscript-ts-mode . lsp)
+  (rust-ts-mode . lsp)
   (lsp-mode . lsp-enable-which-key-integration)
   :config
   ;; Disable TypeProf and default ruby-lsp to avoid conflicts
