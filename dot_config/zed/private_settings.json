@@ -19,10 +19,17 @@
       "provider": "copilot_chat",
       "model": "claude-3.5-sonnet"
     },
-    "version": "2"
   },
   "context_servers": {
+    "mcp-server-context7": {
+      "source": "extension",
+      "enabled": true,
+      "settings": {
+        "default_minimum_tokens": "10000"
+      }
+    },
     "postgres-context-server": {
+      "source": "extension",
       "settings": {
         "database_url": "postgresql://kay@localhost:5432/loyal_guru"
       }
