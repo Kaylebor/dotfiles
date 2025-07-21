@@ -28,3 +28,6 @@ alias nerdctl="lima nerdctl"
 # Override ls with eza without hyperlinks to prevent terminal formatting issues
 alias ls='eza --smart-group --header --group-directories-first --time-style=long-iso --icons=always'
 {{- end }}
+{{- if lookPath "bunx" }}
+alias ccusage='bunx ccusage'
+{{- end }}

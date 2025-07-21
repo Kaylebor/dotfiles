@@ -117,7 +117,9 @@ set -Ux PSQL_EDITOR $EDITOR
 set -Ux MANPAGER "sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p -lman'"
 
 # Fisher plugin manager
-curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher update
+if not functions -q fisher
+    curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher update
+end
 
 # https://github.com/catppuccin/fzf
 set -Ux FZF_DEFAULT_OPTS "\
@@ -137,7 +139,8 @@ set -Ux FZF_CTRL_T_OPTS '--ansi'
 set -Ux FZF_ALT_C_COMMAND "fd -u -t d ."
 
 # https://github.com/catppuccin/fish
-fish_config theme save "Catppuccin Frappe"
+# Apply theme (automatically answer yes to overwrite prompt)
+echo "y" | fish_config theme save "Catppuccin Frappe"
 
 # Set up gcc paths for alternative Homebrew installations on macOS
 if test (uname) = Darwin

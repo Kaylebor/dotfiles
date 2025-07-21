@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: ccusage
+description: Claude usage tracking and cost reporting
+commands:
+  - name: daily
+    description: Show usage report grouped by date
+  - name: monthly
+    description: Show usage report grouped by month
+  - name: session
+    description: Show usage report grouped by conversation session
+  - name: blocks
+    description: Show usage report grouped by session billing blocks
+  - name: mcp
+    description: Start MCP server with usage reporting tools
+flags:
+  -s, --since=: Filter from date (YYYYMMDD format)
+  -u, --until=: Filter until date (YYYYMMDD format)
+  -j, --json: Output in JSON format
+  -m, --mode=: Cost calculation mode
+  -d, --debug: Show pricing mismatch information for debugging
+  --debug-samples=: Number of sample discrepancies to show in debug output (default 5)
+  -o, --order=: Sort order
+  -b, --breakdown: Show per-model cost breakdown
+  -O, --offline: Use cached pricing data for Claude models
+  --no-offline: Don't use cached pricing data
+  --color: Enable colored output
+  --no-color: Disable colored output
+  -i, --instances: Show usage breakdown by project/instance
+  -p, --project=: Filter to specific project name
+  -h, --help: Display help message
+  -v, --version: Display version
+completion:
+  flag:
+    mode: ["auto", "calculate", "display"]
+    order: ["desc", "asc"]
