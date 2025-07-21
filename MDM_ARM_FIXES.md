@@ -50,13 +50,14 @@ MDM-managed Macs often restrict access to standard system locations like `/opt/h
 - Missing or incorrect C++ compiler configuration
 - ImageMagick version compatibility issues
 
-**Solution**: Force Ruby to use system clang compilers and ImageMagick 6
+**Solution**: Force Ruby to use system clang compilers instead of GCC
 
 ```toml
 # In mise/config.toml (or equivalent tool configuration)
 CC="/usr/bin/clang"
 CXX="/usr/bin/clang++"
-USE_IMAGEMAGICK_6="1"
+CPLUS_INCLUDE_PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1"
+C_INCLUDE_PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"
 ```
 
 **Package Changes**:
@@ -215,6 +216,8 @@ PKG_CONFIG_PATH="/alternative/homebrew/opt/imagemagick@6/lib/pkgconfig:/alternat
 ## Compiler configuration for alternative Homebrew
 CC="/usr/bin/clang"
 CXX="/usr/bin/clang++"
+CPLUS_INCLUDE_PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1"
+C_INCLUDE_PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"
 USE_IMAGEMAGICK_6="1"
 CFLAGS="-Wno-error=implicit-function-declaration"
 

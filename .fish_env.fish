@@ -6,6 +6,7 @@ mkdir -p ~/.config/fish/functions
 if not command -q brew
     # Activate brew - check alternative path first, then standard locations
     set -l brew_paths \
+        $HOME/homebrew/bin/brew \
         $HOME/.homebrew/bin/brew \
         /opt/homebrew/bin/brew \
         /usr/local/bin/brew \
@@ -138,28 +139,31 @@ set -Ux FZF_ALT_C_COMMAND "fd -u -t d ."
 # https://github.com/catppuccin/fish
 fish_config theme save "Catppuccin Frappe"
 
-# Set up gcc paths for alternative Homebrew installations
-{{- if eq .chezmoi.os "darwin" }}
-{{- if eq .homebrewInstallType "alternative" }}
-{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "opt" "gcc") }}
-# Library paths
-{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "opt" "gcc" "lib" "gcc" "current") }}
-set -Ux LIBRARY_PATH "$HOME/.homebrew/opt/gcc/lib/gcc/current:$LIBRARY_PATH"
-{{- end }}
-
-# C/C++ include paths
-{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "opt" "gcc" "include") }}
-set -Ux C_INCLUDE_PATH "$HOME/.homebrew/opt/gcc/include:$C_INCLUDE_PATH"
-{{- end }}
-{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "opt" "gcc" "include" "c++" "15") }}
-set -Ux CPLUS_INCLUDE_PATH "$HOME/.homebrew/opt/gcc/include/c++/15:$CPLUS_INCLUDE_PATH"
-{{- end }}
-
-# Set CC and CXX to use the Homebrew gcc
-{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "bin" "gcc-15") }}
-set -Ux CC gcc-15
-set -Ux CXX g++-15
-{{- end }}
-{{- end }}
-{{- end }}
-{{- end }}
+# Set up gcc paths for alternative Homebrew installations on macOS
+if test (uname) = Darwin
+    # Check for homebrew in alternative locations
+    for brew_prefix in $HOME/homebrew $HOME/.homebrew
+        if test -d $brew_prefix/opt/gcc
+            # Library paths
+            if test -d $brew_prefix/opt/gcc/lib/gcc/current
+                set -Ux LIBRARY_PATH "$brew_prefix/opt/gcc/lib/gcc/current:$LIBRARY_PATH"
+            end
+            
+            # C/C++ include paths
+            if test -d $brew_prefix/opt/gcc/include
+                set -Ux C_INCLUDE_PATH "$brew_prefix/opt/gcc/include:$C_INCLUDE_PATH"
+            end
+            if test -d $brew_prefix/opt/gcc/include/c++/15
+                set -Ux CPLUS_INCLUDE_PATH "$brew_prefix/opt/gcc/include/c++/15:$CPLUS_INCLUDE_PATH"
+            end
+            
+            # Set CC and CXX to use the Homebrew gcc
+            if test -x $brew_prefix/bin/gcc-15
+                set -Ux CC gcc-15
+                set -Ux CXX g++-15
+            end
+            
+            break  # Only use the first found alternative homebrew
+        end
+    end
+end

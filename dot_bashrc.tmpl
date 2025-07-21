@@ -5,8 +5,8 @@ export LC_ALL=en_US.UTF-8
 
 {{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
 # Switch to Fish shell if available in non-standard Homebrew path (for MDM setups)
-if [[ $- == *i* ]] && [[ -x "$HOME/.homebrew/bin/fish" ]]; then
-    exec "$HOME/.homebrew/bin/fish"
+if [[ $- == *i* ]] && [[ -x "$HOME/{{ .homebrewPath }}/bin/fish" ]]; then
+    exec "$HOME/{{ .homebrewPath }}/bin/fish"
 fi
 {{- end }}
 
@@ -43,8 +43,8 @@ PATH="${XDG_DATA_HOME:-$HOME/.local/share}/google-cloud-sdk/bin:$PATH" # Google 
 {{- if eq .chezmoi.os "darwin" }}
 {{-   $brewPrefix := "" }}
 {{-   if eq .homebrewInstallType "alternative" }}
-{{-     if stat (joinPath .chezmoi.homeDir ".homebrew") }}
-{{-       $brewPrefix = joinPath .chezmoi.homeDir ".homebrew" }}
+{{-     if stat (joinPath .chezmoi.homeDir .homebrewPath) }}
+{{-       $brewPrefix = joinPath .chezmoi.homeDir .homebrewPath }}
 {{-     end }}
 {{-   else }}
 {{-     if stat "/opt/homebrew" }}
@@ -100,8 +100,8 @@ export MANPAGER="sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p
 # Erlang install fixes
 {{- $brewPrefix := "" }}
 {{- if eq .homebrewInstallType "alternative" }}
-{{-   if stat (joinPath .chezmoi.homeDir ".homebrew") }}
-{{-     $brewPrefix = joinPath .chezmoi.homeDir ".homebrew" }}
+{{-   if stat (joinPath .chezmoi.homeDir .homebrewPath) }}
+{{-     $brewPrefix = joinPath .chezmoi.homeDir .homebrewPath }}
 {{-   end }}
 {{- else }}
 {{-   if stat "/opt/homebrew" }}
@@ -119,22 +119,22 @@ export KERL_CONFIGURE_OPTIONS="--with-odbc=${UNIXODBCHOME}"
 
 # GCC setup for alternative Homebrew installations
 {{- if eq .homebrewInstallType "alternative" }}
-{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "opt" "gcc") }}
+{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc") }}
 # Library paths
-{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "opt" "gcc" "lib" "gcc" "current") }}
-export LIBRARY_PATH="$HOME/.homebrew/opt/gcc/lib/gcc/current:$LIBRARY_PATH"
+{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "lib" "gcc" "current") }}
+export LIBRARY_PATH="$HOME/{{ .homebrewPath }}/opt/gcc/lib/gcc/current:$LIBRARY_PATH"
 {{- end }}
 
 # C/C++ include paths
-{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "opt" "gcc" "include") }}
-export C_INCLUDE_PATH="$HOME/.homebrew/opt/gcc/include:$C_INCLUDE_PATH"
+{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "include") }}
+export C_INCLUDE_PATH="$HOME/{{ .homebrewPath }}/opt/gcc/include:$C_INCLUDE_PATH"
 {{- end }}
-{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "opt" "gcc" "include" "c++" "15") }}
-export CPLUS_INCLUDE_PATH="$HOME/.homebrew/opt/gcc/include/c++/15:$CPLUS_INCLUDE_PATH"
+{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "include" "c++" "15") }}
+export CPLUS_INCLUDE_PATH="$HOME/{{ .homebrewPath }}/opt/gcc/include/c++/15:$CPLUS_INCLUDE_PATH"
 {{- end }}
 
 # Set CC and CXX to use the Homebrew gcc
-{{- if stat (joinPath .chezmoi.homeDir ".homebrew" "bin" "gcc-15") }}
+{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "bin" "gcc-15") }}
 export CC=gcc-15
 export CXX=g++-15
 {{- end }}

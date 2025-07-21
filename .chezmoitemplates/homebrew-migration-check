@@ -1,0 +1,132 @@
+{{- /* Template to check for homebrew path migrations and identify packages needing rebuild */ -}}
+{{- if eq .homebrewInstallType "alternative" }}
+# Homebrew migration check for alternative installations
+CURRENT_BREW_PREFIX="$HOME/{{ .homebrewPath }}"
+STATE_FILE="$HOME/.config/chezmoi/.homebrew-state"
+
+# Read the last known homebrew path
+LAST_BREW_PREFIX=""
+if [[ -f "$STATE_FILE" ]]; then
+    LAST_BREW_PREFIX=$(cat "$STATE_FILE" 2>/dev/null || echo "")
+fi
+
+# Function to check if a binary/library has embedded paths to old homebrew location
+check_embedded_paths() {
+    local file="$1"
+    local old_prefix="$2"
+    
+    if [[ -z "$old_prefix" ]] || [[ "$old_prefix" == "$CURRENT_BREW_PREFIX" ]]; then
+        return 1  # No migration or same path
+    fi
+    
+    # Check if file exists and is a Mach-O binary
+    if [[ -f "$file" ]] && file "$file" 2>/dev/null | grep -q "Mach-O"; then
+        # Check for old paths in linked libraries
+        if otool -L "$file" 2>/dev/null | grep -q "$old_prefix"; then
+            return 0  # Found old path
+        fi
+    fi
+    
+    return 1  # No old paths found
+}
+
+# Function to check if a package has wrong embedded paths
+check_package_paths() {
+    local pkg="$1"
+    local old_prefix="$2"
+    local pkg_prefix="$(brew --prefix "$pkg" 2>/dev/null || echo "")"
+    
+    if [[ -z "$pkg_prefix" ]] || [[ ! -d "$pkg_prefix" ]]; then
+        return 1  # Package not installed or not found
+    fi
+    
+    # Check main binaries
+    for binary in "$pkg_prefix"/bin/*; do
+        if check_embedded_paths "$binary" "$old_prefix"; then
+            return 0  # Found old paths
+        fi
+    done
+    
+    # Check libraries
+    for lib in "$pkg_prefix"/lib/*.dylib "$pkg_prefix"/lib/*.so; do
+        if check_embedded_paths "$lib" "$old_prefix"; then
+            return 0  # Found old paths
+        fi
+    done
+    
+    # Check libexec binaries (important for gcc)
+    if [[ -d "$pkg_prefix/libexec" ]]; then
+        while IFS= read -r -d '' binary; do
+            if check_embedded_paths "$binary" "$old_prefix"; then
+                return 0  # Found old paths
+            fi
+        done < <(find "$pkg_prefix/libexec" -type f -perm +111 -print0 2>/dev/null)
+    fi
+    
+    return 1  # No old paths found
+}
+
+# Detect if migration happened
+MIGRATION_DETECTED=false
+PACKAGES_TO_REBUILD=""
+
+if [[ -n "$LAST_BREW_PREFIX" ]] && [[ "$LAST_BREW_PREFIX" != "$CURRENT_BREW_PREFIX" ]]; then
+    echo "🔍 Detected Homebrew path migration: $LAST_BREW_PREFIX → $CURRENT_BREW_PREFIX"
+    MIGRATION_DETECTED=true
+    
+    # List of packages known to embed paths
+    PACKAGES_WITH_EMBEDDED_PATHS=(
+        "gcc"
+        "llvm"  
+        "binutils"
+        "gettext"
+        "icu4c@76"
+        "readline"
+        "openssl@3"
+        "gnutls"
+        "libmpc"
+        "mpfr"
+        "isl"
+        "gmp"
+        "zstd"
+        "xz"
+        "lz4"
+    )
+    
+    echo "Checking installed packages for outdated paths..."
+    
+    for pkg in "${PACKAGES_WITH_EMBEDDED_PATHS[@]}"; do
+        # First check if package is installed
+        if brew list --formula 2>/dev/null | grep -q "^${pkg}$"; then
+            echo -n "  Checking $pkg... "
+            if check_package_paths "$pkg" "$LAST_BREW_PREFIX"; then
+                echo "❌ needs rebuild (contains paths to $LAST_BREW_PREFIX)"
+                PACKAGES_TO_REBUILD="$PACKAGES_TO_REBUILD,$pkg"
+            else
+                echo "✅ OK"
+            fi
+        fi
+    done
+    
+    if [[ -n "$PACKAGES_TO_REBUILD" ]]; then
+        # Remove leading comma
+        PACKAGES_TO_REBUILD="${PACKAGES_TO_REBUILD#,}"
+        
+        echo ""
+        echo "⚠️  The following packages need to be rebuilt due to the Homebrew path change:"
+        echo "   $PACKAGES_TO_REBUILD"
+        echo ""
+        echo "These packages will be automatically rebuilt..."
+        
+        # Set the environment variable for force reinstall
+        export CHEZMOI_FORCE_REINSTALL_PACKAGES="$PACKAGES_TO_REBUILD"
+    fi
+fi
+
+# Function to update the state file with current path
+update_homebrew_state() {
+    mkdir -p "$(dirname "$STATE_FILE")"
+    echo "$CURRENT_BREW_PREFIX" > "$STATE_FILE"
+    echo "✅ Updated Homebrew state file with current path: $CURRENT_BREW_PREFIX"
+}
+{{- end }}

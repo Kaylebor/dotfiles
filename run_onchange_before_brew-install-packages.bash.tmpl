@@ -17,11 +17,11 @@
 {{- if (not (lookPath "brew")) }}
 # Install Homebrew
 {{- if eq .homebrewInstallType "alternative" }}
-# Alternative installation to ~/.homebrew (for MDM setups)
-echo "Installing Homebrew to ~/.homebrew for MDM compatibility..."
-mkdir -p "$HOME/.homebrew"
-curl -L {{ .urls.homebrew.tarball }} | tar xz --strip-components 1 -C "$HOME/.homebrew"
-eval "$($HOME/.homebrew/bin/brew shellenv)"
+# Alternative installation to {{ $.homebrewPath }} (for MDM setups)
+echo "Installing Homebrew to {{ $.homebrewPath }} for MDM compatibility..."
+mkdir -p "$HOME/{{ $.homebrewPath }}"
+curl -L {{ .urls.homebrew.tarball }} | tar xz --strip-components 1 -C "$HOME/{{ $.homebrewPath }}"
+eval "$($HOME/{{ $.homebrewPath }}/bin/brew shellenv)"
 brew update --force --quiet
 chmod -R go-w "$(brew --prefix)/share/zsh" 2>/dev/null || true
 {{- else }}
@@ -30,6 +30,9 @@ chmod -R go-w "$(brew --prefix)/share/zsh" 2>/dev/null || true
 {{- end }}
 {{- end }}
 {{- template "brew_eval" . }}
+
+{{/* Check for Homebrew path migrations and packages needing rebuild */}}
+{{- template "homebrew-migration-check" . }}
 
 # Apply formula patches for alternative Homebrew
 {{- if eq .homebrewInstallType "alternative" }}
@@ -66,7 +69,8 @@ fi
 {{- end }}
 {{- end }}
 
-bash "{{ .chezmoi.sourceDir }}/scripts/patch-homebrew-formulas.bash"
+{{/* Execute the patch script template */}}
+{{- template "patch-homebrew-formulas" . }}
 
 # Set environment variable to force Homebrew to use local formulas instead of API
 export HOMEBREW_NO_INSTALL_FROM_API=1
@@ -95,14 +99,75 @@ if [ -n "$CHEZMOI_REINSTALL_PACKAGES" ]; then
   done
 fi
 
+echo "DEBUG: CHEZMOI_FORCE_REINSTALL_PACKAGES='$CHEZMOI_FORCE_REINSTALL_PACKAGES'"
 if [ -n "$CHEZMOI_FORCE_REINSTALL_PACKAGES" ]; then
   echo "Force reinstalling packages (uninstall + install): $CHEZMOI_FORCE_REINSTALL_PACKAGES"
   IFS=',' read -ra PACKAGES <<< "$CHEZMOI_FORCE_REINSTALL_PACKAGES"
+  # First uninstall all packages
   for pkg in "${PACKAGES[@]}"; do
     pkg=$(echo "$pkg" | tr -d ' ')  # Trim whitespace
     if brew list --formula | grep -q "^${pkg}$"; then
       echo "Uninstalling $pkg for clean reinstall..."
       brew uninstall --ignore-dependencies "$pkg"
+    fi
+  done
+  # Install packages in dependency order
+  # Critical build tools first
+  CRITICAL_PACKAGES=("gcc" "llvm" "cmake" "pkg-config")
+  
+  echo "Installing critical build tools first..."
+  for critical in "${CRITICAL_PACKAGES[@]}"; do
+    for pkg in "${PACKAGES[@]}"; do
+      pkg=$(echo "$pkg" | tr -d ' ')
+      if [[ "$pkg" == "$critical" ]]; then
+        echo "Installing critical package: $pkg..."
+        brew install "$pkg"
+        eval "$(brew shellenv)"
+        brew link "$pkg" 2>/dev/null || true
+        
+        # Special handling for gcc - ensure gfortran symlinks exist
+        if [[ "$pkg" == "gcc" ]]; then
+          echo "Setting up gcc/gfortran symlinks..."
+          # Find the latest gcc version
+          BREW_PREFIX="$(brew --prefix)"
+          GCC_VERSION=$(ls -1 "$BREW_PREFIX/bin"/gcc-* 2>/dev/null | grep -E 'gcc-[0-9]+$' | sort -V | tail -1 | sed 's/.*gcc-//')
+          if [[ -n "$GCC_VERSION" ]]; then
+            echo "Found gcc version: $GCC_VERSION"
+            # Create symlinks for gcc tools
+            for tool in gcc g++ gfortran; do
+              if [[ -f "$BREW_PREFIX/bin/${tool}-${GCC_VERSION}" ]]; then
+                echo "Creating symlink: $BREW_PREFIX/bin/${tool} -> ${tool}-${GCC_VERSION}"
+                ln -sf "$BREW_PREFIX/bin/${tool}-${GCC_VERSION}" "$BREW_PREFIX/bin/${tool}"
+              fi
+            done
+            # Set Fortran compiler environment variables
+            export FC="$BREW_PREFIX/bin/gfortran"
+            export F77="$BREW_PREFIX/bin/gfortran"
+            export F90="$BREW_PREFIX/bin/gfortran"
+          fi
+        fi
+      fi
+    done
+  done
+  
+  # Then install remaining packages
+  echo "Installing remaining packages..."
+  for pkg in "${PACKAGES[@]}"; do
+    pkg=$(echo "$pkg" | tr -d ' ')
+    is_critical=0
+    for critical in "${CRITICAL_PACKAGES[@]}"; do
+      [[ "$pkg" == "$critical" ]] && is_critical=1 && break
+    done
+    if [[ $is_critical -eq 0 ]]; then
+      echo "Installing $pkg..."
+      # For packages that need Fortran, ensure the compiler is found
+      if [[ "$pkg" == "lapack" ]] || [[ "$pkg" == "openblas" ]] || [[ "$pkg" == "octave" ]]; then
+        echo "Installing $pkg with Fortran compiler configuration..."
+        BREW_PREFIX="$(brew --prefix)"
+        FC="$BREW_PREFIX/bin/gfortran" F77="$BREW_PREFIX/bin/gfortran" F90="$BREW_PREFIX/bin/gfortran" brew install "$pkg"
+      else
+        brew install "$pkg"
+      fi
     fi
   done
 fi
@@ -124,9 +189,9 @@ fi
 
 # Install {{ .name }}{{- if or $hasEnv $hasAlternativeEnv }} with isolated environment{{- end }}
 {{- if or $hasEnv $hasAlternativeEnv }}
-({{- if $hasEnv }}{{- range $key, $value := .env }} {{ $key }}={{ $value | quote }}{{- end }}{{- end }}{{- if and $hasAlternativeEnv (stat (joinPath (env "HOME") ".homebrew")) }}{{- range $key, $value := .alternative_only.env }} {{ $key }}={{ $value | quote }}{{- end }}{{- end }}; brew install {{ .name | quote }}{{- if hasKey . "args" }} {{ range .args }} --{{ . }}{{ end }}{{- end }}{{- if and (hasKey . "alternative_only") (stat (joinPath (env "HOME") ".homebrew")) }}{{- if hasKey .alternative_only "args" }} {{ range .alternative_only.args }} --{{ . }}{{ end }}{{- end }}{{- end }})
+({{- if $hasEnv }}{{- range $key, $value := .env }} {{ $key }}={{ $value | quote }}{{- end }}{{- end }}{{- if and $hasAlternativeEnv (eq $.homebrewInstallType "alternative") }}{{- range $key, $value := .alternative_only.env }} {{ $key }}={{ $value | quote }}{{- end }}{{- end }}; brew install {{ .name | quote }}{{- if hasKey . "args" }} {{ range .args }} --{{ . }}{{ end }}{{- end }}{{- if and (hasKey . "alternative_only") (eq $.homebrewInstallType "alternative") }}{{- if hasKey .alternative_only "args" }} {{ range .alternative_only.args }} --{{ . }}{{ end }}{{- end }}{{- end }})
 {{- else }}
-brew install {{ .name | quote }}{{- if hasKey . "args" }} {{ range .args }} --{{ . }}{{ end }}{{- end }}{{- if and (hasKey . "alternative_only") (stat (joinPath (env "HOME") ".homebrew")) }}{{- if hasKey .alternative_only "args" }} {{ range .alternative_only.args }} --{{ . }}{{ end }}{{- end }}{{- end }}
+brew install {{ .name | quote }}{{- if hasKey . "args" }} {{ range .args }} --{{ . }}{{ end }}{{- end }}{{- if and (hasKey . "alternative_only") (eq $.homebrewInstallType "alternative") }}{{- if hasKey .alternative_only "args" }} {{ range .alternative_only.args }} --{{ . }}{{ end }}{{- end }}{{- end }}
 {{- end }}
 
 {{- end }}
@@ -150,7 +215,7 @@ brew {{ . | quote }}
 {{- end }}
 {{- end }}
 {{- if not (or $hasEnv $hasAlternativeEnv) }}
-brew {{ .name | quote }}{{- if hasKey . "args" }}, args: [{{ range $i, $arg := .args }}{{if $i}}, {{end}}{{ $arg | quote }}{{ end }}]{{- end }}{{- if and (hasKey . "alternative_only") (stat (joinPath (env "HOME") ".homebrew")) }}{{- if hasKey .alternative_only "args" }}, args: [{{ range $i, $arg := .alternative_only.args }}{{if $i}}, {{end}}{{ $arg | quote }}{{ end }}]{{- end }}{{- end }}
+brew {{ .name | quote }}{{- if hasKey . "args" }}, args: [{{ range $i, $arg := .args }}{{if $i}}, {{end}}{{ $arg | quote }}{{ end }}]{{- end }}{{- if and (hasKey . "alternative_only") (eq $.homebrewInstallType "alternative") }}{{- if hasKey .alternative_only "args" }}, args: [{{ range $i, $arg := .alternative_only.args }}{{if $i}}, {{end}}{{ $arg | quote }}{{ end }}]{{- end }}{{- end }}
 {{- end }}
 {{- end }}
 {{ end -}}
@@ -180,6 +245,11 @@ cask {{ .name | quote }}
 {{- end }}
 {{ end -}}
 EOF
+
+{{- if eq .homebrewInstallType "alternative" }}
+# Update homebrew state file after successful installation
+update_homebrew_state
+{{- end }}
 {{ end -}}
 
 {{/* Linux setup commands */}}

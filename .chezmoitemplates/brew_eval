@@ -1,8 +1,10 @@
 # Initialize brew [https://brew.sh]
 {{- if eq .chezmoi.os "darwin" }}
 {{-   if eq .homebrewInstallType "alternative" }}
-{{-     if stat (joinPath .chezmoi.homeDir ".homebrew" "bin" "brew") }}
-eval "$({{ joinPath .chezmoi.homeDir ".homebrew" "bin" "brew" }} shellenv)"
+{{-     if stat (joinPath .chezmoi.homeDir .homebrewPath "bin" "brew") }}
+eval "$({{ joinPath .chezmoi.homeDir .homebrewPath "bin" "brew" }} shellenv)"
+# Fix PATH to remove old homebrew paths and ensure correct ones are first
+export PATH="$HOME/{{ .homebrewPath }}/bin:$HOME/{{ .homebrewPath }}/sbin:$(echo "$PATH" | sed 's|[^:]*\.homebrew[^:]*:*||g' | sed 's/:*$//')"
 {{-     end }}
 {{-   else }}
 {{-     if stat "/opt/homebrew/bin/brew" }}

@@ -1,9 +1,17 @@
 {{- $homebrewInstallType := "" }}
+{{- $homebrewPath := "" }}
 {{- if eq .chezmoi.os "darwin" }}
 {{-   if hasKey . "homebrewInstallType" }}
 {{-     $homebrewInstallType = .homebrewInstallType }}
 {{-   else }}
 {{-     $homebrewInstallType = promptChoice "How would you like to install Homebrew on this Mac?" (list "standard" "alternative") }}
+{{-   end }}
+{{-   if eq $homebrewInstallType "alternative" }}
+{{-     if hasKey . "homebrewPath" }}
+{{-       $homebrewPath = .homebrewPath }}
+{{-     else }}
+{{-       $homebrewPath = promptString "Enter the homebrew installation path (relative to home directory)" ".homebrew" }}
+{{-     end }}
 {{-   end }}
 {{- end }}
 
@@ -19,5 +27,11 @@
 data:
 {{- if eq .chezmoi.os "darwin" }}
   homebrewInstallType: {{ $homebrewInstallType | quote }}
+{{-   if eq $homebrewInstallType "alternative" }}
+  homebrewPath: {{ $homebrewPath | quote }}
+  brewBin: {{ printf "$HOME/%s/bin/brew" $homebrewPath | quote }}
+{{-   else }}
+  brewBin: "brew"
+{{-   end }}
 {{- end }}
   skip1Password: {{ $skip1Password }}

@@ -98,6 +98,42 @@ chezmoi templates use:
 - `stat` function to check if paths exist
 - Package lists from `.chezmoidata/packages.yml`
 
+### Homebrew Path Migration
+
+When using alternative Homebrew installations (outside standard locations), the system automatically handles path migrations:
+
+#### Automatic Migration Detection
+- Tracks the current Homebrew installation path in `~/.config/chezmoi/.homebrew-state`
+- Detects when the path has changed (e.g., from `~/.homebrew` to `~/homebrew`)
+- Automatically identifies packages with embedded paths that need rebuilding
+
+#### Packages with Embedded Paths
+The following packages commonly embed Homebrew paths during compilation:
+- **gcc** - Contains paths in libexec binaries and libraries
+- **llvm** - Similar embedded paths issue  
+- **binutils** - Build tools with path dependencies
+- **gettext, icu4c, readline, openssl, gnutls** - Libraries referenced by many other packages
+- **libmpc, mpfr, isl, gmp, zstd, xz, lz4** - Core dependencies for gcc
+
+#### Migration Process
+1. When `chezmoi apply` runs, it checks if the Homebrew path has changed
+2. Uses `otool -L` to verify which installed packages contain old paths
+3. Automatically sets `CHEZMOI_FORCE_REINSTALL_PACKAGES` for affected packages
+4. Rebuilds packages with proper flags (e.g., `-headerpad_max_install_names` for gcc)
+
+#### Manual Recovery
+If automatic detection fails:
+```bash
+# Force rebuild specific packages
+CHEZMOI_FORCE_REINSTALL_PACKAGES="gcc,llvm,binutils" chezmoi apply
+
+# Or manually rebuild gcc with proper flags
+brew uninstall --ignore-dependencies gcc
+LDFLAGS="-Wl,-headerpad_max_install_names" \
+BOOT_LDFLAGS="-Wl,-headerpad_max_install_names" \
+brew install gcc --build-from-source
+```
+
 ## Development Workflow
 
 When modifying this repository:

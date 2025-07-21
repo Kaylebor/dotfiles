@@ -3,16 +3,37 @@
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PATCHES_DIR="$SCRIPT_DIR/patches"
+# Set up brew environment
+{{- template "brew_eval" . }}
+
+PATCHES_DIR="{{ .chezmoi.sourceDir }}/scripts/patches"
 
 echo "Applying Homebrew formula patches for alternative installation..."
+
+# Ensure all taps are clean before patching
+echo "Ensuring clean homebrew taps..."
+# Reset homebrew-core
+if [[ -d "$(brew --repository homebrew/core)" ]]; then
+    git -C "$(brew --repository homebrew/core)" checkout HEAD -- . 2>/dev/null || true
+    git -C "$(brew --repository homebrew/core)" clean -fd 2>/dev/null || true
+fi
+
+# Reset any additional taps
+{{- if .packages.darwin.taps }}
+{{- range .packages.darwin.taps }}
+TAP_PATH="$(brew --repository {{ . }})"
+if [[ -d "$TAP_PATH" ]]; then
+    echo "Cleaning tap: {{ . }}"
+    git -C "$TAP_PATH" checkout HEAD -- . 2>/dev/null || true
+    git -C "$TAP_PATH" clean -fd 2>/dev/null || true
+fi
+{{- end }}
+{{- end }}
 
 # Check if patches directory exists
 if [[ ! -d "$PATCHES_DIR" ]]; then
     echo "No patches directory found at $PATCHES_DIR, skipping"
-    exit 0
-fi
+else
 
 # Function to patch a formula
 patch_formula() {
@@ -27,14 +48,24 @@ patch_formula() {
         return 0
     fi
     
-    # Get formula path
+    # Get formula path - try to find it in any tap
     local formula_path
+    
+    # First try homebrew-core (most common)
     formula_path="$(brew --repository homebrew/core)/Formula/${formula_name:0:1}/${formula_name}.rb"
     
+    # If not found in core, search other taps
     if [[ ! -f "$formula_path" ]]; then
-        echo "⚠️  Formula not found: $formula_path"
+        # Use brew formula to find the actual path
+        formula_path="$(brew formula "$formula_name" 2>/dev/null | grep -E "^/.*/Formula/.*\.rb$" | head -1)" || true
+    fi
+    
+    if [[ ! -f "$formula_path" ]]; then
+        echo "⚠️  Formula not found: $formula_name"
         return 1
     fi
+    
+    echo "Found formula at: $formula_path"
     
     # Check if already patched by looking for our specific patch content
     if grep -q "this->end()" "$formula_path"; then
@@ -52,9 +83,6 @@ patch_formula() {
     echo "Applying patch from $patch_file..."
     
     # Apply the patch by modifying the formula structure
-    # First, restore from git to get clean version
-    git -C "$(brew --repository homebrew/core)" checkout HEAD -- "Formula/${formula_name:0:1}/${formula_name}.rb" 2>/dev/null || true
-    
     # Check if formula already uses patch :DATA (aspell case)
     if grep -q "patch :DATA" "$formula_path"; then
         echo "Formula already uses patch :DATA, appending our patch..."
@@ -99,3 +127,5 @@ for patch_file in "$PATCHES_DIR"/*.patch; do
 done
 
 echo "✅ Formula patching complete"
+
+fi
