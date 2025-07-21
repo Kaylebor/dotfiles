@@ -4,103 +4,43 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Preferred CLI Tools
 
-This environment uses modern alternatives to traditional Unix tools. When searching, processing files, or performing system tasks, prefer these tools:
+Modern alternatives to traditional Unix tools. When searching, processing files, or performing system tasks, prefer these:
 
-### File Management & Search
-- **`fd`** instead of `find` - Fast file search with regex support
-- **`ripgrep` (`rg`)** instead of `grep` - Fast text search with PCRE support
-- **`eza`** instead of `ls` - Enhanced directory listings with git status and icons
-- **`fzf`** - Interactive fuzzy finder (integrated with fd for file search)
-- **`tree`** - Directory structure visualization
-
-### Text Processing & Viewing
-- **`bat`** instead of `cat` - Syntax highlighting and git integration
-- **`delta`** - Enhanced git diff viewer (configured as git pager)
-- **`jq`** - JSON processor
-- **`yq`** - YAML processor
-- **`jc`** - Convert command output to JSON
-
-### System Monitoring
-- **`btop`** instead of `htop` - Modern system monitor
-- **`dysk`** - Disk usage analyzer
-
-### Development Tools
-- **`mise`** - Runtime version manager (manages Node, Ruby, Python, Go, etc.)
-- **`gh`** - GitHub CLI for repository operations
-- **`shellcheck`** - Shell script linting
-- **`shfmt`** - Shell script formatting
+### Core Tools
+- **Search**: `fd` (find), `rg` (grep), `fzf` (fuzzy finder)
+- **View/Edit**: `bat` (cat), `delta` (diff), `nvim`/`helix`/`emacs`
+- **File ops**: `eza` (ls), `tree`, `jq`/`yq` (JSON/YAML), `jc` (cmd→JSON)
+- **System**: `btop` (htop), `dysk` (disk usage), `curlie` (curl)
+- **Dev**: `mise` (runtime manager), `gh` (GitHub CLI), `shellcheck`, `shfmt`
 {{- if eq .chezmoi.os "darwin" }}
-- **`golangci-lint`** - Go linting
-- **`biome`** - JavaScript/TypeScript formatting and linting
+- **Linting**: `golangci-lint`, `biome` (JS/TS)
 {{- end }}
-
-### Version Control & Diffs
-- **`delta`** - Git diff pager with syntax highlighting
-- **`difftastic` (`difft`)** - Structural diff tool
-- **`gitu`** - Terminal UI for Git operations
-
-### Network & HTTP
-- **`curlie`** instead of `curl` - Modern HTTP client with better UX
 {{- if eq .chezmoi.os "linux" }}
-- **`nmap`** - Network discovery and security auditing
+- **Network**: `nmap`
 {{- end }}
-
-### Text Editors Available
-- **`nvim`** - Neovim with extensive plugin configuration
-- **`helix`** - Modern editor with built-in LSP support
-- **`emacs`** - Primary editor with comprehensive configuration
+- **VCS**: `delta`, `difft`, `gitu`
 
 ### Shell Environment
-- **Shell**: Fish (primary) with extensive configuration
-- **Prompt**: Starship with git integration and language version display
-- **Terminal Multiplexer**: tmux
-- **Completion**: carapace multi-shell completion
+- **Shell**: Fish (primary) + Starship prompt
+- **Multiplexer**: tmux
+- **Completion**: carapace
 
-## File Organization Patterns
+## Configuration
+- **Dotfiles**: Managed via chezmoi
+- **Aliases**: `cat`→`bat`, `diff`→`delta`, git shortcuts
+- **Search integration**: FZF+fd, previews with bat/tree/jq/yq
 
-### Configuration Files
-- Dotfiles are managed via chezmoi
-- Editor configurations are extensively customized
-- Shell aliases optimize common workflows
+## Key Features
+- Fast file operations (fd, ripgrep)
+- Rich terminal output with colors/icons
+- Git-aware operations
+- Cross-platform (macOS/Linux)
 
-### Common Aliases
-- `cat` → `bat` (syntax highlighting)
-- `diff` → `delta` (better git diffs)  
-- Various git shortcuts for enhanced workflow
-
-## Search and Preview Integration
-
-This environment has sophisticated search integration:
-- **FZF** uses `fd` as default command
-- **File previews** use `bat` for syntax highlighting
-- **Directory previews** use `tree` for structure
-- **JSON/YAML previews** use `jq`/`yq` respectively
-
-## Performance Notes
-
-These tools are optimized for:
-- Fast file system operations (fd, ripgrep)
-- Rich terminal output with colors and icons
-- Git-aware file operations
-- Cross-platform compatibility (macOS and Linux)
-
-## Usage Examples
-
+## Common Usage
 ```bash
-# Fast file search
-fd "*.py" --type f
-
-# Text search with context
-rg "function.*search" --context 3
-
-# Directory listing with git status
-eza -la --git --icons
-
-# File preview with syntax highlighting
-bat README.md
-
-# Interactive file search with preview
-fd . | fzf --preview 'bat --color=always {}'
+fd "*.py" --type f                    # Find files
+rg "function.*search" -C 3            # Search with context
+eza -la --git --icons                 # List with git status
+bat README.md                         # View with syntax highlighting
+fd . | fzf --preview 'bat {}'         # Interactive search
 ```
-
-When working with this environment, these tools provide enhanced functionality, performance, and visual feedback compared to traditional Unix utilities.

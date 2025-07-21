@@ -4,154 +4,75 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a chezmoi-managed dotfiles repository for cross-platform development environment setup (macOS and Arch Linux). It uses Go templating to conditionally configure tools and packages based on the operating system.
+Chezmoi-managed dotfiles for cross-platform development (macOS/Arch Linux) using Go templating.
 
 ## Key Commands
 
-### Chezmoi Management
-- `chezmoi apply` - Apply changes to the system
-- `chezmoi diff` - See what changes would be applied
-- `chezmoi add <file>` - Add a new file to chezmoi management
-- `chezmoi edit <file>` - Edit a managed file
-- `chezmoi cd` - Change to the chezmoi source directory
-
-### Development Tools Setup
-- `mise install` - Install all programming language runtimes and tools
-- `bat cache --build` - Rebuild bat syntax highlighting cache (required after theme changes)
-- `nvim --headless +PlugInstall +qall` - Install/update Neovim plugins
-
-### System Package Installation
-Scripts are automatically run by chezmoi:
-- `run_once_0-install-brew.bash.tmpl` - Initial Homebrew installation (macOS only)
-- `run_onchange_before_brew-install-packages.bash.tmpl` - Install packages via Homebrew/paru
-- `run_onchange_98_tools_update.bash` - Update development tools
-- `run_onchange_fish.bash.tmpl` - Fish shell configuration
+**Chezmoi**: `apply`, `diff`, `add <file>`, `edit <file>`, `cd`  
+**Tools**: `mise install`, `bat cache --build`, `nvim --headless +PlugInstall +qall`  
+**Auto-run scripts**: `run_once_*` (Homebrew install), `run_onchange_*` (package updates)
 
 ## Architecture
 
-### Configuration Structure
-- `dot_*` files map to `.*` files in home directory
-- `.tmpl` suffix indicates Go template files processed by chezmoi
-- `.chezmoidata/` contains YAML data files for package lists and URLs
-- Platform-specific configurations use chezmoi template conditionals
+### File Structure
+- `dot_*` → `.*` files in home
+- `.tmpl` → Go template files
+- `.chezmoidata/` → YAML package lists/URLs
+- Platform detection via template conditionals
 
 ### Package Management
-- **macOS**: Homebrew (brews and casks defined in `.chezmoidata/packages.yml`)
-- **Arch Linux**: paru AUR helper (packages defined in `.chezmoidata/packages.yml`)
-- **Development tools**: mise (formerly rtx) manages language runtimes
-- **Editor plugins**: Neovim via vim-plug, Emacs via elpaca
+- **macOS**: Homebrew (`.chezmoidata/packages.yml`)
+- **Arch**: paru AUR helper
+- **Runtimes**: mise (formerly rtx)
+- **Editors**: vim-plug (Neovim), elpaca (Emacs)
 
-#### Homebrew Package Configuration
-The `packages.yml` file supports advanced package configurations:
-- **Global configurations**: Apply to all Homebrew installation types
-- **Alternative-specific configurations**: Only applied when using alternative Homebrew prefix (`~/.homebrew`)
-- **Environment variables**: Set per-package for complex builds (e.g., gcc with header padding flags)
-- **Build arguments**: Custom compilation flags and options
-
-Example package with alternative-specific configuration:
+### Advanced Homebrew Config
+Supports per-package build flags and environment vars:
 ```yaml
 - name: "gcc"
   alternative_only:
-    args:
-      - "build-from-source"
+    args: ["build-from-source"]
     env:
       LDFLAGS: "-Wl,-headerpad_max_install_names"
-      BOOT_LDFLAGS: "-Wl,-headerpad_max_install_names"
-      CFLAGS_FOR_TARGET: "-Wl,-headerpad_max_install_names"
-      CXXFLAGS_FOR_TARGET: "-Wl,-headerpad_max_install_names"
-      HOMEBREW_NO_INSTALL_CLEANUP: "1"
 ```
 
-#### Known Limitations
-- **GCC with Alternative Homebrew**: May show dylib fixing errors during post-install but compiles and runs correctly
-- **Alternative installation**: All packages built from source, significantly longer installation times
+### Stack
+**Languages**: Ruby, Node, Go, Python, Java (GraalVM), Elixir, Erlang, Rust, Deno, Bun  
+**Editors**: Emacs (primary), Neovim, Helix, Zed  
+**Shells**: Fish (primary), Zsh  
+**Tools**: Git+delta, ripgrep, fd, bat, eza, starship, tmux, 1Password SSH
 
-### Key Tools and Languages
-Development environment includes:
-- **Languages**: Ruby, Node.js, Go, Python, Java (GraalVM), Elixir, Erlang, Rust, Deno, Bun
-- **Editors**: Emacs (primary), Neovim, Helix, Zed
-- **Shells**: Fish (primary), Zsh
-- **Version control**: Git with delta diff viewer, difftastic, 1Password SSH signing
-- **CLI tools**: ripgrep, fd, fzf, bat, eza, starship prompt, tmux
-
-### Authentication
-Uses 1Password for:
-- SSH key signing (configured in git)
-- Secure storage of signing keys and tokens
-- Template data injection via `onepasswordRead` function
-
-#### 1Password CLI Bypass
-For environments where 1Password CLI is broken (e.g., MDM setups), the repository includes bypass mechanisms:
-- **Configuration flag**: Set `skip1Password: true` in chezmoi config or use `CHEZMOI_SKIP_1PASSWORD=true`
-- **Git signing**: Automatically disables SSH signing when 1Password is skipped (prevents commit failures)
-- **Environment variable fallbacks**:
-  - `CHEZMOI_GIT_SIGNING_KEY` - SSH signing key for git commits (used in gitconfig but signing disabled when skipped)
-  - `CHEZMOI_GEMINI_API_KEY` - Gemini API key for aider
-  - `CHEZMOI_OPENROUTER_API_KEY` - OpenRouter API key for aider
-  - `CHEZMOI_DEEPSEEK_API_KEY` - DeepSeek API key for aider
-
-### Templating System
-chezmoi templates use:
-- `.chezmoi.os` for OS detection ("darwin" or "linux")
-- `.chezmoi.osRelease.idLike` for Linux distribution detection
-- `lookPath` function to check if commands exist
-- `stat` function to check if paths exist
-- Package lists from `.chezmoidata/packages.yml`
+### 1Password Integration
+- SSH signing for git
+- Template data via `onepasswordRead`
+- **Bypass**: Set `skip1Password: true` or `CHEZMOI_SKIP_1PASSWORD=true`
+- **Fallback env vars**: `CHEZMOI_GIT_SIGNING_KEY`, `CHEZMOI_*_API_KEY`
 
 ### Homebrew Path Migration
+Auto-detects path changes (`~/.homebrew` → `~/homebrew`):
+1. Tracks state in `~/.config/chezmoi/.homebrew-state`
+2. Identifies packages with embedded paths (gcc, llvm, binutils, etc.)
+3. Auto-rebuilds with `CHEZMOI_FORCE_REINSTALL_PACKAGES`
 
-When using alternative Homebrew installations (outside standard locations), the system automatically handles path migrations:
-
-#### Automatic Migration Detection
-- Tracks the current Homebrew installation path in `~/.config/chezmoi/.homebrew-state`
-- Detects when the path has changed (e.g., from `~/.homebrew` to `~/homebrew`)
-- Automatically identifies packages with embedded paths that need rebuilding
-
-#### Packages with Embedded Paths
-The following packages commonly embed Homebrew paths during compilation:
-- **gcc** - Contains paths in libexec binaries and libraries
-- **llvm** - Similar embedded paths issue  
-- **binutils** - Build tools with path dependencies
-- **gettext, icu4c, readline, openssl, gnutls** - Libraries referenced by many other packages
-- **libmpc, mpfr, isl, gmp, zstd, xz, lz4** - Core dependencies for gcc
-
-#### Migration Process
-1. When `chezmoi apply` runs, it checks if the Homebrew path has changed
-2. Uses `otool -L` to verify which installed packages contain old paths
-3. Automatically sets `CHEZMOI_FORCE_REINSTALL_PACKAGES` for affected packages
-4. Rebuilds packages with proper flags (e.g., `-headerpad_max_install_names` for gcc)
-
-#### Manual Recovery
-If automatic detection fails:
+Manual fix:
 ```bash
-# Force rebuild specific packages
-CHEZMOI_FORCE_REINSTALL_PACKAGES="gcc,llvm,binutils" chezmoi apply
-
-# Or manually rebuild gcc with proper flags
-brew uninstall --ignore-dependencies gcc
-LDFLAGS="-Wl,-headerpad_max_install_names" \
-BOOT_LDFLAGS="-Wl,-headerpad_max_install_names" \
-brew install gcc --build-from-source
+CHEZMOI_FORCE_REINSTALL_PACKAGES="gcc,llvm" chezmoi apply
 ```
+
+### Templates
+- OS: `.chezmoi.os` ("darwin"/"linux")
+- Linux distro: `.chezmoi.osRelease.idLike`
+- Command check: `lookPath`
+- Path check: `stat`
 
 ## Development Workflow
 
-When modifying this repository:
-1. Edit files in the chezmoi source directory (this directory)
-2. Test changes with `chezmoi diff` before applying
-3. Use `chezmoi apply` to deploy changes to the system
-4. For new packages, add them to the appropriate section in `.chezmoidata/packages.yml`
-5. Template files should handle both macOS and Linux configurations where applicable
+1. Edit in chezmoi source directory
+2. Preview: `chezmoi diff`
+3. Deploy: `chezmoi apply`
+4. Add packages to `.chezmoidata/packages.yml`
 
-## Fuzzy Finding Tools
+## Fuzzy Finders
 
-### Television (Primary)
-- **Purpose**: Modern fuzzy finder with channel-based architecture
-- **Shell Integration**: Configured for Fish, Zsh, and Bash via `tv init`
-- **Community Channels**: Automatically installed via `tv update-channels`
-- **Custom Scripts**: `git-aware-files.fish` and `preview-smart.fish` can be used in custom channels
-
-### fzf (Legacy)
-- **Purpose**: Kept only for Neovim integration via fzf.vim plugin
-- **Note**: Shell integrations are installed but Television takes precedence for shell operations
-- **Future**: May be removed once Television has Neovim plugin support
+**Television** (primary): Modern channel-based finder with `tv init`/`tv update-channels`  
+**fzf** (legacy): Kept for Neovim integration only
