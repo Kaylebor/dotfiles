@@ -142,3 +142,16 @@ When modifying this repository:
 3. Use `chezmoi apply` to deploy changes to the system
 4. For new packages, add them to the appropriate section in `.chezmoidata/packages.yml`
 5. Template files should handle both macOS and Linux configurations where applicable
+
+## Fuzzy Finding Tools
+
+### Television (Primary)
+- **Purpose**: Modern fuzzy finder with channel-based architecture
+- **Shell Integration**: Configured for Fish, Zsh, and Bash via `tv init`
+- **Community Channels**: Automatically installed via `tv update-channels`
+- **Custom Scripts**: `git-aware-files.fish` and `preview-smart.fish` can be used in custom channels
+
+### fzf (Legacy)
+- **Purpose**: Kept only for Neovim integration via fzf.vim plugin
+- **Note**: Shell integrations are installed but Television takes precedence for shell operations
+- **Future**: May be removed once Television has Neovim plugin support

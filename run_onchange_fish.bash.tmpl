@@ -21,6 +21,12 @@ carapace _carapace fish > ~/.config/fish/conf.d/carapace.fish
 fzf --fish > ~/.config/fish/conf.d/0fzf_key_bindings.fish
 {{- end }}
 
+{{/* Television integration */}}
+{{- if lookPath "tv" }}
+# Integrate Television
+tv init fish > ~/.config/fish/conf.d/television.fish
+{{- end }}
+
 # Run the fish environment setup
 fish -c "source {{ .chezmoi.sourceDir }}/.fish_env.fish"
 

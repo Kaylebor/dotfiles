@@ -76,6 +76,11 @@ export FZF_DEFAULT_OPTS=" \
 --color=border:#414559,label:#c6d0f5"
 {{- end }}
 
+{{- if lookPath "tv" }}
+# Integrate Television
+eval "$(tv init bash)"
+{{- end }}
+
 {{- if lookPath "carapace" }}
 # Load carapace completions
 # It includes completions for: aws, gcloud, docker, git, kubectl, terraform, and more
