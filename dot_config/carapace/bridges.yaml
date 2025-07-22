@@ -16,6 +16,10 @@ eza: clap          # Modern ls
 delta: clap        # Git diff
 mise: clap         # Runtime manager
 
+# Node.js + Yargs
+jest: yargs        # JavaScript testing (via fish function/npx)
+ng: yargs          # Angular CLI (via fish function/npx)
+
 # Shell bridge fallback for everything else
 # The special underscore key enables implicit bridges for all commands
 _: [zsh, fish, bash]
