@@ -142,6 +142,11 @@ set -Ux FZF_ALT_C_COMMAND "fd -u -t d ."
 # Apply theme (automatically answer yes to overwrite prompt)
 echo "y" | fish_config theme save "Catppuccin Frappe"
 
+# Configure carapace bridges for shell completion fallback
+if type -q carapace
+    set -Ux CARAPACE_BRIDGES 'zsh,fish,bash'
+end
+
 # Set up gcc paths for alternative Homebrew installations on macOS
 if test (uname) = Darwin
     # Check for homebrew in alternative locations

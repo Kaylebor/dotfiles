@@ -3,13 +3,6 @@
 # Force en_US.UTF-8 locale
 export LC_ALL=en_US.UTF-8
 
-{{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
-# Switch to Fish shell if available in non-standard Homebrew path (for MDM setups)
-if [[ $- == *i* ]] && [[ -x "$HOME/{{ .homebrewPath }}/bin/fish" ]]; then
-    exec "$HOME/{{ .homebrewPath }}/bin/fish"
-fi
-{{- end }}
-
 # Activate Mise on interactive
 eval "$(mise hook-env -s zsh)"
 
@@ -92,44 +85,8 @@ setopt HIST_FIND_NO_DUPS         # Do not display a line previously found.
 setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history file.
 setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording entry.
 
-## COMPLETIONS
-zstyle ':completion:*' menu yes select
-zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
-{{- if lookPath "eza" }}
-# eza styles https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/eza#configuration
-zstyle ':omz:plugins:eza' 'dirs-first' 'yes'
-zstyle ':omz:plugins:eza' 'git-status' 'yes'
-zstyle ':omz:plugins:eza' 'header' 'yes'
-zstyle ':omz:plugins:eza' 'show-group' 'yes'
-zstyle ':omz:plugins:eza' 'icons' 'yes'
-zstyle ':omz:plugins:eza' 'size-prefix' 'si'
-zstyle ':omz:plugins:eza' 'time-style' 'long-iso'
-zstyle ':omz:plugins:eza' 'hyperlink' 'no'
-{{- end }}
-# Configure builtin completions
-zmodload -a colors
-zmodload -a autocomplete
-zmodload -a complist
-autoload -Uz compinit && compinit
-{{- if lookPath "carapace" }}
-# Load carapace completions
-# It includes completions for: aws, gcloud, docker, git, kubectl, terraform, and more
-source <(carapace _carapace zsh)
-{{- end }}
-
-{{- if lookPath "op" }}
-# Load op completions
-source <(op completion zsh)
-{{- end }}
-
-{{- if lookPath "starship" }}
-# Load starship prompt
-if [[ "$TERM" != "dumb" ]]; then
-  source <(starship init zsh)
-fi
-{{- end }}
-
-# Load antidote plugin manager
+## EARLY SETUP
+# Load antidote plugin manager early (it will handle compinit via ez-compinit)
 {{- $antidoteFiles := list }}
 {{- if eq .chezmoi.os "darwin" }}
 {{-   $brewPrefix := "" }}
@@ -156,6 +113,41 @@ source "{{ $antidoteFile }}"
 antidote load
 {{-     break }}
 {{-   end }}
+{{- end }}
+
+## COMPLETIONS
+# Set completion styles
+zstyle ':completion:*' menu yes select
+zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
+{{- if lookPath "eza" }}
+# eza styles https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/eza#configuration
+zstyle ':omz:plugins:eza' 'dirs-first' 'yes'
+zstyle ':omz:plugins:eza' 'git-status' 'yes'
+zstyle ':omz:plugins:eza' 'header' 'yes'
+zstyle ':omz:plugins:eza' 'show-group' 'yes'
+zstyle ':omz:plugins:eza' 'icons' 'yes'
+zstyle ':omz:plugins:eza' 'size-prefix' 'si'
+zstyle ':omz:plugins:eza' 'time-style' 'long-iso'
+zstyle ':omz:plugins:eza' 'hyperlink' 'no'
+{{- end }}
+
+{{- if lookPath "carapace" }}
+# Load carapace completions
+# It includes completions for: aws, gcloud, docker, git, kubectl, terraform, and more
+export CARAPACE_BRIDGES='zsh,fish,bash'
+source <(carapace _carapace zsh)
+{{- end }}
+
+{{- if lookPath "op" }}
+# Load op completions
+source <(op completion zsh)
+{{- end }}
+
+{{- if lookPath "starship" }}
+# Load starship prompt
+if [[ "$TERM" != "dumb" ]]; then
+  source <(starship init zsh)
+fi
 {{- end }}
 
 ## Envs
