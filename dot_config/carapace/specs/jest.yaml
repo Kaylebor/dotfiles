@@ -1,0 +1,57 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: jest
+description: JavaScript testing framework
+# Jest is available via fish function that wraps npx/node_modules
+flags:
+  # Main options
+  --all: Run all tests (opposite of onlyChanged)
+  --automock: Automock all files by default
+  -b, --bail?: Exit after N test failures
+  --cache?: Use transform cache (--no-cache to disable)
+  --changedFilesWithAncestor: Run tests for current + last commit changes
+  --changedSince=: Run tests related to changes since given branch/commit
+  --ci: Run in CI mode
+  --clearCache: Delete Jest cache and exit
+  --collectCoverage: Collect test coverage information
+  --colors?: Force colors in output (--no-colors to disable)
+  --config=: Path to config file
+  --coverage?: Alias for --collectCoverage
+  --detectOpenHandles: Detect handles keeping Jest from exiting
+  --errorOnDeprecated: Make calling deprecated APIs throw errors
+  --expand: Show full diffs instead of patch
+  --findRelatedTests: Find tests for given source files
+  --forceExit: Force exit after tests complete
+  --help: Show help
+  -i, --runInBand: Run tests serially
+  --json: Print results in JSON
+  --lastCommit: Run tests affected by last commit
+  --listTests: List all test files
+  --maxConcurrency=: Max concurrent test files to run
+  --maxWorkers=: Max worker threads
+  --noStackTrace: Disable stack trace in errors
+  --notify?: Send notification after run (--no-notify to disable)
+  -o, --onlyChanged: Run tests for changed files
+  --onlyFailures: Run only previously failed tests
+  --passWithNoTests: Pass when no test files found
+  --projects: Run tests from specific projects
+  --reporters: Custom reporters
+  --runTestsByPath: Run tests by exact paths
+  --selectProjects: Select projects interactively
+  --setupFilesAfterEnv: Setup files after test framework
+  --showConfig: Print resolved config and exit
+  --silent: Prevent tests from printing messages
+  -t, --testNamePattern=: Run tests matching name pattern
+  --testLocationInResults: Add location to test results
+  --testPathPattern=: Run tests matching path pattern
+  --testRunner=: Specify test runner
+  --updateSnapshot: Update snapshots
+  -u: Alias for --updateSnapshot
+  --useStderr: Divert output to stderr
+  --verbose: Display individual test results
+  --version: Print version and exit
+  -w, --watch: Watch files for changes and rerun
+  --watchAll?: Watch all files (--no-watchAll to disable)
+  --watchman?: Use watchman for watching (--no-watchman to disable)
+completion:
+  positional:
+    - ["$files([.js,.jsx,.ts,.tsx,.mjs,.cjs])", "$directories"]

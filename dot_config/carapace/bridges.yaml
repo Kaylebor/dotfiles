@@ -19,6 +19,9 @@ mise: clap         # Runtime manager
 # Node.js + Yargs
 ng: yargs          # Angular CLI (via fish function/npx)
 
+# Special cases
+aider: zsh         # AI pair programming (uses shtab-generated zsh completions)
+
 # Shell bridge fallback for everything else
 # The special underscore key enables implicit bridges for all commands
 _: [zsh, fish, bash]
