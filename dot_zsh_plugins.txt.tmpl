@@ -34,3 +34,9 @@ ohmyzsh/ohmyzsh path:plugins/rake-fast  # faster rake completion [https://github
 {{- if lookPath "redis-cli" }}
 ohmyzsh/ohmyzsh path:plugins/redis-cli  # redis-cli aliases and functions [https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/redis-cli]
 {{- end }}
+{{- if lookPath "tmux" }}
+ohmyzsh/ohmyzsh path:plugins/tmux       # tmux aliases and functions [https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/tmux]
+{{- end }}
+{{- if lookPath "fzf" }}
+# Note: fzf completions are loaded in .zshrc via 'source <(fzf --zsh)'
+{{- end }}
