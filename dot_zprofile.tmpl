@@ -1,11 +1,10 @@
 {{- template "brew_eval" . }}
 eval "$(mise activate zsh)" # Mise [https://mise.jdx.dev]
 
-# Add custom completion directories to fpath for all zsh instances
-# This ensures carapace bridges can find our completions
+# Add XDG-compliant completion directory to fpath for all zsh instances
+# This ensures tools like carapace and aider completions are found
 fpath=(
-    $HOME/.local/share/zsh/site-functions
-    $HOME/.config/zsh/completions
+    ${XDG_DATA_HOME:-$HOME/.local/share}/zsh/site-functions
     $fpath
 )
 

@@ -22,29 +22,5 @@ if [[ "$(uname)" == "Darwin" ]] && command -v carapace >/dev/null 2>&1; then
     fi
 fi
 
-# Generate aider zsh completions
-if command -v aider >/dev/null 2>&1; then
-    # Generate completion once
-    AIDER_COMPLETION=$(aider --shell-completions zsh)
-    
-    # Determine the appropriate site-functions directory
-    if [[ -d "/usr/local/share/zsh/site-functions" ]] && [[ -w "/usr/local/share/zsh/site-functions" ]]; then
-        # Standard location that's writable
-        SITE_FUNCTIONS="/usr/local/share/zsh/site-functions"
-    elif [[ -d "$HOME/.local/share/zsh/site-functions" ]]; then
-        # User-level fallback
-        SITE_FUNCTIONS="$HOME/.local/share/zsh/site-functions"
-    else
-        # Create user-level directory if nothing else works
-        SITE_FUNCTIONS="$HOME/.local/share/zsh/site-functions"
-        mkdir -p "$SITE_FUNCTIONS"
-    fi
-    
-    echo "Installing aider completion to $SITE_FUNCTIONS"
-    echo "$AIDER_COMPLETION" > "$SITE_FUNCTIONS/_aider"
-    
-    # Also keep it in our custom directory for interactive shells
-    ZSH_COMPLETIONS_DIR="$HOME/.config/zsh/completions"
-    mkdir -p "$ZSH_COMPLETIONS_DIR"
-    echo "$AIDER_COMPLETION" > "$ZSH_COMPLETIONS_DIR/_aider"
-fi
+# Note: We're using carapace specs for aider instead of native completions
+# due to issues with the generated completion scripts

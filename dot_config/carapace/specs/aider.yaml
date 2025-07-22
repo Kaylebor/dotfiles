@@ -1,0 +1,38 @@
+name: aider
+description: AI coding assistant
+flags:
+  -h, --help: show help message
+  --version: show version
+  --model=: specify the model to use
+  --list-models=: list known models matching pattern
+  --models=: list known models matching pattern (alias for --list-models)
+  --openai-api-key=: OpenAI API key
+  --anthropic-api-key=: Anthropic API key
+  -m, --message=: single message to send
+  -f, --message-file=: file containing message
+  --file=: specify file to edit
+  --read=: specify read-only file
+  -v, --verbose: enable verbose output
+  -c, --config=: config file
+  --yes-always: always say yes
+  --no-auto-commits: disable auto commits
+  --auto-commits: enable auto commits
+  --dark-mode: dark terminal colors
+  --light-mode: light terminal colors
+  -4, --4: use gpt-4
+  --opus: use claude-3-opus
+  --sonnet: use claude-3-sonnet
+  --haiku: use claude-3-haiku
+completion:
+  positional:
+    - ["$files"]
+  flag:
+    message-file: ["$files"]
+    file: ["$files"]
+    read: ["$files"]
+    config: ["$files"]
+    model: ["$(aider --list-models . 2>&1 | awk 'NR > 2 && /^- / { sub(/^- */, \"\"); print $1 }')"]
+    list-models: [".", "anthropic", "openai", "claude", "gpt", "o1", "amazon", "nova", "ai21", "jamba", "groq", "llama", "mistral", "mixtral", "gemini", "deepseek", "qwen", "phi", "cohere", "command", "meta", "bedrock", "vertex", "azure", "ollama", "sonnet", "opus", "haiku", "mini", "turbo", "pro", "lite", "large", "small"]
+    models: [".", "anthropic", "openai", "claude", "gpt", "o1", "amazon", "nova", "ai21", "jamba", "groq", "llama", "mistral", "mixtral", "gemini", "deepseek", "qwen", "phi", "cohere", "command", "meta", "bedrock", "vertex", "azure", "ollama", "sonnet", "opus", "haiku", "mini", "turbo", "pro", "lite", "large", "small"]
+    edit-format: ["whole", "diff", "diff-fenced", "udiff", "udiff-full"]
+    shell-completions: ["bash", "zsh", "fish"]
