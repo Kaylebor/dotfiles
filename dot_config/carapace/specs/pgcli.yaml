@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: pgcli
+description: Postgres CLI with auto-completion and syntax highlighting
+flags:
+  -h, --host=: Host address of the postgres database
+  -p, --port=: Port number at which the postgres instance is listening
+  -U, --username=: Username to connect to the postgres database
+  -u, --user=: Username to connect to the postgres database
+  -W, --password: Force password prompt
+  -w, --no-password: Never prompt for password
+  --single-connection: Do not use a separate connection for completions
+  -v, --version: Version of pgcli
+  -d, --dbname=: Database name to connect to
+  --pgclirc=: Location of pgclirc file
+  -D, --dsn=: Use DSN configured into the [alias_dsn] section of pgclirc file
+  --list-dsn: List of DSN configured into the [alias_dsn] section of pgclirc file
+  --row-limit=: Set threshold for row limit prompt (0 to disable)
+  --application-name=: Application name for the connection
+  --less-chatty: Skip intro on startup and goodbye on exit
+  --prompt=: Prompt format
+  --prompt-dsn=: Prompt format for connections using DSN aliases
+  -l, --list: List available databases, then exit
+  --ping: Check database connectivity, then exit
+  --auto-vertical-output: Automatically switch to vertical output mode
+  --warn=: Warn before running a destructive query
+  --ssh-tunnel=: Open an SSH tunnel to the given address
+  --log-file=: Write all queries & output into a file
+  --help: Show this message and exit
+completion:
+  flag:
+    pgclirc: ["$files"]
+    log-file: ["$files"]

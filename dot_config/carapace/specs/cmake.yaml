@@ -1,0 +1,83 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: cmake
+description: Cross-platform build system generator
+flags:
+  -S=: Explicitly specify a source directory
+  -B=: Explicitly specify a build directory
+  -C=: Pre-load a script to populate the cache
+  -D=: Create or update a cmake cache entry
+  -U=: Remove matching entries from CMake cache
+  -G=: Specify a build system generator
+  -T=: Specify toolset name if supported by generator
+  -A=: Specify platform name if supported by generator
+  --toolchain=: Specify toolchain file
+  --install-prefix=: Specify install directory
+  --project-file=: Specify an alternate project file name
+  -Wdev: Enable developer warnings
+  -Wno-dev: Suppress developer warnings
+  -Werror=dev: Make developer warnings errors
+  -Wno-error=dev: Make developer warnings not errors
+  -Wdeprecated: Enable deprecation warnings
+  -Wno-deprecated: Suppress deprecation warnings
+  -Werror=deprecated: Make deprecated macro and function warnings errors
+  -Wno-error=deprecated: Make deprecated macro and function warnings not errors
+  --preset=: Specify a configure preset
+  --list-presets?: List available presets
+  --workflow: Run a workflow preset
+  -E: CMake command mode
+  -L: List non-advanced cached variables
+  -LA: List all cached variables
+  -LH: List non-advanced cached variables with help
+  -LAH: List all cached variables with help
+  -LR=: Show cached variables that match the regex
+  -LRA=: Show all cached variables that match the regex
+  -LRH=: Show cached variables with help that match the regex
+  -LRAH=: Show all cached variables with help that match the regex
+  --fresh: Configure a fresh build tree
+  --build=: Build a CMake-generated project binary tree
+  --install=: Install a CMake-generated project binary tree
+  --open=: Open generated project in the associated application
+  --config=: Choose configuration for multi-config generators
+  --parallel=: The maximum number of concurrent processes
+  -j=: The maximum number of concurrent processes
+  --target=: Build specific target instead of all
+  -t=: Build specific target instead of all
+  --clean-first: Clean build before starting
+  --use-stderr: Put output on stderr
+  --verbose: Enable verbose output
+  -v: Enable verbose output
+  --version: Show program version
+  -h: Print usage information
+  --help: Print usage information
+  --help-full: Print all help manuals
+  --help-manual=: Print one help manual
+  --help-manual-list: List help manuals available
+  --help-command=: Print help for one command
+  --help-command-list: List commands with help available
+  --help-commands: Print cmake-commands manual
+  --help-module=: Print help for one module
+  --help-module-list: List modules with help available
+  --help-modules: Print cmake-modules manual
+  --help-policy=: Print help for one policy
+  --help-policy-list: List policies with help available
+  --help-policies: Print cmake-policies manual
+  --help-property=: Print help for one property
+  --help-property-list: List properties with help available
+  --help-properties: Print cmake-properties manual
+  --help-variable=: Print help for one variable
+  --help-variable-list: List variables with help available
+  --help-variables: Print cmake-variables manual
+completion:
+  flag:
+    S: ["$directories"]
+    B: ["$directories"]
+    C: ["$files"]
+    toolchain: ["$files"]
+    install-prefix: ["$directories"]
+    build: ["$directories"]
+    install: ["$directories"]
+    open: ["$directories"]
+    G: ["Unix Makefiles", "Ninja", "Ninja Multi-Config", "Watcom WMake", "Xcode", "CodeBlocks - Ninja", "CodeBlocks - Unix Makefiles", "CodeLite - Ninja", "CodeLite - Unix Makefiles", "Eclipse CDT4 - Ninja", "Eclipse CDT4 - Unix Makefiles", "Kate - Ninja", "Kate - Unix Makefiles"]
+    list-presets: ["configure", "build", "test", "all"]
+  positional:
+    - ["$directories"]

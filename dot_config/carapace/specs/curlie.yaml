@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
+name: curlie
+description: The power of curl, the ease of use of httpie
+# Curlie is a frontend to curl that adds httpie-like syntax
+# Format: curlie [options...] [METHOD] URL [REQUEST_ITEM...]
+flags:
+  # Common curl options that curlie supports
+  -X=: Specify request method
+  -H=: Pass custom header(s)
+  -d=: HTTP POST data
+  -b=: Send cookies
+  -c=: Write cookies to file
+  -u=: Server user and password
+  -x=: Use proxy
+  -L: Follow redirects
+  -o=: Write to file instead of stdout
+  -O: Write output to file named as remote file
+  -s: Silent mode
+  -S: Show error even in silent mode
+  -i: Include response headers in output
+  -I: Show document info only
+  -v: Make operation more verbose
+  -V: Show version
+  -h: Show help
+  --compressed: Request compressed response
+  --insecure: Allow insecure SSL connections
+  --cert=: Client certificate file
+  --key=: Private key file
+  --cacert=: CA certificate file
+  --capath=: CA directory
+  --max-time=: Maximum time allowed for transfer
+  --connect-timeout=: Maximum connection time
+  --retry=: Number of retries
+  --retry-delay=: Delay between retries
+  --retry-max-time=: Maximum time for retries
+  --user-agent=: User-Agent string
+  --referer=: Referer URL
+  --header=: Custom header
+  --cookie=: Cookie string
+  --cookie-jar=: Cookie jar file
+  --data=: HTTP POST data
+  --data-raw=: HTTP POST raw data
+  --data-binary=: HTTP POST binary data
+  --data-urlencode=: HTTP POST URL encoded data
+  --form=: HTTP multipart POST data
+  --output=: Write to file
+  --remote-name: Write to file named as remote
+  --location: Follow redirects
+  --fail: Fail silently on HTTP errors
+  --show-error: Show error on fail
+  --silent: Silent mode
+  --verbose: Verbose mode
+  --trace=: Enable full trace
+  --trace-ascii=: Enable ASCII trace
+completion:
+  flag:
+    X: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "CONNECT", "TRACE"]
+    o: ["$files"]
+    output: ["$files"]
+    cert: ["$files"]
+    key: ["$files"]
+    cacert: ["$files"]
+    capath: ["$directories"]
+    cookie-jar: ["$files"]
+    c: ["$files"]
+    trace: ["$files"]
+    trace-ascii: ["$files"]
+  positional:
+    - ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
+    - []  # URL
+    - []  # Request items (headers, data, etc)
