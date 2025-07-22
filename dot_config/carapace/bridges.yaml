@@ -17,7 +17,6 @@ delta: clap        # Git diff
 mise: clap         # Runtime manager
 
 # Node.js + Yargs
-jest: yargs        # JavaScript testing (via fish function/npx)
 ng: yargs          # Angular CLI (via fish function/npx)
 
 # Shell bridge fallback for everything else
