@@ -73,5 +73,27 @@ CHEZMOI_FORCE_REINSTALL_PACKAGES="emacs-plus@31" chezmoi apply
 
 You can specify multiple packages separated by commas, and use both variables together if needed.
 
+## Shell Completions
+
+This repository uses [carapace](https://carapace-sh.github.io/carapace-bin/) for universal shell completions across Fish, Zsh, and Bash.
+
+### Completion Frameworks
+
+Many modern CLI tools include completion frameworks that provide rich, context-aware completions:
+
+- **Cobra** (Go): Used by `gh`, `kubectl`, `docker`, `helm`, `hugo`
+- **Clap** (Rust): Used by `fd`, `rg`, `bat`, `eza`, `delta`, `mise`
+- **Click** (Python): Used by `pgcli`
+- **Argcomplete** (Python): Enhancement for Python's argparse
+- **Yargs** (Node.js): Used by many JavaScript CLIs
+- **Urfave/cli** (Go): Alternative Go framework
+
+Carapace automatically detects and bridges these frameworks, providing better completions than shell-specific scripts. Framework bridges are preferred because they:
+- Get completions directly from the tool's built-in completion engine
+- Are faster and more accurate than parsing help text
+- Update automatically when the tool updates
+
+The configuration in `.config/carapace/bridges.yaml` maps tools to their frameworks for optimal performance.
+
 ## Extras
 - Fonts: [Iosevka and Iosevka Term](https://typeof.net/Iosevka/)

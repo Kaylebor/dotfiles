@@ -76,3 +76,23 @@ CHEZMOI_FORCE_REINSTALL_PACKAGES="gcc,llvm" chezmoi apply
 
 **Television** (primary): Modern channel-based finder with `tv init`/`tv update-channels`  
 **fzf** (legacy): Kept for Neovim integration only
+
+## Shell Completions
+
+**Carapace**: Universal completion engine supporting Fish, Zsh, Bash, and more.
+
+### Completion Strategy
+1. **Framework bridges** (preferred): Direct communication with tool's built-in completion
+   - Cobra (Go): `gh`, `kubectl`, `docker`, `helm`, `hugo`
+   - Clap (Rust): `fd`, `rg`, `bat`, `eza`, `delta`, `mise`
+   - Click (Python): `pgcli`
+2. **Shell bridges** (fallback): Parse shell-specific completions
+   - Priority order: zsh → fish → bash
+
+### Detection
+Use `carapace --detect <tool>` to identify which framework a tool uses.
+
+### Configuration
+- `.config/carapace/bridges.yaml`: Maps tools to frameworks
+- No manual spec files needed - bridges handle everything
+- Framework completions update automatically with the tool

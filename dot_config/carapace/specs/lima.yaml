@@ -1,7 +1,0 @@
-# yaml-language-server: $schema=https://carapace.sh/schemas/command.json
-name: lima
-description: Linux virtual machines (alias for limactl shell)
-# lima is essentially "limactl shell [instance]" with environment variable support
-completion:
-  positional:
-    - ["default"]  # Common instance names, can be expanded

@@ -1,0 +1,21 @@
+# Carapace bridge configuration
+# Framework bridges (preferred - faster and more accurate)
+# These tools have their completion framework compiled in
+
+# Go + Cobra
+gh: cobra          # GitHub CLI
+
+# Python + Click  
+pgcli: click       # PostgreSQL CLI
+
+# Rust + Clap
+fd: clap           # Fast find
+rg: clap           # Ripgrep
+bat: clap          # Better cat
+eza: clap          # Modern ls
+delta: clap        # Git diff
+mise: clap         # Runtime manager
+
+# Shell bridge fallback for everything else
+# The special underscore key enables implicit bridges for all commands
+_: [zsh, fish, bash]
