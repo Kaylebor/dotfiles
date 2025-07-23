@@ -1,12 +1,84 @@
 {{- template "brew_eval" . }}
 eval "$(mise activate bash)" # Mise [https://mise.jdx.dev]
 
+## PATH
+# Add each of the specified directories to PATH if they exist
+{{- if stat (joinPath .chezmoi.homeDir ".local" "bin") }}
+PATH="$HOME/.local/bin:$PATH" # User-installed binaries
+{{- end }}
+{{- if stat (joinPath .chezmoi.homeDir ".mix" "escripts") }}
+PATH="$HOME/.mix/escripts:$PATH" # Mix escripts (Elixir)
+{{- end }}
+{{- if stat (joinPath .chezmoi.homeDir ".bun" "bin") }}
+PATH="$HOME/.bun/bin:$PATH" # Bun JavaScript runtime
+{{- end }}
+{{- if stat (joinPath .chezmoi.homeDir ".deno" "bin") }}
+PATH="$HOME/.deno/bin:$PATH" # Deno JavaScript runtime
+{{- end }}
+{{- if stat (joinPath .chezmoi.homeDir ".rd" "bin") }}
+PATH="$HOME/.rd/bin:$PATH" # Rancher Desktop for Docker management
+{{- end }}
+{{- if stat (joinPath .chezmoi.homeDir ".local" "share" "yabridge") }}
+PATH="$HOME/.local/share/yabridge:$PATH" # Yabridge for VST plugins
+{{- end }}
+{{- $xdgDataHome := env "XDG_DATA_HOME" }}
+{{- if not $xdgDataHome }}
+{{-   $xdgDataHome = joinPath .chezmoi.homeDir ".local" "share" }}
+{{- end }}
+{{- if stat (joinPath $xdgDataHome "google-cloud-sdk" "bin") }}
+PATH="${XDG_DATA_HOME:-$HOME/.local/share}/google-cloud-sdk/bin:$PATH" # Google Cloud SDK
+{{- end }}
+{{- if eq .chezmoi.os "darwin" }}
+{{-   $brewPrefix := "" }}
+{{-   if eq .homebrewInstallType "alternative" }}
+{{-     if stat (joinPath .chezmoi.homeDir .homebrewPath) }}
+{{-       $brewPrefix = joinPath .chezmoi.homeDir .homebrewPath }}
+{{-     end }}
+{{-   else }}
+{{-     if stat "/opt/homebrew" }}
+{{-       $brewPrefix = "/opt/homebrew" }}
+{{-     else if stat "/usr/local/Homebrew" }}
+{{-       $brewPrefix = "/usr/local" }}
+{{-     end }}
+{{-   end }}
+{{-   if and $brewPrefix (stat (joinPath $brewPrefix "opt" "libpq" "bin")) }}
+PATH="{{ $brewPrefix }}/opt/libpq/bin:$PATH" # PostgreSQL
+{{-   end }}
+{{- end }}
+{{- if and (lookPath "brew") (eq .chezmoi.os "darwin") }}
+PATH="$(brew --prefix sqlite)/bin:$PATH" # Sqlite from Homebrew instead of MacOS built-in
+{{- end }}
+export PATH
+
+# Force en_US.UTF-8 locale
+export LC_ALL=en_US.UTF-8
+
 {{- if eq .chezmoi.os "darwin" }}
 # Increase file descriptor limit for development work (macOS)
 ulimit -n 65536 2>/dev/null || true
 
 # Set up gcc paths for alternative Homebrew installations
 export LANG=en_US.UTF-8
+
+# Erlang/ODBC settings
+{{- $brewPrefix := "" }}
+{{- if eq .homebrewInstallType "alternative" }}
+{{-   if stat (joinPath .chezmoi.homeDir .homebrewPath) }}
+{{-     $brewPrefix = joinPath .chezmoi.homeDir .homebrewPath }}
+{{-   end }}
+{{- else }}
+{{-   if stat "/opt/homebrew" }}
+{{-     $brewPrefix = "/opt/homebrew" }}
+{{-   else if stat "/usr/local/Homebrew" }}
+{{-     $brewPrefix = "/usr/local" }}
+{{-   end }}
+{{- end }}
+{{- if $brewPrefix }}
+UNIXODBCHOME="{{ joinPath $brewPrefix "opt" "unixodbc" }}"
+export CPPFLAGS="${CPPFLAGS+"$CPPFLAGS "}-I${UNIXODBCHOME}/include"
+export LDFLAGS="${LDFLAGS+"$LDFLAGS "}-L${UNIXODBCHOME}/lib"
+export KERL_CONFIGURE_OPTIONS="--with-odbc=${UNIXODBCHOME}"
+{{- end }}
 {{- if eq .homebrewInstallType "alternative" }}
 {{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc") }}
 # Library paths

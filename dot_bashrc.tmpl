@@ -1,59 +1,7 @@
 #!/bin/bash
 
-# Force en_US.UTF-8 locale
-export LC_ALL=en_US.UTF-8
-
 # Activate Mise on interactive
 eval "$(mise hook-env -s bash)"
-
-## PATH
-# Add each of the specified directories to PATH if they exist
-{{- if stat (joinPath .chezmoi.homeDir ".local" "bin") }}
-PATH="$HOME/.local/bin:$PATH" # User-installed binaries
-{{- end }}
-{{- if stat (joinPath .chezmoi.homeDir ".mix" "escripts") }}
-PATH="$HOME/.mix/escripts:$PATH" # Mix escripts (Elixir)
-{{- end }}
-{{- if stat (joinPath .chezmoi.homeDir ".bun" "bin") }}
-PATH="$HOME/.bun/bin:$PATH" # Bun JavaScript runtime
-{{- end }}
-{{- if stat (joinPath .chezmoi.homeDir ".deno" "bin") }}
-PATH="$HOME/.deno/bin:$PATH" # Deno JavaScript runtime
-{{- end }}
-{{- if stat (joinPath .chezmoi.homeDir ".rd" "bin") }}
-PATH="$HOME/.rd/bin:$PATH" # Rancher Desktop for Docker management
-{{- end }}
-{{- if stat (joinPath .chezmoi.homeDir ".local" "share" "yabridge") }}
-PATH="$HOME/.local/share/yabridge:$PATH" # Yabridge for VST plugins
-{{- end }}
-{{- $xdgDataHome := env "XDG_DATA_HOME" }}
-{{- if not $xdgDataHome }}
-{{-   $xdgDataHome = joinPath .chezmoi.homeDir ".local" "share" }}
-{{- end }}
-{{- if stat (joinPath $xdgDataHome "google-cloud-sdk" "bin") }}
-PATH="${XDG_DATA_HOME:-$HOME/.local/share}/google-cloud-sdk/bin:$PATH" # Google Cloud SDK
-{{- end }}
-{{- if eq .chezmoi.os "darwin" }}
-{{-   $brewPrefix := "" }}
-{{-   if eq .homebrewInstallType "alternative" }}
-{{-     if stat (joinPath .chezmoi.homeDir .homebrewPath) }}
-{{-       $brewPrefix = joinPath .chezmoi.homeDir .homebrewPath }}
-{{-     end }}
-{{-   else }}
-{{-     if stat "/opt/homebrew" }}
-{{-       $brewPrefix = "/opt/homebrew" }}
-{{-     else if stat "/usr/local/Homebrew" }}
-{{-       $brewPrefix = "/usr/local" }}
-{{-     end }}
-{{-   end }}
-{{-   if and $brewPrefix (stat (joinPath $brewPrefix "opt" "libpq" "bin")) }}
-PATH="{{ $brewPrefix }}/opt/libpq/bin:$PATH" # PostgreSQL
-{{-   end }}
-{{- end }}
-{{- if and (lookPath "brew") (eq .chezmoi.os "darwin") }}
-PATH="$(brew --prefix sqlite)/bin:$PATH" # Sqlite from Homebrew instead of MacOS built-in
-{{- end }}
-export PATH
 
 {{- if lookPath "fzf" }}
 # Integrate fzf
@@ -93,53 +41,6 @@ fi
 export MANPAGER="sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p -lman'"
 {{- end }}
 
-{{- if eq .chezmoi.os "darwin" }}
-## MacOS-specific fixes
-
-# Erlang install fixes
-{{- $brewPrefix := "" }}
-{{- if eq .homebrewInstallType "alternative" }}
-{{-   if stat (joinPath .chezmoi.homeDir .homebrewPath) }}
-{{-     $brewPrefix = joinPath .chezmoi.homeDir .homebrewPath }}
-{{-   end }}
-{{- else }}
-{{-   if stat "/opt/homebrew" }}
-{{-     $brewPrefix = "/opt/homebrew" }}
-{{-   else if stat "/usr/local/Homebrew" }}
-{{-     $brewPrefix = "/usr/local" }}
-{{-   end }}
-{{- end }}
-{{- if $brewPrefix }}
-UNIXODBCHOME="{{ joinPath $brewPrefix "opt" "unixodbc" }}"
-export CPPFLAGS="${CPPFLAGS+"$CPPFLAGS "}-I${UNIXODBCHOME}/include"
-export LDFLAGS="${LDFLAGS+"$LDFLAGS "}-L${UNIXODBCHOME}/lib"
-export KERL_CONFIGURE_OPTIONS="--with-odbc=${UNIXODBCHOME}"
-{{- end }}
-
-# GCC setup for alternative Homebrew installations
-{{- if eq .homebrewInstallType "alternative" }}
-{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc") }}
-# Library paths
-{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "lib" "gcc" "current") }}
-export LIBRARY_PATH="$HOME/{{ .homebrewPath }}/opt/gcc/lib/gcc/current:$LIBRARY_PATH"
-{{- end }}
-
-# C/C++ include paths
-{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "include") }}
-export C_INCLUDE_PATH="$HOME/{{ .homebrewPath }}/opt/gcc/include:$C_INCLUDE_PATH"
-{{- end }}
-{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "include" "c++" "15") }}
-export CPLUS_INCLUDE_PATH="$HOME/{{ .homebrewPath }}/opt/gcc/include/c++/15:$CPLUS_INCLUDE_PATH"
-{{- end }}
-
-# Set CC and CXX to use the Homebrew gcc
-{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "bin" "gcc-15") }}
-export CC=gcc-15
-export CXX=g++-15
-{{- end }}
-{{- end }}
-{{- end }}
-{{- end }}
 
 {{- if stat (joinPath .chezmoi.homeDir ".config" "op" "plugins.sh") }}
 source $HOME/.config/op/plugins.sh
