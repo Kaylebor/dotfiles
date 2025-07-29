@@ -1,0 +1,7 @@
+# External files managed by chezmoi
+
+# Catppuccin Frappé theme for Nushell
+[".config/nushell/themes/catppuccin_frappe.nu"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/catppuccin/nushell/main/themes/catppuccin_frappe.nu"
+    refreshPeriod = "168h"

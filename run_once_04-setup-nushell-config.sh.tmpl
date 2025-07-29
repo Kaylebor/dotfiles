@@ -1,0 +1,39 @@
+#!/bin/bash
+# Setup nushell configuration directory on macOS
+# This script creates a symlink from macOS's default location to XDG location
+
+{{- if eq .chezmoi.os "darwin" }}
+set -euo pipefail
+
+MACOS_NUSHELL_DIR="$HOME/Library/Application Support/nushell"
+XDG_NUSHELL_DIR="$HOME/.config/nushell"
+
+# Create the Application Support directory if it doesn't exist
+mkdir -p "$HOME/Library/Application Support"
+
+# Remove any existing macOS nushell directory (Chezmoi manages the config now)
+if [ -e "$MACOS_NUSHELL_DIR" ] && [ ! -L "$MACOS_NUSHELL_DIR" ]; then
+    echo "Removing existing nushell config in macOS location (Chezmoi will manage it)..."
+    rm -rf "$MACOS_NUSHELL_DIR"
+fi
+
+# Create symlink if it doesn't exist
+if [ ! -e "$MACOS_NUSHELL_DIR" ]; then
+    echo "Creating symlink from macOS location to XDG location..."
+    ln -s "$XDG_NUSHELL_DIR" "$MACOS_NUSHELL_DIR"
+    echo "Symlink created: $MACOS_NUSHELL_DIR -> $XDG_NUSHELL_DIR"
+elif [ -L "$MACOS_NUSHELL_DIR" ]; then
+    # Verify the symlink points to the right place
+    CURRENT_TARGET=$(readlink "$MACOS_NUSHELL_DIR")
+    if [ "$CURRENT_TARGET" != "$XDG_NUSHELL_DIR" ]; then
+        echo "Fixing symlink to point to correct location..."
+        rm "$MACOS_NUSHELL_DIR"
+        ln -s "$XDG_NUSHELL_DIR" "$MACOS_NUSHELL_DIR"
+        echo "Symlink updated: $MACOS_NUSHELL_DIR -> $XDG_NUSHELL_DIR"
+    else
+        echo "Symlink already correct: $MACOS_NUSHELL_DIR -> $XDG_NUSHELL_DIR"
+    fi
+else
+    echo "Warning: $MACOS_NUSHELL_DIR exists but is not a symlink"
+fi
+{{- end }}

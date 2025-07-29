@@ -1,0 +1,22 @@
+#!/bin/bash
+# Setup tool integrations for nushell
+
+set -euo pipefail
+
+# Create necessary directories
+mkdir -p "$HOME/.cache/carapace"
+mkdir -p "$HOME/.cache/starship"
+
+# Initialize Starship for nushell
+{{- if lookPath "starship" }}
+echo "Generating Starship init for nushell..."
+NU_DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/nushell"
+mkdir -p "$NU_DATA_DIR/vendor/autoload"
+starship init nu > "$NU_DATA_DIR/vendor/autoload/starship.nu"
+{{- end }}
+
+# Initialize Carapace completions for nushell
+{{- if lookPath "carapace" }}
+echo "Generating Carapace completions for nushell..."
+carapace _carapace nushell > "$HOME/.cache/carapace/init.nu"
+{{- end }}
