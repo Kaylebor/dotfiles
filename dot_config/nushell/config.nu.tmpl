@@ -30,10 +30,6 @@ $env.PATH = ($env.PATH | split row (char esep) | prepend [
     {{- end }}
 ] | uniq)
 
-# Tool-specific environment
-{{- if lookPath "eza" }}
-$env.EZA_STANDARD_OPTIONS = "--long --all --group"
-{{- end }}
 
 # 1Password SSH Agent
 {{- if not .skip1Password }}
@@ -213,6 +209,11 @@ $env.config = ($env.config | upsert keybindings ($env.config.keybindings | appen
 {{- $gitShortcuts := joinPath .chezmoi.homeDir ".config/nushell/scripts/git-shortcuts.nu" }}
 {{- if stat $gitShortcuts }}
 source "{{ $gitShortcuts }}"
+{{- end }}
+
+{{- $ezaAliases := joinPath .chezmoi.homeDir ".config/nushell/scripts/eza-aliases.nu" }}
+{{- if stat $ezaAliases }}
+source "{{ $ezaAliases }}"
 {{- end }}
 
 # Load Catppuccin theme (downloaded via .chezmoiexternal.toml)

@@ -5,21 +5,23 @@
 alias g = git
 alias ga = git add
 alias gaa = git add --all
-alias gc = git commit -v
-alias gca = git commit -v -a
-alias gcan = git commit -v -a --no-edit --amend
+alias gc = git commit
+alias gca = git commit --amend
+alias gcan = git commit --amend --no-edit
 alias gcm = git commit -m
 alias gd = git diff
 alias gdca = git diff --cached
 alias gf = git fetch
-alias gg = git grep -n
+alias gg = git status
 alias gl = git pull
 alias glog = git log --oneline --decorate --graph
 alias gm = git merge
 alias gp = git push
 alias "gp!" = git push --force-with-lease
-alias gr = git remote -v
-alias gs = git status -sb
+alias gr = git rebase
+alias gs = git show --ext-diff
+alias gst = git status -sb
+alias grv = git remote -v
 
 # Interactive git checkout using tv (television)
 def gco [] {
