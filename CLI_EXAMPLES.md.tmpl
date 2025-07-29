@@ -1,0 +1,170 @@
+# CLI Tool Usage Examples
+
+## File Operations
+
+### Finding Files
+```bash
+# Find all Python files
+fd "*.py" --type f
+
+# Find files modified in last 24 hours
+fd --changed-within 24h
+
+# Find and preview files interactively
+fd . | fzf --preview 'bat {}'
+```
+
+### Searching Content
+```bash
+# Search for function definitions
+rg "function.*search" -C 3
+
+# Search only in specific file types
+rg "TODO" --type js
+
+# Search with replacements (dry run)
+rg "old_pattern" --replace "new_pattern"
+```
+
+### Viewing Files
+```bash
+# View with syntax highlighting
+bat README.md
+
+# View with line numbers
+bat -n script.py
+
+# Compare files with syntax highlighting
+delta file1.txt file2.txt
+```
+
+## Directory Navigation
+
+### Listing Files
+```bash
+# List with git status and icons
+eza -la --git --icons
+
+# Tree view with git ignore
+eza --tree --git-ignore
+
+# List by modification time
+eza -la --sort=modified
+```
+
+### Interactive Navigation
+```bash
+# Fuzzy find and cd
+cd $(fd --type d | fzf)
+
+# Preview directories before entering
+fd --type d | fzf --preview 'eza -la {}'
+```
+
+## Data Processing
+
+### JSON/YAML Operations
+```bash
+# Pretty print JSON
+cat data.json | jq '.'
+
+# Extract specific fields
+cat config.json | jq '.database.host'
+
+# Convert YAML to JSON
+yq eval -o=json config.yaml
+```
+
+### Command Output Parsing
+```bash
+# Convert command output to JSON
+systemctl status nginx | jc --systemctl
+
+# Parse and query
+ps aux | jc --ps | jq '.[] | select(.cpu > 50)'
+```
+
+## Git Operations
+
+### Enhanced Diffs
+```bash
+# Side-by-side diff
+delta --side-by-side
+
+# Navigate large diffs
+delta --navigate
+```
+
+### Interactive Git UI
+```bash
+# Launch git TUI
+gitu
+```
+
+## System Monitoring
+
+### Process Monitoring
+```bash
+# Interactive process viewer
+btop
+```
+
+### Disk Usage
+```bash
+# Show disk usage with charts
+dysk
+```
+
+## Development Tools
+
+### HTTP Requests
+```bash
+# Pretty HTTP requests
+curlie httpbin.org/get
+
+# POST with JSON
+curlie -d '{"key": "value"}' httpbin.org/post
+```
+
+### Shell Script Checking
+```bash
+# Check shell script
+shellcheck script.sh
+
+# Format shell script
+shfmt -w script.sh
+```
+
+{{- if eq .chezmoi.os "darwin" }}
+
+## macOS Specific
+
+### JavaScript/TypeScript Linting
+```bash
+# Format and lint JS/TS files
+biome check --apply .
+```
+{{- end }}
+
+## Advanced Combinations
+
+### Find, Filter, and Edit
+```bash
+# Find files, filter interactively, open in editor
+fd "\.rs$" | fzf --multi --preview 'bat {}' | xargs -o nvim
+```
+
+### Search and Replace Across Files
+```bash
+# Interactive search and replace
+rg "pattern" --files-with-matches | xargs -o nvim -c "bufdo %s/pattern/replacement/gc"
+```
+
+### Git-Aware Operations
+```bash
+# Only search in git-tracked files
+rg "TODO" $(git ls-files)
+
+# View recently modified tracked files
+git ls-files --modified | fzf --preview 'bat {}'
+```

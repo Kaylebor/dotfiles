@@ -26,15 +26,7 @@ Chezmoi-managed dotfiles for cross-platform development (macOS/Arch Linux) using
 - **Runtimes**: mise (formerly rtx)
 - **Editors**: vim-plug (Neovim), elpaca (Emacs)
 
-### Advanced Homebrew Config
-Supports per-package build flags and environment vars:
-```yaml
-- name: "gcc"
-  alternative_only:
-    args: ["build-from-source"]
-    env:
-      LDFLAGS: "-Wl,-headerpad_max_install_names"
-```
+See @PACKAGE_MANAGEMENT.md for advanced configuration and Homebrew path migration
 
 ### Stack
 **Languages**: Ruby, Node, Go, Python, Java (GraalVM), Elixir, Erlang, Rust, Deno, Bun  
@@ -45,19 +37,9 @@ Supports per-package build flags and environment vars:
 ### 1Password Integration
 - SSH signing for git
 - Template data via `onepasswordRead`
-- **Bypass**: Set `skip1Password: true` or `CHEZMOI_SKIP_1PASSWORD=true`
-- **Fallback env vars**: `CHEZMOI_GIT_SIGNING_KEY`, `CHEZMOI_*_API_KEY`
+- Bypass and fallback options available
 
-### Homebrew Path Migration
-Auto-detects path changes (`~/.homebrew` → `~/homebrew`):
-1. Tracks state in `~/.config/chezmoi/.homebrew-state`
-2. Identifies packages with embedded paths (gcc, llvm, binutils, etc.)
-3. Auto-rebuilds with `CHEZMOI_FORCE_REINSTALL_PACKAGES`
-
-Manual fix:
-```bash
-CHEZMOI_FORCE_REINSTALL_PACKAGES="gcc,llvm" chezmoi apply
-```
+See @ONEPASSWORD_SETUP.md for detailed setup and troubleshooting
 
 ### Templates
 - OS: `.chezmoi.os` ("darwin"/"linux")
@@ -81,18 +63,4 @@ CHEZMOI_FORCE_REINSTALL_PACKAGES="gcc,llvm" chezmoi apply
 
 **Carapace**: Universal completion engine supporting Fish, Zsh, Bash, and more.
 
-### Completion Strategy
-1. **Framework bridges** (preferred): Direct communication with tool's built-in completion
-   - Cobra (Go): `gh`, `kubectl`, `docker`, `helm`, `hugo`
-   - Clap (Rust): `fd`, `rg`, `bat`, `eza`, `delta`, `mise`
-   - Click (Python): `pgcli`
-2. **Shell bridges** (fallback): Parse shell-specific completions
-   - Priority order: zsh → fish → bash
-
-### Detection
-Use `carapace --detect <tool>` to identify which framework a tool uses.
-
-### Configuration
-- `.config/carapace/bridges.yaml`: Maps tools to frameworks
-- No manual spec files needed - bridges handle everything
-- Framework completions update automatically with the tool
+See @SHELL_COMPLETIONS.md for framework bridges, configuration, and usage details
