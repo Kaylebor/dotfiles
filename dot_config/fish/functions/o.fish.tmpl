@@ -1,0 +1,7 @@
+function o --description 'Open file with default application'
+{{- if eq .chezmoi.os "darwin" }}
+    open $argv
+{{- else }}
+    xdg-open $argv
+{{- end }}
+end
