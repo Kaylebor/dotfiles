@@ -43,11 +43,13 @@
   :delight
   :custom
   (projectile-keymap-prefix (kbd "C-x p"))
-  (projectile-project-search-path '("~/projects/" "~/work/" "~/playground"))
+  (projectile-project-search-path '(("~/projects/" . 1) ("~/work/" . 1) ("~/playground" . 2)))
   (projectile-known-projects-file (expand-file-name "projectile-bookmarks.eld" user-emacs-directory))
   (projectile-cache-file (expand-file-name "projectile.cache" user-emacs-directory))
   (projectile-enable-caching t)  ; Enable caching for better performance
   (projectile-auto-discover t)  ; Automatically discover projects in search path
+  (projectile-indexing-method 'alien)  ; Use external tools (fd/rg) for better performance
+  (projectile-sort-order 'recently-active)  ; Sort projects by recent activity
   :config
   (projectile-mode)
   ;; Discover projects after initialization
