@@ -1,0 +1,33 @@
+# Mako notification daemon configuration
+
+# Include Catppuccin Frappe theme (sapphire accent)
+include=~/.config/mako/catppuccin-frappe-sapphire.conf
+
+# Custom settings (these override theme settings if needed)
+# Notification position
+anchor=top-right
+margin=10
+
+# Notification appearance
+width=400
+height=100
+border-radius=10
+font=sans-serif 11
+
+# Icons
+icon-location=left
+max-icon-size=64
+
+# Padding
+padding=10
+outer-margin=5
+
+# Grouping
+group-by=app-name
+
+# Timeout (ms)
+default-timeout=5000
+ignore-timeout=0
+
+# Custom urgency settings can be added here
+# They will override the theme's urgency settings

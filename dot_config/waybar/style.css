@@ -1,0 +1,178 @@
+/* Import Catppuccin Frappe theme colors */
+@import "themes/frappe.css";
+
+* {
+    font-family: "JetBrainsMono Nerd Font", "Font Awesome 6 Free", "Font Awesome 6 Brands", FontAwesome, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+window#waybar {
+    background-color: alpha(@base, 0.8);
+    color: @text;
+    border-radius: 20px;
+    border: 2px solid alpha(@surface0, 0.3);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Remove default borders and backgrounds from all modules */
+#workspaces,
+#window,
+#clock,
+#battery,
+#pulseaudio,
+#network,
+#tray,
+#custom-launcher,
+#custom-power {
+    background-color: transparent;
+    padding: 0px 10px;
+    margin: 0px 3px;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+/* Group styling for right modules */
+.modules-right > * {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+/* Launcher button */
+#custom-launcher {
+    color: @sapphire;
+    font-size: 20px;
+    padding: 0px 16px;
+}
+
+#custom-launcher:hover {
+    background-color: alpha(@sapphire, 0.2);
+    color: @sapphire;
+}
+
+/* Workspaces */
+#workspaces button {
+    color: @overlay0;
+    padding: 0px 8px;
+    margin: 0px 2px;
+    border-radius: 10px;
+    background-color: transparent;
+    transition: all 0.3s ease;
+}
+
+#workspaces button:hover {
+    background-color: alpha(@surface0, 0.5);
+    color: @text;
+}
+
+#workspaces button.active {
+    background-color: alpha(@sapphire, 0.25);
+    color: @sapphire;
+}
+
+#workspaces button.urgent {
+    background-color: alpha(@red, 0.25);
+    color: @red;
+    animation: urgent 0.5s ease infinite alternate;
+}
+
+/* Window title */
+#window {
+    color: @subtext1;
+    padding: 0px 16px;
+}
+
+/* Center clock */
+#clock {
+    color: @text;
+    font-weight: bold;
+    padding: 0px 20px;
+}
+
+#clock:hover {
+    background-color: alpha(@surface0, 0.3);
+}
+
+/* Right side modules - subtle backgrounds on hover */
+#battery,
+#pulseaudio,
+#network {
+    color: @text;
+}
+
+#battery:hover,
+#pulseaudio:hover,
+#network:hover {
+    background-color: alpha(@surface0, 0.3);
+}
+
+/* Battery states */
+#battery.charging {
+    color: @green;
+}
+
+#battery.warning:not(.charging) {
+    color: @yellow;
+}
+
+#battery.critical:not(.charging) {
+    color: @red;
+    animation: urgent 0.5s ease infinite alternate;
+}
+
+/* Network states */
+#network.disconnected {
+    color: @red;
+}
+
+/* Pulseaudio muted */
+#pulseaudio.muted {
+    color: @overlay0;
+}
+
+/* System tray */
+#tray {
+    padding: 0px 8px;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+}
+
+/* Power button */
+#custom-power {
+    color: @red;
+    font-size: 16px;
+    padding: 0px 16px;
+}
+
+#custom-power:hover {
+    background-color: alpha(@red, 0.2);
+    color: @red;
+}
+
+/* Tooltips */
+tooltip {
+    background-color: @base;
+    color: @text;
+    border: 2px solid @sapphire;
+    border-radius: 12px;
+    padding: 8px;
+}
+
+tooltip label {
+    color: @text;
+    padding: 4px;
+}
+
+/* Animations */
+@keyframes urgent {
+    to {
+        background-color: alpha(@red, 0.5);
+    }
+}

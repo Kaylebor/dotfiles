@@ -36,3 +36,33 @@
   exact: true
   stripComponents: 2
   include: ["prismlauncher-main/themes/Frappe/**"]
+
+# Hyprland
+".config/hypr/themes/frappe.conf":
+  type: "archive-file"
+  url: "https://github.com/catppuccin/hyprland/archive/refs/heads/main.tar.gz"
+  path: "hyprland-main/themes/frappe.conf"
+
+# Waybar
+".config/waybar/themes/frappe.css":
+  type: "archive-file"
+  url: "https://github.com/catppuccin/waybar/archive/refs/heads/main.tar.gz"
+  path: "waybar-main/themes/frappe.css"
+
+# Hyprlock - Catppuccin theme
+".config/hypr/hyprlock-catppuccin.conf":
+  type: "archive-file"
+  url: "https://github.com/catppuccin/hyprlock/archive/refs/heads/main.tar.gz"
+  path: "hyprlock-main/hyprlock.conf"
+
+# Fuzzel - Catppuccin theme (sapphire accent)
+".config/fuzzel/themes/catppuccin-frappe-sapphire.ini":
+  type: "archive-file"
+  url: "https://github.com/catppuccin/fuzzel/archive/refs/heads/main.tar.gz"
+  path: "fuzzel-main/themes/catppuccin-frappe/sapphire.ini"
+
+# Qt6ct - Catppuccin theme (for hyprpolkitagent and other Qt6 apps)
+".config/qt6ct/colors/catppuccin-frappe-sapphire.conf":
+  type: "archive-file"
+  url: "https://github.com/catppuccin/qt5ct/archive/refs/heads/main.tar.gz"
+  path: "qt5ct-main/themes/catppuccin-frappe-sapphire.conf"

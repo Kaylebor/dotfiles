@@ -5,3 +5,9 @@
     type = "file"
     url = "https://raw.githubusercontent.com/catppuccin/nushell/main/themes/catppuccin_frappe.nu"
     refreshPeriod = "168h"
+
+# Catppuccin Frappé theme for Mako (sapphire accent)
+[".config/mako/catppuccin-frappe-sapphire.conf"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/catppuccin/mako/main/themes/catppuccin-frappe/catppuccin-frappe-sapphire"
+    refreshPeriod = "168h"

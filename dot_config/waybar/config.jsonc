@@ -1,0 +1,138 @@
+// Modern Waybar config for Hyprland with Catppuccin Frappe theme
+{
+    "layer": "top",
+    "position": "top",
+    "height": 38,
+    "margin-top": 8,
+    "margin-left": 10,
+    "margin-right": 10,
+    "spacing": 8,
+
+    // Module arrangement - cleaner, less cluttered
+    "modules-left": [
+        "custom/launcher",
+        "hyprland/workspaces"
+    ],
+    "modules-center": [
+        "clock"
+    ],
+    "modules-right": [
+        "idle_inhibitor",
+        "pulseaudio",
+        "network",
+        "tray",
+        "custom/power"
+    ],
+
+    // Modules configuration
+    "custom/launcher": {
+        "format": " ",
+        "on-click": "fuzzel",
+        "on-click-right": "~/.config/waybar/scripts/launcher.sh",
+        "tooltip-format": "Left: App Launcher\nRight: Quick Menu"
+    },
+
+    "hyprland/workspaces": {
+        "format": "{icon}",
+        "on-click": "activate",
+        "format-icons": {
+            "1": "",
+            "2": "",
+            "3": "",
+            "4": "",
+            "5": "",
+            "6": "",
+            "7": "",
+            "8": "",
+            "9": "",
+            "10": "",
+            "urgent": "",
+            "default": ""
+        },
+        "sort-by-number": true
+    },
+
+    "hyprland/window": {
+        "format": "{}",
+        "max-length": 50,
+        "separate-outputs": true
+    },
+
+    "clock": {
+        "format": "{:%H:%M}",
+        "format-alt": "{:%a %d %b}",
+        "tooltip-format": "<tt><small>{calendar}</small></tt>",
+        "calendar": {
+            "mode": "month",
+            "mode-mon-col": 3,
+            "on-click-right": "mode",
+            "format": {
+                "today": "<span color='#85c1dc'><b><u>{}</u></b></span>"
+            }
+        }
+    },
+
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "",
+            "deactivated": ""
+        },
+        "tooltip-format-activated": "Idle inhibitor activated",
+        "tooltip-format-deactivated": "Idle inhibitor deactivated"
+    },
+
+    "tray": {
+        "icon-size": 18,
+        "spacing": 10
+    },
+
+    "network": {
+        "format": "{ifname}",
+        "format-wifi": " {signalStrength}%",
+        "format-ethernet": "{ipaddr} ",
+        "format-disconnected": "󰤮 ",
+        "format-linked": " (No IP)",
+        "tooltip-format-ethernet": "{ifname}: {ipaddr}/{cidr}",
+        "tooltip-format-wifi": "{essid} ({signalStrength}%): {ipaddr}",
+        "tooltip-format-disconnected": "Network disconnected",
+        "on-click": "nm-connection-editor"
+    },
+
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-muted": "󰝟 ",
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["", "", ""]
+        },
+        "on-click": "pavucontrol",
+        "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+        "scroll-step": 5
+    },
+
+    "battery": {
+        "bat": "BAT99",
+        "states": {
+            "good": 95,
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity}%",
+        "format-charging": "󰂄 {capacity}%",
+        "format-plugged": " {capacity}%",
+        "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+        "tooltip-format": "{timeTo}\n{power}W"
+    },
+
+    "custom/power": {
+        "format": "⏻",
+        "tooltip": false,
+        "on-click": "~/.config/waybar/scripts/power-menu.sh"
+    }
+}
