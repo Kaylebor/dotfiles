@@ -1,7 +1,12 @@
 ;; -*- lexical-binding: t; -*-
-(use-package dbml-mode :ensure t)
+
+;; External package for database modeling language
+(use-package dbml-mode :ensure t
+  :defer t
+  :mode ("\\.dbml\\'" . dbml-mode))
 
 (use-package tree-sitter :ensure t
+  :defer t  ; Don't load until needed
   :init
   ;; Add treesitter grammars so Emacs knows where to find them
   (setopt treesit-language-source-alist'((bash "https://github.com/tree-sitter/tree-sitter-bash" "v0.23.3")
@@ -62,11 +67,10 @@
 
 (use-package gdscript-mode :ensure (:host github :repo "godotengine/emacs-gdscript-mode") :delight :mode ("\\.gd\\'" . gdscript-ts-mode))
 
-;; Linting
+;; Linting - only activate in programming modes
 (use-package flycheck :ensure t
   :delight
-  :init
-  (global-flycheck-mode)
+  :hook (prog-mode . flycheck-mode)  ; Lazy load for programming modes only
   :config
   ;; Disable Ruby checkers that overlap with Ruby LSP
   (setq-default flycheck-disabled-checkers '(ruby-rubocop ruby-standard)))
@@ -74,6 +78,7 @@
 ;; LSP support
 (use-package lsp-mode :ensure t
   :delight
+  :defer t  ; Don't load until a supported mode activates
   :custom
   (setopt lsp-keymap-prefix "C-c l")
   (lsp-keep-workspace-alive nil) ;; close LSP servers after last buffer is closed
@@ -117,16 +122,74 @@
             (append '("emacs-lsp-booster" "--disable-bytecode" "--") orig-result))
         orig-result)))
   (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command))
+
+{{- if .prewarmRubyLSP }}
+;; Prewarm Ruby LSP server configuration
+(with-eval-after-load 'lsp-mode
+  (defun my/prewarm-ruby-lsp-on-startup ()
+    "Start Ruby LSP server in the background without opening a visible buffer.
+This is intended to be run on startup to avoid delays when opening the first Ruby file."
+    (when (and (executable-find "ruby-lsp")
+               (not (seq-find (lambda (ws)
+                                (string-match-p "ruby-lsp" (lsp--workspace-print ws)))
+                              (lsp-workspaces))))
+      ;; Create a dedicated directory for prewarming to avoid /tmp project detection
+      (let* ((prewarm-dir (expand-file-name "lsp-prewarm" user-emacs-directory))
+             (_ (make-directory prewarm-dir t))
+             (temp-file (expand-file-name "ruby-prewarm.rb" prewarm-dir))
+             (buf (find-file-noselect temp-file t)))
+        ;; Add to LSP session blocklist to prevent "import project" prompts
+        (add-to-list 'lsp-session-folders-blocklist prewarm-dir)
+        (with-current-buffer buf
+          (ruby-ts-mode)
+          (condition-case err
+              (progn
+                ;; Start LSP with minimal features
+                (let ((lsp-auto-guess-root t)
+                      (lsp-enable-file-watchers nil))
+                  (lsp))
+                (message "Ruby LSP server prewarmed successfully"))
+            (error (message "Failed to prewarm Ruby LSP: %s" err)))
+          ;; Clean up buffer immediately, but keep server running
+          (kill-buffer buf))
+        ;; Clean up file after a delay
+        (run-at-time "5 sec" nil
+                     (lambda ()
+                       (ignore-errors
+                         (delete-file temp-file))))))))
+
+;; Add startup hook to run prewarming (must be outside with-eval-after-load)
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (run-at-time "2 sec" nil
+                         (lambda ()
+                           ;; Ensure lsp-mode is loaded before calling our function
+                           (require 'lsp-mode)
+                           (my/prewarm-ruby-lsp-on-startup)))))
+{{- end }}
 (use-package lsp-treemacs :ensure t
+  :defer t
+  :after lsp-mode
   :custom
   (lsp-treemacs-theme "nerd-icons"))
-(use-package lsp-ui :ensure t)
-(use-package helm-lsp :ensure t)
 
-;; DAP debugging
-(use-package dap-mode :ensure t)
+(use-package lsp-ui :ensure t
+  :defer t
+  :after lsp-mode)
 
-;; Better projectile integration for Rails
+(use-package helm-lsp :ensure t
+  :defer t
+  :after (helm lsp-mode))
+
+;; DAP debugging - only loads when needed
+(use-package dap-mode :ensure t
+  :defer t
+  :hook
+  ((lsp-mode . dap-mode)
+   (lsp-mode . dap-ui-mode)))
+
+;; Better projectile integration for Rails - only in Rails projects
 (use-package projectile-rails :ensure t
-  :init
-  (projectile-rails-global-mode))
+  :defer t
+  :after projectile
+  :hook (projectile-mode . projectile-rails-on))

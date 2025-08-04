@@ -24,6 +24,13 @@
 {{-   $skip1Password = false }}
 {{- end }}
 
+{{- $prewarmRubyLSP := false }}
+{{- if hasKey . "prewarmRubyLSP" }}
+{{-   $prewarmRubyLSP = .prewarmRubyLSP }}
+{{- else }}
+{{-   $prewarmRubyLSP = promptBool "Prewarm Ruby LSP on Emacs startup? (recommended for work machines)" false }}
+{{- end }}
+
 data:
 {{- if eq .chezmoi.os "darwin" }}
   homebrewInstallType: {{ $homebrewInstallType | quote }}
@@ -35,3 +42,4 @@ data:
 {{-   end }}
 {{- end }}
   skip1Password: {{ $skip1Password }}
+  prewarmRubyLSP: {{ $prewarmRubyLSP }}
