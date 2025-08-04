@@ -112,7 +112,14 @@
   (("C-c t" . vterm)))
 
 ;; magit
-(use-package magit :ensure t)
+(use-package magit :ensure t
+  :custom
+  {{- if and (eq .chezmoi.os "darwin") (stat "/Applications/Xcode.app/Contents/Developer/usr/bin/git") }}
+  ;; On macOS, use the faster Xcode Git
+  (magit-git-executable "/Applications/Xcode.app/Contents/Developer/usr/bin/git")
+  {{- end }}
+  ;; Show word-level differences within changed lines
+  (magit-diff-refine-hunk t))
 
 ;; which-key for command discovery
 (use-package which-key :ensure t
