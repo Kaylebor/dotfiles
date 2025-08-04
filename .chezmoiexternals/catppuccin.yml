@@ -49,7 +49,7 @@
   url: "https://github.com/catppuccin/waybar/archive/refs/heads/main.tar.gz"
   path: "waybar-main/themes/frappe.css"
 
-# Hyprlock - Catppuccin theme
+# Hyprlock - Catppuccin theme (frappe flavour)
 ".config/hypr/hyprlock-catppuccin.conf":
   type: "archive-file"
   url: "https://github.com/catppuccin/hyprlock/archive/refs/heads/main.tar.gz"
