@@ -43,6 +43,7 @@
   :delight
   :custom
   (projectile-keymap-prefix (kbd "C-x p"))
+  (projectile-use-git-grep t)  ; Use git grep when in git repos
   (projectile-project-search-path '(("~/projects/" . 1) ("~/work/" . 1) ("~/playground" . 2)))
   (projectile-known-projects-file (expand-file-name "projectile-bookmarks.eld" user-emacs-directory))
   (projectile-cache-file (expand-file-name "projectile.cache" user-emacs-directory))
@@ -50,8 +51,11 @@
   (projectile-auto-discover t)  ; Automatically discover projects in search path
   (projectile-indexing-method 'alien)  ; Use external tools (fd/rg) for better performance
   (projectile-sort-order 'recently-active)  ; Sort projects by recent activity
+  :init
+  (projectile-mode)  ; Enable projectile-mode early
   :config
-  (projectile-mode)
+  ;; Define the keymap prefix
+  (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map)
   ;; Discover projects after initialization
   (add-hook 'elpaca-after-init-hook
             (lambda ()
@@ -98,16 +102,12 @@
   (helm-ff-icon-mode))
 (use-package helm-projectile :ensure t
   :after (helm projectile)  ; Ensure both are loaded first
-  :bind
-  (("C-x p p" . helm-projectile-switch-project)
-   ("C-x p f" . helm-projectile-find-file)
-   ("C-x p g" . helm-projectile-grep)
-   ("C-x p b" . helm-projectile-switch-to-buffer)
-   ("C-x p a" . helm-projectile-add-known-project))  ; Add this for adding projects
+  :demand t  ; Force immediate loading to avoid lazy loading issues
   :config
-  (helm-projectile-on)
   ;; Use helm for projectile completions
-  (setq projectile-completion-system 'helm))
+  (setq projectile-completion-system 'helm)
+  ;; Initialize helm-projectile - this replaces projectile commands with helm versions
+  (helm-projectile-on))
 
 ;; company for completion UI
 (use-package company :ensure t
