@@ -153,6 +153,17 @@
   (rust-ts-mode . lsp)
   (lsp-mode . lsp-enable-which-key-integration)
   :config
+  ;; Ensure TypeScript is found properly
+  (setq lsp-clients-typescript-server-args '("--stdio"))
+  (setq lsp-typescript-npm (executable-find "npm"))
+  
+  ;; Configure Angular language server
+  (setq lsp-clients-angular-language-server-command
+        `("ngserver"
+          "--stdio"
+          "--tsProbeLocations" ,(concat (getenv "HOME") "/.local/share/mise/installs/node/")
+          "--ngProbeLocations" ,(concat (getenv "HOME") "/.local/share/mise/installs/node/")))
+  
   ;; Disable TypeProf and default ruby-lsp to avoid conflicts
   (add-to-list 'lsp-disabled-clients 'typeprof-ls)
   (add-to-list 'lsp-disabled-clients 'ruby-lsp-ls)
