@@ -261,6 +261,27 @@
 ;; Disable menu bar
 (menu-bar-mode -1)
 
+;; Auto-install icon fonts after Elpaca finishes (if needed)
+(with-eval-after-load 'elpaca
+  (add-hook 'elpaca-after-init-hook
+            (lambda ()
+              ;; Check and install all-the-icons fonts
+              (when (require 'all-the-icons nil t)
+                (unless (member "all-the-icons" (font-family-list))
+                  (message "Installing all-the-icons fonts...")
+                  (all-the-icons-install-fonts t)))
+              ;; Check and install nerd-icons fonts if package is available
+              (when (and (require 'nerd-icons nil t)
+                         (fboundp 'nerd-icons-install-fonts))
+                ;; Check if any Nerd Font is installed by looking for common patterns
+                (unless (seq-find (lambda (font) 
+                                    (string-match-p "\\(Nerd Font\\|NFM\\|NF\\)" font))
+                                  (font-family-list))
+                  (message "Installing nerd-icons fonts...")
+                  (nerd-icons-install-fonts t))))
+            ;; Run after other init hooks with lower priority
+            90))
+
 ;; Customization
 (setopt custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file 'noerror)
