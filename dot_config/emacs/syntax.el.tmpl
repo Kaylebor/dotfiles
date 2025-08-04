@@ -1,10 +1,5 @@
 ;; -*- lexical-binding: t; -*-
 
-;; External package for database modeling language
-(use-package dbml-mode :ensure t
-  :defer t
-  :mode ("\\.dbml\\'" . dbml-mode))
-
 (use-package tree-sitter :ensure t
   :defer t  ; Don't load until needed
   :init
@@ -33,37 +28,102 @@
                                          (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "v0.23.2" "typescript/src")
                                          (yaml "https://github.com/ikatyang/tree-sitter-yaml" "v0.5.0")
                                          (hcl "https://github.com/tree-sitter-grammars/tree-sitter-hcl" "v1.1.0")))
-  ;; Map file extensions to tree-sitter modes
-  (add-to-list 'major-mode-remap-alist '(ruby-mode . ruby-ts-mode)))
+  ;; Map built-in modes to their tree-sitter equivalents
+  (setq major-mode-remap-alist
+        '((ruby-mode . ruby-ts-mode)
+          (python-mode . python-ts-mode)
+          (js-mode . javascript-ts-mode)
+          (css-mode . css-ts-mode)
+          (html-mode . html-ts-mode)
+          (json-mode . json-ts-mode)
+          (sh-mode . bash-ts-mode))))
 
-(use-package emacs-lisp-mode :delight :mode ("\\.el\\'" . emacs-lisp-mode))
+(use-package ruby-ts-mode
+  :ensure nil  ; Built-in mode
+  :defer t
+  :delight)
 
-(use-package bash-ts-mode :delight :mode ("\\.\\(sh\\|bash\\(rc\\)?\\|zsh\\(rc\\)?\\|rc\\)\\'" . bash-ts-mode))
-(use-package sh-mode :delight :mode ("\\.fish\\(rc\\)?\\'" . sh-mode))
+(use-package emacs-lisp-mode
+  :ensure nil  ; Built-in mode
+  :delight
+  :mode ("\\.el\\'" . emacs-lisp-mode))
 
-(use-package json-ts-mode :delight :mode ("\\.json\\(?:\\(?:c\\|ld\\|5\\|net\\)\\)?\\'" . json-ts-mode))
-(use-package yaml-ts-mode :delight :mode ("\\.\\(ya?ml\\)\\(?:-cpp\\)?\\'" . yaml-ts-mode))
-(use-package toml-ts-mode :delight :mode ("\\.toml\\'" . toml-ts-mode))
+(use-package bash-ts-mode
+  :ensure nil  ; Built-in mode
+  :defer t
+  :delight)
+(use-package sh-mode
+  :ensure nil  ; Built-in mode
+  :delight
+  :mode ("\\.fish\\(rc\\)?\\'" . sh-mode))
 
-(use-package sql-ts-mode :delight :mode ("\\.sql\\'" . sql-ts-mode))
-(use-package dbml-mode :delight :mode ("\\.dbml\\'" . dbml-mode))
+(use-package json-ts-mode
+  :ensure nil  ; Built-in mode
+  :defer t
+  :delight)
+(use-package yaml-ts-mode
+  :ensure nil  ; Built-in mode
+  :delight
+  :mode ("\\.\\(ya?ml\\)\\(?:-cpp\\)?\\'" . yaml-ts-mode))
+(use-package toml-ts-mode
+  :ensure nil  ; Built-in mode
+  :delight
+  :mode ("\\.toml\\'" . toml-ts-mode))
 
-(use-package hcl-ts-mode :delight :mode ("\\.hcl[2-4]?\\'" . hcl-ts-mode))
+(use-package sql-ts-mode
+  :ensure nil  ; Built-in mode
+  :delight
+  :mode ("\\.sql\\'" . sql-ts-mode))
+(use-package dbml-mode
+  :ensure t  ; External package
+  :delight
+  :mode ("\\.dbml\\'" . dbml-mode))
 
-(use-package markdown-ts-mode :delight :mode ("\\.md\\'" . markdown-ts-mode))
+(use-package hcl-ts-mode
+  :ensure nil  ; Built-in mode
+  :delight
+  :mode ("\\.hcl[2-4]?\\'" . hcl-ts-mode))
 
-(use-package html-ts-mode :delight :mode ("\\.html\\'" . html-ts-mode))
-(use-package css-ts-mode :delight :mode ("\\.css\\'" . css-ts-mode))
-(use-package javascript-ts-mode :delight :mode (("\\.js\\'" . javascript-ts-mode)
-                                       ("\\.jsx\\'" . js-jsx-mode)))
+(use-package markdown-ts-mode
+  :ensure nil  ; Built-in mode
+  :delight
+  :mode ("\\.md\\'" . markdown-ts-mode))
 
-(use-package typescript-ts-mode :delight :mode (("\\.ts\\'" . typescript-ts-mode)
-                                       ("\\.tsx\\'" . tsx-ts-mode)))
+(use-package html-ts-mode
+  :ensure nil  ; Built-in mode
+  :defer t
+  :delight)
+(use-package css-ts-mode
+  :ensure nil  ; Built-in mode
+  :defer t
+  :delight)
+(use-package javascript-ts-mode
+  :ensure nil  ; Built-in mode
+  :delight
+  :mode (("\\.jsx\\'" . js-jsx-mode)))  ; jsx still needs explicit mode
 
-(use-package elixir-ts-mode :delight :mode ("\\.\\(ex\\|exs\\|eex\\|leex\\|heex\\)\\'" . elixir-ts-mode))
-(use-package python-ts-mode :delight :mode ("\\.py\\'" . python-ts-mode))
-(use-package rust-ts-mode :delight :mode ("\\.rs\\'" . rust-ts-mode))
-(use-package go-ts-mode :delight :mode ("\\(\\.go\\|/go\\.mod\\|/go\\.sum\\)\\'" . go-ts-mode))
+(use-package typescript-ts-mode
+  :ensure nil  ; Built-in mode, don't try to install
+  :delight
+  :mode (("\\.ts\\'" . typescript-ts-mode)
+         ("\\.tsx\\'" . tsx-ts-mode)))
+
+(use-package elixir-ts-mode
+  :ensure nil  ; Built-in mode
+  :delight
+  :mode ("\\.\\(ex\\|exs\\|eex\\|leex\\|heex\\)\\'" . elixir-ts-mode))
+(use-package python-ts-mode
+  :ensure nil  ; Built-in mode
+  :defer t
+  :delight)
+(use-package rust-ts-mode
+  :ensure nil  ; Built-in mode
+  :delight
+  :mode ("\\.rs\\'" . rust-ts-mode))
+(use-package go-ts-mode
+  :ensure nil  ; Built-in mode
+  :delight
+  :mode ("\\(\\.go\\|/go\\.mod\\|/go\\.sum\\)\\'" . go-ts-mode))
 
 (use-package gdscript-mode :ensure (:host github :repo "godotengine/emacs-gdscript-mode") :delight :mode ("\\.gd\\'" . gdscript-ts-mode))
 
@@ -139,7 +199,8 @@ This is intended to be run on startup to avoid delays when opening the first Rub
              (temp-file (expand-file-name "ruby-prewarm.rb" prewarm-dir))
              (buf (find-file-noselect temp-file t)))
         ;; Add to LSP session blocklist to prevent "import project" prompts
-        (add-to-list 'lsp-session-folders-blocklist prewarm-dir)
+        (when (boundp 'lsp-session-folders-blocklist)
+          (add-to-list 'lsp-session-folders-blocklist prewarm-dir))
         (with-current-buffer buf
           (ruby-ts-mode)
           (condition-case err
@@ -158,8 +219,8 @@ This is intended to be run on startup to avoid delays when opening the first Rub
                        (ignore-errors
                          (delete-file temp-file))))))))
 
-;; Add startup hook to run prewarming (must be outside with-eval-after-load)
-(add-hook 'emacs-startup-hook
+;; Add elpaca-after-init-hook to run prewarming after all packages are loaded
+(add-hook 'elpaca-after-init-hook
           (lambda ()
             (run-at-time "2 sec" nil
                          (lambda ()

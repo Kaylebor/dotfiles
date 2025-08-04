@@ -44,8 +44,19 @@
   :custom
   (projectile-keymap-prefix (kbd "C-x p"))
   (projectile-project-search-path '("~/projects/" "~/work/" "~/playground"))
+  (projectile-known-projects-file (expand-file-name "projectile-bookmarks.eld" user-emacs-directory))
+  (projectile-cache-file (expand-file-name "projectile.cache" user-emacs-directory))
+  (projectile-enable-caching t)  ; Enable caching for better performance
+  (projectile-auto-discover t)  ; Automatically discover projects in search path
   :config
-  (projectile-mode))
+  (projectile-mode)
+  ;; Discover projects after initialization
+  (add-hook 'elpaca-after-init-hook
+            (lambda ()
+              (projectile-discover-projects-in-search-path)
+              (message "Discovered %d projects" (length projectile-known-projects))))
+  ;; Save known projects on exit
+  (add-hook 'kill-emacs-hook #'projectile-save-known-projects))
 
 ;; icons
 (use-package all-the-icons :ensure t)
@@ -84,14 +95,17 @@
   (helm-popup-tip-mode)
   (helm-ff-icon-mode))
 (use-package helm-projectile :ensure t
+  :after (helm projectile)  ; Ensure both are loaded first
   :bind
   (("C-x p p" . helm-projectile-switch-project)
    ("C-x p f" . helm-projectile-find-file)
    ("C-x p g" . helm-projectile-grep)
    ("C-x p b" . helm-projectile-switch-to-buffer)
-   ("C-x p g" . helm-projectile-grep))
+   ("C-x p a" . helm-projectile-add-known-project))  ; Add this for adding projects
   :config
-  (helm-projectile-on))
+  (helm-projectile-on)
+  ;; Use helm for projectile completions
+  (setq projectile-completion-system 'helm))
 
 ;; company for completion UI
 (use-package company :ensure t
