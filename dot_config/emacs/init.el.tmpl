@@ -49,20 +49,35 @@
   (projectile-cache-file (expand-file-name "projectile.cache" user-emacs-directory))
   (projectile-enable-caching t)  ; Enable caching for better performance
   (projectile-auto-discover t)  ; Automatically discover projects in search path
+  (projectile-auto-cleanup-known-projects nil)  ; Don't auto-cleanup, it's too aggressive
   (projectile-indexing-method 'alien)  ; Use external tools (fd/rg) for better performance
   (projectile-sort-order 'recently-active)  ; Sort projects by recent activity
   :init
-  (projectile-mode)  ; Enable projectile-mode early
+  ;; Enable projectile-mode and set up keymap before other packages can use it
+  (projectile-mode +1)
+  (with-eval-after-load 'projectile
+    (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map))
   :config
-  ;; Define the keymap prefix
-  (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map)
   ;; Discover projects after initialization
   (add-hook 'elpaca-after-init-hook
             (lambda ()
               (projectile-discover-projects-in-search-path)
               (message "Discovered %d projects" (length projectile-known-projects))))
   ;; Save known projects on exit
-  (add-hook 'kill-emacs-hook #'projectile-save-known-projects))
+  (add-hook 'kill-emacs-hook #'projectile-save-known-projects)
+  ;; Add manual refresh command (without cleanup)
+  (define-key projectile-command-map "r" 
+    (lambda ()
+      (interactive)
+      (projectile-discover-projects-in-search-path)
+      (message "Discovered projects. Total: %d projects" (length projectile-known-projects))))
+  ;; Add manual cleanup + refresh command  
+  (define-key projectile-command-map "R" 
+    (lambda ()
+      (interactive)
+      (projectile-cleanup-known-projects)
+      (projectile-discover-projects-in-search-path)
+      (message "Cleaned and refreshed project list: %d projects" (length projectile-known-projects)))))
 
 ;; icons
 (use-package all-the-icons :ensure t)
@@ -87,6 +102,7 @@
 ;; helm for incremental completion
 (use-package helm :ensure t
   :delight
+  :demand t  ; Load immediately, don't wait for keybindings
   :bind
   (("C-x C-f" . helm-find-files)
    ("C-x b" . helm-buffers-list)
@@ -103,10 +119,13 @@
 (use-package helm-projectile :ensure t
   :after (helm projectile)  ; Ensure both are loaded first
   :demand t  ; Force immediate loading to avoid lazy loading issues
+  :init
+  ;; Ensure projectile uses helm before helm-projectile-on is called
+  (with-eval-after-load 'projectile
+    (setq projectile-completion-system 'helm))
   :config
-  ;; Use helm for projectile completions
-  (setq projectile-completion-system 'helm)
   ;; Initialize helm-projectile - this replaces projectile commands with helm versions
+  ;; This should now work because the keymap is already defined
   (helm-projectile-on))
 
 ;; company for completion UI
