@@ -6,7 +6,7 @@
 (setq-default native-comp-deferred-compilation t)
 (setq-default native-comp-jit-compilation t)
 
-;; Increase garbage collection threshold
+;; Increase garbage collection threshold during startup
 (setq gc-cons-threshold 100000000)
 
 ;; For lsp-mode: use plists
@@ -63,41 +63,40 @@
 
 {{- if eq .chezmoi.os "darwin" }}
 ;;; macOS-specific libgcc fix for native compilation
-(when (eq system-type 'darwin)
-  (defun my-append-env-var (var-name value)
-    "Append VALUE to the beginning of current value of env variable VAR-NAME."
-    (setenv var-name (if (getenv var-name)
-                         (format "%s:%s" value (getenv var-name))
-                       value)))
+(defun my-append-env-var (var-name value)
+  "Append VALUE to the beginning of current value of env variable VAR-NAME."
+  (setenv var-name (if (getenv var-name)
+                       (format "%s:%s" value (getenv var-name))
+                     value)))
 
-  ;; Use runtime-detected Homebrew path for GCC libraries
-  ;; Need to include the actual GCC subdirectory where libemutls_w.a lives
-  (let* ((homebrew-prefix (string-trim (shell-command-to-string "brew --prefix")))
-         (gcc-base (concat homebrew-prefix "/lib/gcc/current"))
-         (gcc-lib-base (concat gcc-base "/gcc"))
-         (gcc-subdir (when (file-directory-p gcc-lib-base)
-                      (car (directory-files gcc-lib-base t "^aarch64-apple-darwin"))))
-         (gcc-version-dir (when gcc-subdir
-                           (car (directory-files gcc-subdir t "^[0-9]+$"))))
-         (gccjitpath (if gcc-version-dir
-                        (format "%s:%s:%s/lib" 
-                                gcc-version-dir gcc-base homebrew-prefix)
-                      (format "%s:%s/lib" gcc-base homebrew-prefix))))
-    (when (file-directory-p gcc-base)
-      (mapc (lambda (var-name)
-              (my-append-env-var var-name gccjitpath))
-            '("LIBRARY_PATH" "LD_LIBRARY_PATH"))
-      
-      ;; Also set up the compiler paths for libgccjit
-      (when (file-exists-p (concat homebrew-prefix "/bin/gcc-15"))
-        (setenv "CC" (concat homebrew-prefix "/bin/gcc-15"))
-        (setenv "CXX" (concat homebrew-prefix "/bin/g++-15")))
-      
-      ;; Set native compilation driver options for libgccjit
-      (when (boundp 'native-comp-driver-options)
-        (setq native-comp-driver-options
-              (append native-comp-driver-options
-                      (list (concat "-B" homebrew-prefix "/bin/"))))))))
+;; Use runtime-detected Homebrew path for GCC libraries
+;; Need to include the actual GCC subdirectory where libemutls_w.a lives
+(let* ((homebrew-prefix (string-trim (shell-command-to-string "brew --prefix")))
+       (gcc-base (concat homebrew-prefix "/lib/gcc/current"))
+       (gcc-lib-base (concat gcc-base "/gcc"))
+       (gcc-subdir (when (file-directory-p gcc-lib-base)
+                    (car (directory-files gcc-lib-base t "^aarch64-apple-darwin"))))
+       (gcc-version-dir (when gcc-subdir
+                         (car (directory-files gcc-subdir t "^[0-9]+$"))))
+       (gccjitpath (if gcc-version-dir
+                      (format "%s:%s:%s/lib" 
+                              gcc-version-dir gcc-base homebrew-prefix)
+                    (format "%s:%s/lib" gcc-base homebrew-prefix))))
+  (when (file-directory-p gcc-base)
+    (mapc (lambda (var-name)
+            (my-append-env-var var-name gccjitpath))
+          '("LIBRARY_PATH" "LD_LIBRARY_PATH"))
+    
+    ;; Also set up the compiler paths for libgccjit
+    (when (file-exists-p (concat homebrew-prefix "/bin/gcc-15"))
+      (setenv "CC" (concat homebrew-prefix "/bin/gcc-15"))
+      (setenv "CXX" (concat homebrew-prefix "/bin/g++-15")))
+    
+    ;; Set native compilation driver options for libgccjit
+    (when (boundp 'native-comp-driver-options)
+      (setq native-comp-driver-options
+            (append native-comp-driver-options
+                    (list (concat "-B" homebrew-prefix "/bin/")))))))
 {{- end }}
 
 ;;; Security

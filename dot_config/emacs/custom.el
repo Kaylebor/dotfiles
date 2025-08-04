@@ -39,6 +39,13 @@
 (setopt split-width-threshold 170
         split-height-threshold nil)
 
+;; File operation performance optimizations
+;; Use file system notifications for auto-revert
+(setopt auto-revert-use-notify t)
+
+;; Don't check version control info for remote files
+(setopt auto-revert-check-vc-info nil)
+
 ;; Buffers
 (setopt uniquify-buffer-name-style 'forward
         comint-prompt-read-only t

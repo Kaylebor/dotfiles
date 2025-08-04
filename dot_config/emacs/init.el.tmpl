@@ -10,8 +10,13 @@
 (load-file (expand-file-name "functions.el" user-emacs-directory))
 
 ;; PACKAGES
+{{- if eq .chezmoi.os "darwin" }}
 ;; Improves some MacOS defaults
-(when (or (daemonp) (memq window-system '(mac ns))) (elpaca exec-path-from-shell (exec-path-from-shell-initialize)))
+(elpaca exec-path-from-shell (exec-path-from-shell-initialize))
+{{- else }}
+;; Only load exec-path-from-shell in daemon mode on non-macOS
+(when (daemonp) (elpaca exec-path-from-shell (exec-path-from-shell-initialize)))
+{{- end }}
 
 ;; delight to hide or replace modeline information per-package
 (use-package delight :ensure t)
@@ -184,6 +189,36 @@
 ;; Manually process elpaca queues now before loading customizations
 ;; Keybindings may go above this line if they depend on extra packages
 (elpaca-process-queues)
+
+;; Performance optimizations
+
+;; Reset GC threshold after startup for better runtime performance
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (setq gc-cons-threshold (* 20 1024 1024)  ; 20MB
+                  gc-cons-percentage 0.1)
+            (message "GC threshold reset to %s" gc-cons-threshold)))
+
+;; Better pixel-precision scrolling (Emacs 29+) - benefits all platforms
+(when (fboundp 'pixel-scroll-precision-mode)
+  (pixel-scroll-precision-mode 1)
+  (setq pixel-scroll-precision-interpolate-page t))
+
+;; Version control optimizations - only track Git
+(setq vc-handled-backends '(Git))
+
+{{- if eq .chezmoi.os "darwin" }}
+;; macOS-specific optimizations
+;; Smoother scrolling on macOS (Mac Port specific)
+(setq mac-mouse-wheel-smooth-scroll t)
+
+;; Optimize for macOS window management
+(setq ns-use-native-fullscreen t)
+(setq ns-pop-up-frames nil)
+
+;; Faster frame switching
+(setq frame-title-format nil)
+{{- end }}
 
 ;; Hide some Emacs-native modes from modeline
 (delight '((eldoc-mode nil "eldoc")))
