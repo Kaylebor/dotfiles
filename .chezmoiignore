@@ -1,8 +1,45 @@
+# Documentation and meta files
 README.md
 chezmoi.toml
 CLAUDE.md
 PACKAGE_MANAGEMENT.md
 SHELL_COMPLETIONS.md
 ONEPASSWORD_SETUP.md
+COMPANY_DOTFILES_PLAN.md
 scripts/
 docs/
+
+# macOS-specific files to ignore on non-macOS systems
+{{ if ne .chezmoi.os "darwin" -}}
+run_once_0-install-brew.bash.tmpl
+run_onchange_before_brew-install-packages.bash.tmpl
+Library/
+{{- end }}
+
+# Linux-specific files to ignore on non-Linux systems
+{{ if ne .chezmoi.os "linux" -}}
+# Wayland/Hyprland specific
+dot_config/hypr/
+dot_config/waybar/
+dot_local/bin/executable_hypr-keybind-helper.py
+
+# Linux notification daemon
+dot_config/mako/
+
+# Qt theming (Linux desktop)
+dot_config/qt6ct/
+
+# Arch Linux AUR helper
+dot_config/paru/
+
+# Linux desktop entries
+dot_local/share/applications/
+
+# Systemd user services
+dot_config/systemd/
+{{- end }}
+
+# Windows-specific files to ignore on non-Windows systems
+{{ if ne .chezmoi.os "windows" -}}
+# Currently no Windows-specific files
+{{- end }}
