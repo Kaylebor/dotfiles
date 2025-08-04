@@ -153,6 +153,10 @@
   (rust-ts-mode . lsp)
   (lsp-mode . lsp-enable-which-key-integration)
   :config
+  ;; Enable breadcrumb in header line with icons
+  (setq lsp-headerline-breadcrumb-enable t)
+  (setq lsp-headerline-breadcrumb-icons-enable t)
+  
   ;; Ensure TypeScript is found properly
   (setq lsp-clients-typescript-server-args '("--stdio"))
   (setq lsp-typescript-npm (executable-find "npm"))

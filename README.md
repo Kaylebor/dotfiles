@@ -31,6 +31,12 @@ Within Emacs, you may want to run this to install the tree sitter grammars:
 (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
 ```
 
+You'll also need to install icon fonts for proper display:
+```
+M-x all-the-icons-install-fonts
+M-x nerd-icons-install-fonts
+```
+
 ## Package Management
 
 ### Homebrew Installation Types
