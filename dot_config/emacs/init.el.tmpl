@@ -82,9 +82,8 @@
       (projectile-discover-projects-in-search-path)
       (message "Cleaned and refreshed project list: %d projects" (length projectile-known-projects)))))
 
-;; icons
-(use-package all-the-icons :ensure t)
-;; Run all-the-icons-install-fonts afterwards
+;; icons - using nerd-icons for consistency
+(use-package nerd-icons :ensure t)
 
 ;; Alternative modeline; may change or build my own later
 (use-package simple-modeline :ensure t
@@ -102,8 +101,17 @@
   :config
   (treemacs-load-theme "nerd-icons"))
 
+;; helm icons support using nerd-icons
+(use-package helm-icons :ensure t
+  :after nerd-icons
+  :custom
+  (helm-icons-provider 'nerd-icons)
+  :config
+  (helm-icons-enable))
+
 ;; helm for incremental completion
 (use-package helm :ensure t
+  :after helm-icons  ; Load helm-icons first
   :delight
   :demand t  ; Load immediately, don't wait for keybindings
   :bind
@@ -117,8 +125,7 @@
   (helm-completion-in-region-fuzzy-match t)
   :config
   (helm-mode 1)
-  (helm-popup-tip-mode)
-  (helm-ff-icon-mode))
+  (helm-popup-tip-mode))
 (use-package helm-projectile :ensure t
   :after (helm projectile)  ; Ensure both are loaded first
   :demand t  ; Force immediate loading to avoid lazy loading issues
@@ -130,6 +137,12 @@
   ;; Initialize helm-projectile - this replaces projectile commands with helm versions
   ;; This should now work because the keymap is already defined
   (helm-projectile-on))
+
+;; Add nerd-icons support for completion frameworks including helm
+(use-package nerd-icons-completion :ensure t
+  :after nerd-icons
+  :config
+  (nerd-icons-completion-mode))
 
 ;; company for completion UI
 (use-package company :ensure t
@@ -163,8 +176,8 @@
     :custom
     ;; Use vterm as terminal backend (already installed)
     (claude-code-ide-terminal-backend 'vterm)
-    ;; Claude CLI is available via mise
-    (claude-code-ide-cli-executable "claude")
+    ;; Claude CLI is available via mise - use executable-find to locate it
+    (claude-code-ide-cli-executable (executable-find "claude"))
     ;; Optional: Enable debug mode initially to verify setup
     (claude-code-ide-debug-mode t)
     :config
@@ -287,11 +300,6 @@
 (with-eval-after-load 'elpaca
   (add-hook 'elpaca-after-init-hook
             (lambda ()
-              ;; Check and install all-the-icons fonts
-              (when (require 'all-the-icons nil t)
-                (unless (member "all-the-icons" (font-family-list))
-                  (message "Installing all-the-icons fonts...")
-                  (all-the-icons-install-fonts t)))
               ;; Check and install nerd-icons fonts if package is available
               (when (and (require 'nerd-icons nil t)
                          (fboundp 'nerd-icons-install-fonts))
