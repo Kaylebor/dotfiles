@@ -33,6 +33,9 @@
 ;; transient
 (use-package transient :ensure t)
 
+;; websocket (required for claude-code-ide)
+(use-package websocket :ensure t)
+
 ;; ripgrep
 (use-package rg :ensure t
   :init
@@ -150,6 +153,25 @@
 (use-package vterm :ensure t
   :bind
   (("C-c t" . vterm)))
+
+;; Claude Code IDE integration
+(elpaca (claude-code-ide 
+         :host github 
+         :repo "manzaltu/claude-code-ide.el")
+  (use-package claude-code-ide
+    :bind ("C-c C-'" . claude-code-ide-menu)
+    :custom
+    ;; Use vterm as terminal backend (already installed)
+    (claude-code-ide-terminal-backend 'vterm)
+    ;; Claude CLI is available via mise
+    (claude-code-ide-cli-executable "claude")
+    ;; Optional: Enable debug mode initially to verify setup
+    (claude-code-ide-debug-mode t)
+    :config
+    ;; Enable Emacs tools integration for advanced features
+    (claude-code-ide-emacs-tools-setup)
+    ;; Optional: Customize window placement
+    (setq claude-code-ide-window-placement 'right)))
 
 ;; magit
 (use-package magit :ensure t
