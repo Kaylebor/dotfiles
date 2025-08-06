@@ -102,12 +102,15 @@
   (treemacs-load-theme "nerd-icons"))
 
 ;; helm icons support using nerd-icons
-(use-package helm-icons :ensure t
-  :after nerd-icons
-  :custom
-  (helm-icons-provider 'nerd-icons)
-  :config
-  (helm-icons-enable))
+(elpaca (helm-icons 
+         :host github 
+         :repo "yyoncho/helm-icons")
+  (use-package helm-icons
+    :after nerd-icons
+    :custom
+    (helm-icons-provider 'nerd-icons)
+    :config
+    (helm-icons-enable)))
 
 ;; helm for incremental completion
 (use-package helm :ensure t
