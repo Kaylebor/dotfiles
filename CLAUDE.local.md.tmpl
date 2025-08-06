@@ -38,3 +38,16 @@ Modern alternatives to traditional Unix tools. When searching, processing files,
 
 ## Common Usage
 See @CLI_EXAMPLES.md for detailed usage examples and advanced combinations
+
+## Emacs Integration
+
+When Claude Code is opened from within Emacs (vs a normal terminal), additional code navigation tools may be available:
+
+- **mcp__emacs-tools__claude-code-ide-mcp-project-info** - Project overview and statistics
+- **mcp__emacs-tools__claude-code-ide-mcp-imenu-list-symbols** - List functions/classes in files
+- **mcp__emacs-tools__claude-code-ide-mcp-xref-find-references** - Find symbol usage across codebase
+- **mcp__emacs-tools__claude-code-ide-mcp-xref-find-apropos** - Search for symbols by pattern
+- **mcp__emacs-tools__claude-code-ide-mcp-treesit-info** - AST/syntax tree analysis
+- **mcp__ide__getDiagnostics** - LSP diagnostics and linting warnings
+
+These tools provide deep code analysis and navigation when available. Use them for understanding large codebases and finding symbol relationships.
