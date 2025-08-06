@@ -23,6 +23,24 @@ DESCRIPTIONS = {
     "up, movefocus, u": "Focus upper window",
     "down, movefocus, d": "Focus lower window",
     
+    # Window resizing
+    "ALT, left, resizeactive, -50 0": "Resize window smaller horizontally",
+    "ALT, right, resizeactive, 50 0": "Resize window larger horizontally",
+    "ALT, up, resizeactive, 0 -50": "Resize window smaller vertically",
+    "ALT, down, resizeactive, 0 50": "Resize window larger vertically",
+    
+    # Window movement
+    "SHIFT, left, movewindow, l": "Move window left",
+    "SHIFT, right, movewindow, r": "Move window right",
+    "SHIFT, up, movewindow, u": "Move window up",
+    "SHIFT, down, movewindow, d": "Move window down",
+    
+    # Window swapping
+    "CTRL, left, swapwindow, l": "Swap with left window",
+    "CTRL, right, swapwindow, r": "Swap with right window",
+    "CTRL, up, swapwindow, u": "Swap with upper window",
+    "CTRL, down, swapwindow, d": "Swap with lower window",
+    
     # Workspaces
     "1, workspace, 1": "Switch to workspace 1",
     "2, workspace, 2": "Switch to workspace 2",
@@ -63,6 +81,9 @@ DESCRIPTIONS = {
     # System
     "L, exec, $screenlock": "Lock screen",
     "F1, exec, $keybindhelper": "Show this keybind help",
+    
+    # Applications
+    "CTRL SHIFT, Space, exec, 1password --quick-access": "1Password Quick Access",
     
     # Mouse controls
     "mouse:272, movewindow": "Move window with mouse",
