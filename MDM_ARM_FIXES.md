@@ -83,7 +83,7 @@ mise install ruby@3.2.2
 
 **Key Components**:
 - `.chezmoidata/packages.yml` - Configuration for patches and expected hashes
-- `run_onchange_before_brew-install-packages.bash.tmpl` - Automatic patch application
+- `run_onchange_before_install-packages.bash.tmpl` - Automatic patch application
 - `scripts/patches/` - Directory containing formula-specific patches
 
 ### 3. GCC Build Issues
