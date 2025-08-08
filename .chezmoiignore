@@ -19,24 +19,26 @@ Library/
 # Linux-specific files to ignore on non-Linux systems
 {{ if ne .chezmoi.os "linux" -}}
 # Wayland/Hyprland specific
-dot_config/hypr/
-dot_config/waybar/
-dot_local/bin/executable_hypr-keybind-helper.py
+.config/hypr/**
+.config/waybar/**
+.local/bin/hypr-keybind-helper.py
+.local/bin/idle-inhibit-status.sh
+.local/bin/idle-inhibit-toggle.sh
 
 # Linux notification daemon
-dot_config/mako/
+.config/mako/**
 
 # Qt theming (Linux desktop)
-dot_config/qt6ct/
+.config/qt6ct/**
 
 # Arch Linux AUR helper
-dot_config/paru/
+.config/paru/**
 
 # Linux desktop entries
-dot_local/share/applications/
+.local/share/applications/**
 
 # Systemd user services
-dot_config/systemd/
+.config/systemd/**
 {{- end }}
 
 # Windows-specific files to ignore on non-Windows systems
