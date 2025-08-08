@@ -17,7 +17,7 @@
         "clock"
     ],
     "modules-right": [
-        "idle_inhibitor",
+        "custom/idle_inhibitor",
         "pulseaudio",
         "network",
         "tray",
@@ -72,14 +72,16 @@
         }
     },
 
-    "idle_inhibitor": {
+    "custom/idle_inhibitor": {
+        "exec": "~/.local/bin/idle-inhibit-status.sh",
+        "interval": 5,
+        "return-type": "json",
+        "on-click": "~/.local/bin/idle-inhibit-toggle.sh",
         "format": "{icon}",
         "format-icons": {
             "activated": "",
             "deactivated": ""
-        },
-        "tooltip-format-activated": "Idle inhibitor activated",
-        "tooltip-format-deactivated": "Idle inhibitor deactivated"
+        }
     },
 
     "tray": {
