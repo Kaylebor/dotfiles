@@ -1,6 +1,18 @@
 #!/usr/bin/env zsh
 
-# Activate Mise on interactive
+# Claude Code Detection and Environment Setup
+# Claude Code sets CLAUDECODE=1 but doesn't source .zprofile
+# We need to ensure mise is properly initialized for Claude Code
+if [[ -n "$CLAUDECODE" ]]; then
+    # Running in Claude Code - ensure mise is fully activated
+    # Source .zprofile functionality since Claude Code doesn't source it
+    if [[ -z "$__MISE_ACTIVATED" ]]; then
+        eval "$(mise activate zsh)"
+        export __MISE_ACTIVATED=1
+    fi
+fi
+
+# Activate Mise hook-env for all shells (interactive and Claude Code)
 eval "$(mise hook-env -s zsh)"
 
 {{- if lookPath "fzf" }}
