@@ -147,6 +147,13 @@ if type -q carapace
     set -Ux CARAPACE_BRIDGES 'zsh,fish,bash'
 end
 
+# Update Fish completions from man pages
+# This generates completions for commands that don't have explicit completion files
+if type -q fish_update_completions
+    echo "Updating Fish completions from man pages..."
+    fish_update_completions
+end
+
 # Set up gcc paths for alternative Homebrew installations on macOS
 if test (uname) = Darwin
     # Check for homebrew in alternative locations
