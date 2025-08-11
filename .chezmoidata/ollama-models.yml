@@ -1,0 +1,30 @@
+# Default models for each tool
+defaults:
+  gptel: "qwen3:30b-a3b-instruct-2507-q4_K_M"
+  aider: "qwen3-coder:30b"
+  aidermacs: "devstral:latest"
+
+# Ollama models for AI development
+models:
+  # Best for chat/reasoning - Qwen3 30B Instruct
+  - name: "qwen3:30b-a3b-instruct-2507-q4_K_M"
+    description: "General chat and reasoning"
+    default_for: ["gptel"]
+    
+  # Base model for complex reasoning
+  - name: "qwen3:30b-a3b"
+    description: "Base model for reasoning tasks"
+    
+  # Specialized for coding
+  - name: "qwen3-coder:30b"
+    description: "Code analysis and generation"
+    default_for: ["aider"]
+    
+  # Agentic coding assistant
+  - name: "devstral:latest"
+    description: "Agentic coding tasks"
+    default_for: ["aidermacs"]
+    
+  # OpenAI's open model
+  - name: "gpt-oss:20b"
+    description: "OpenAI-style responses"

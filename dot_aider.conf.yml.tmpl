@@ -1,4 +1,14 @@
+{{- $ollamaModels := (fromYaml (include ".chezmoidata/ollama-models.yml")) -}}
+{{- if ne .ollamaHost "" }}
+# Ollama configuration
+model: ollama/{{ $ollamaModels.defaults.aider }}
+{{-   if ne .ollamaHost "localhost:11434" }}
+api-base: {{ .ollamaApiBase }}
+{{-   end }}
+{{- else }}
+# Cloud configuration
 model: gemini/gemini-2.5-pro-exp-03-25
+{{- end }}
 api-key:
   - gemini={{ template "onepassword_safe" dict "opPath" "op://Private/kvupxk4odcrfhpzy7pi5sfmqnu/credential" "envVar" "CHEZMOI_GEMINI_API_KEY" "context" . }}
   - openrouter={{ template "onepassword_safe" dict "opPath" "op://Private/OpenRouter/API Token" "envVar" "CHEZMOI_OPENROUTER_API_KEY" "context" . }}

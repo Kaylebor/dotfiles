@@ -31,6 +31,22 @@
 {{-   $prewarmRubyLSP = promptBool "Prewarm Ruby LSP on Emacs startup? (recommended for work machines)" false }}
 {{- end }}
 
+{{- $ollamaHost := "localhost:11434" }}
+{{- if hasKey . "ollamaHost" }}
+{{-   $ollamaHost = .ollamaHost }}
+{{- else }}
+{{-   $ollamaHost = promptString "Ollama host (use 'localhost:11434' for local, or hostname:port for remote)" "localhost:11434" }}
+{{- end }}
+
+{{- $pullOllamaModels := false }}
+{{- if eq $ollamaHost "localhost:11434" }}
+{{-   if hasKey . "pullOllamaModels" }}
+{{-     $pullOllamaModels = .pullOllamaModels }}
+{{-   else }}
+{{-     $pullOllamaModels = promptBool "Pull Ollama models for local development?" false }}
+{{-   end }}
+{{- end }}
+
 data:
 {{- if eq .chezmoi.os "darwin" }}
   homebrewInstallType: {{ $homebrewInstallType | quote }}
@@ -43,3 +59,6 @@ data:
 {{- end }}
   skip1Password: {{ $skip1Password }}
   prewarmRubyLSP: {{ $prewarmRubyLSP }}
+  ollamaHost: {{ $ollamaHost | quote }}
+  ollamaApiBase: {{ printf "http://%s" $ollamaHost | quote }}
+  pullOllamaModels: {{ $pullOllamaModels }}

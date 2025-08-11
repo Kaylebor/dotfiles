@@ -1,0 +1,9 @@
+{{- if .pullOllamaModels }}
+{{- $ollamaModels := (fromYaml (include ".chezmoidata/ollama-models.yml")) -}}
+# Context window configuration for Ollama models
+{{- range $ollamaModels.models }}
+- name: ollama/{{ .name }}
+  extra_params:
+    num_ctx: {{ if contains "30b" .name }}65536{{ else }}32768{{ end }}
+{{- end }}
+{{- end }}

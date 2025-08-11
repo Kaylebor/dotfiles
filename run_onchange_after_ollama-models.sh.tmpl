@@ -1,0 +1,20 @@
+#!/bin/bash
+# hash: {{ include ".chezmoidata/ollama-models.yml" | sha256sum }}
+{{ if .pullOllamaModels -}}
+{{- $ollamaModels := (fromYaml (include ".chezmoidata/ollama-models.yml")) -}}
+if command -v ollama &> /dev/null && ollama list &> /dev/null; then
+  echo "Pulling Ollama models for local development..."
+  {{- range $ollamaModels.models }}
+  echo "Pulling {{ .name }}: {{ .description }}"
+  ollama pull "{{ .name }}" || echo "Failed to pull {{ .name }}"
+  {{- end }}
+  
+  echo ""
+  echo "Default models configured:"
+  echo "  gptel: {{ $ollamaModels.defaults.gptel }}"
+  echo "  aider: {{ $ollamaModels.defaults.aider }}"
+  echo "  aidermacs: {{ $ollamaModels.defaults.aidermacs }}"
+fi
+{{- else }}
+echo "Skipping Ollama model pulls (disabled in config)"
+{{- end }}
