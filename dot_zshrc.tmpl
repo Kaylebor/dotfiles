@@ -29,11 +29,6 @@ export FZF_DEFAULT_OPTS=" \
 --color=border:#414559,label:#c6d0f5"
 {{- end }}
 
-{{- if lookPath "tv" }}
-# Integrate Television
-eval "$(tv init zsh)"
-{{- end }}
-
 ## HISTORY
 export HISTFILE=~/.zsh_history
 export HISTSIZE=500000
@@ -99,6 +94,11 @@ source <(carapace _carapace zsh)
 {{- end }}
 
 # Note: compinit is already handled by the ez-compinit plugin loaded via antidote
+
+{{- if lookPath "tv" }}
+# Integrate Television (after compinit is available)
+eval "$(tv init zsh)"
+{{- end }}
 
 {{- if lookPath "op" }}
 # Load op completions

@@ -1,0 +1,10 @@
+font-family = "Maple Mono NF"
+theme = "catppuccin-frappe.conf"
+keybind = shift+enter=text:\n
+{{- if lookPath "fish" }}
+command = {{ lookPath "fish" | quote }}
+{{- else if lookPath "zsh" }}
+command = {{ lookPath "zsh" | quote }}
+{{- else if lookPath "bash" }}
+command = {{ lookPath "bash" | quote }}
+{{- end }}
