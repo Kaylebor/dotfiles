@@ -1,5 +1,11 @@
 #!/bin/bash
 # Setup tool integrations for nushell
+{{- if lookPath "starship" }}
+# hash: {{ output "starship" "--version" | sha256sum }}
+{{- end }}
+{{- if lookPath "carapace" }}
+# hash: {{ output "sh" "-c" "carapace --version 2>&1" | sha256sum }}
+{{- end }}
 
 set -euo pipefail
 

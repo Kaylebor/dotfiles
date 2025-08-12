@@ -1,4 +1,13 @@
 #!/usr/bin/env bash
+{{- if lookPath "nvim" }}
+# hash: {{ output "nvim" "--version" | sha256sum }}
+{{- end }}
+{{- if lookPath "tv" }}
+# hash: {{ output "tv" "--version" | sha256sum }}
+{{- end }}
+{{- if lookPath "carapace" }}
+# hash: {{ output "sh" "-c" "carapace --version 2>&1" | sha256sum }}
+{{- end }}
 
 # Activate mise for tool availability
 eval "$(mise activate bash)"

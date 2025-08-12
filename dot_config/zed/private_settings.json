@@ -35,32 +35,6 @@
       }
     }
   },
-  "language_models": {
-    "google": {
-      "available_models": [
-        {
-          "name": "gemini-2.0-flash-exp",
-          "display_name": "Gemini 2.0 Flash Experimental",
-          "max_tokens": 1048576
-        },
-        {
-          "name": "gemini-2.0-pro-exp-02-05",
-          "display_name": "Gemini 2.0 Pro Experimental 02-05",
-          "max_tokens": 2097152
-        },
-        {
-          "name": "gemini-2.0-flash-thinking-exp-01-21",
-          "display_name": "Gemini 2.0 Flash Thinking Experimental 01-21",
-          "max_tokens": 1048576
-        },
-        {
-          "name": "gemini-2.0-flash-lite-preview-02-05",
-          "display_name": "Gemini 2.0 Flash Lite Preview 02-05",
-          "max_tokens": 1048576
-        }
-      ]
-    }
-  },
   "ui_font_size": 14,
   "ui_font_family": "Maple Mono NF",
   // "buffer_font_size": 14,
@@ -91,8 +65,13 @@
       ]
     },
     "HTML": {
-      "prettier": {
-        "allowed": false
+      "formatter": "language_server"
+    },
+    "SQL": {
+      "formatter": {
+        "external": {
+          "command": "sql-formatter"
+        }
       }
     },
     "TypeScript": {

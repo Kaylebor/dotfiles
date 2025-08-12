@@ -1,5 +1,8 @@
 #!/bin/bash
 {{/* Prime Emacs native compilation on macOS with alternative Homebrew */}}
+{{- if lookPath "emacs" }}
+# hash: {{ output "emacs" "--version" | sha256sum }}
+{{- end }}
 
 {{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
 # Prime Emacs native compilation for alternative Homebrew setup

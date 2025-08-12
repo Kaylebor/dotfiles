@@ -1,5 +1,6 @@
 #!/bin/bash
 {{/* Script to check OS and install packages based on OS */}}
+# hash: {{ include ".chezmoidata/packages.yml" | sha256sum }}
 
 {{/* 
   Environment variables for package reinstallation:
