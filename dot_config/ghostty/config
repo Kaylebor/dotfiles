@@ -1,3 +1,3 @@
-font-family = "IosevkaTerm NFM"
+font-family = "Maple Mono NF"
 theme = "catppuccin-frappe.conf"
 keybind = shift+enter=text:\n

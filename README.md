@@ -102,4 +102,4 @@ Carapace automatically detects and bridges these frameworks, providing better co
 The configuration in `.config/carapace/bridges.yaml` maps tools to their frameworks for optimal performance.
 
 ## Extras
-- Fonts: [Iosevka and Iosevka Term](https://typeof.net/Iosevka/)
+- Fonts: [Maple Mono](https://github.com/subframe7536/maple-font)

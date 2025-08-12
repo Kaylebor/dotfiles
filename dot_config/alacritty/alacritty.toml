@@ -6,4 +6,4 @@ dimensions = { columns = 134, lines = 32 }
 history = 100000
 
 [font]
-normal = { family = "IosevkaTerm Nerd Font" }
+normal = { family = "Maple Mono NF" }
