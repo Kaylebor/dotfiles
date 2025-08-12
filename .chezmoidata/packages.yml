@@ -99,6 +99,7 @@ packages:
       - "coreutils"
       - "curl"
       - "curlie"
+      - "cursor-cli"
       - "delta"
       - "difftastic"
       - "diffutils"
