@@ -1,6 +1,11 @@
 {{- template "brew_eval" . }}
 eval "$(mise activate bash)" # Mise [https://mise.jdx.dev]
 
+{{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
+# Install Homebrew Casks to home directory (MDM-restricted systems use alternative installation)
+export HOMEBREW_CASK_OPTS="--appdir=$HOME/Applications"
+{{- end }}
+
 {{- if eq .chezmoi.os "darwin" }}
 # Increase file descriptor limit for development work (macOS)
 ulimit -n 65536 2>/dev/null || true

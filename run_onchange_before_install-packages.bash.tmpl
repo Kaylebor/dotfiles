@@ -249,6 +249,12 @@ EOF
 {{- if eq .homebrewInstallType "alternative" }}
 # Update homebrew state file after successful installation
 update_homebrew_state
+
+# Index ~/Applications for Spotlight so newly installed apps are searchable
+if [ -d "$HOME/Applications" ]; then
+  echo "Indexing ~/Applications for Spotlight..."
+  mdimport "$HOME/Applications" 2>/dev/null || true
+fi
 {{- end }}
 {{ end -}}
 

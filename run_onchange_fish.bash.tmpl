@@ -36,6 +36,13 @@ tv init fish > ~/.config/fish/conf.d/television.fish
 # Run the fish environment setup
 fish -c "source {{ .chezmoi.sourceDir }}/.fish_env.fish"
 
+{{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
+# Ensure ~/Applications directory exists for Homebrew Casks
+mkdir -p "$HOME/Applications"
+# Set Homebrew Cask options for home directory installation (MDM-restricted systems)
+fish -c "set -Ux HOMEBREW_CASK_OPTS '--appdir=$HOME/Applications'"
+{{- end }}
+
 {{- if eq .chezmoi.os "darwin" }}
 # MacOS-specific variable configuration
 fish -l -c "fish_add_path -Uam (brew --prefix sqlite)/bin"
