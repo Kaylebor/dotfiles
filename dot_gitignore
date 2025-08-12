@@ -139,4 +139,8 @@ $RECYCLE.BIN/
 # Zed
 .zed
 
+# Environment files
+.env
+.env.*
+
 tmp_code_*
