@@ -109,7 +109,6 @@ else
 fi
 
 EMACSCLIENT="$BREW_PREFIX/bin/emacsclient"
-EMACS="$BREW_PREFIX/bin/emacs"
 
 # Check if emacsclient exists
 if [ ! -x "$EMACSCLIENT" ]; then
@@ -117,23 +116,11 @@ if [ ! -x "$EMACSCLIENT" ]; then
     exit 1
 fi
 
-# Check if daemon is running
-if ! "$EMACSCLIENT" -e "(boundp 'server-process)" 2>/dev/null | grep -q 't'; then
-    # Start emacs daemon
-    "$EMACS" --daemon 2>/dev/null &
-    
-    # Wait for the daemon to be ready
-    for i in {1..20}; do
-        if "$EMACSCLIENT" -e "(boundp 'server-process)" 2>/dev/null | grep -q 't'; then
-            break
-        fi
-        sleep 0.5
-    done
-fi
-
-# Create a new frame or focus existing one
-# Important: Don't use exec here - it causes the app to terminate incorrectly on macOS
-"$EMACSCLIENT" -c -n "$@"
+# Create a new frame, connecting to existing server or starting one if needed
+# The -a '' flag tells emacsclient to start Emacs as daemon if no server is running
+# The -c flag creates a new frame
+# The -n flag returns immediately without waiting
+"$EMACSCLIENT" -c -n -a '' "$@"
 EOF
 
 # Make the launcher executable

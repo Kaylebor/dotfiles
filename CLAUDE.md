@@ -12,6 +12,8 @@ Chezmoi-managed dotfiles for cross-platform development (macOS/Arch Linux) using
 **Tools**: `mise install`, `bat cache --build`, `nvim --headless +PlugInstall +qall`  
 **Auto-run scripts**: `run_once_*` (Homebrew install), `run_onchange_*` (package updates)
 
+Note: `chezmoi apply` works from any directory - it automatically uses `~/.local/share/chezmoi` as source and `$HOME` as target.
+
 ## Architecture
 
 ### File Structure
