@@ -70,7 +70,7 @@
     "SQL": {
       "formatter": {
         "external": {
-          "command": "sql-formatter"
+          "command": "pg_format"
         }
       }
     },

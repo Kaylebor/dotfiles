@@ -2,5 +2,10 @@
   "language": "postgresql",
   "tabWidth": 2,
   "keywordCase": "upper",
-  "linesBetweenQueries": 2
+  "dataTypeCase": "upper",
+  "functionCase": "lower",
+  "linesBetweenQueries": 2,
+  "expressionWidth": 80,
+  "denseOperators": false,
+  "logicalOperatorNewline": "after"
 }

@@ -1,0 +1,158 @@
+#!/bin/bash
+{{/* Create Emacs Client app for macOS */}}
+{{- if and (eq .chezmoi.os "darwin") (lookPath "emacs") }}
+# hash: {{ output "emacs" "--version" | sha256sum }}
+
+set -euo pipefail
+
+echo "Setting up Emacs Client app..."
+
+# Determine Applications directory based on installation type
+{{- if eq .homebrewInstallType "alternative" }}
+APPS_DIR="$HOME/Applications"
+{{- else }}
+APPS_DIR="/Applications"
+{{- end }}
+
+# Ensure Applications directory exists
+mkdir -p "$APPS_DIR"
+
+# Find the actual Emacs.app location
+EMACS_APP_PATH=""
+if [ -d "$(brew --prefix emacs-plus@31)/Emacs.app" ]; then
+    EMACS_APP_PATH="$(brew --prefix emacs-plus@31)/Emacs.app"
+elif [ -d "$(brew --cellar emacs-plus@31)/$(brew list --versions emacs-plus@31 | awk '{print $2}')/Emacs.app" ]; then
+    EMACS_APP_PATH="$(brew --cellar emacs-plus@31)/$(brew list --versions emacs-plus@31 | awk '{print $2}')/Emacs.app"
+fi
+
+if [ -z "$EMACS_APP_PATH" ]; then
+    echo "Could not find Emacs.app in Homebrew installation"
+    exit 1
+fi
+
+echo "Found Emacs.app at: $EMACS_APP_PATH"
+
+# Create or update the main Emacs.app symlink
+if [ -L "$APPS_DIR/Emacs.app" ] || [ ! -e "$APPS_DIR/Emacs.app" ]; then
+    echo "Creating/updating Emacs.app symlink..."
+    rm -f "$APPS_DIR/Emacs.app"
+    ln -s "$EMACS_APP_PATH" "$APPS_DIR/Emacs.app"
+else
+    echo "Emacs.app already exists at $APPS_DIR/Emacs.app (not a symlink, skipping)"
+fi
+
+# Create the Emacs Client app
+CLIENT_APP="$APPS_DIR/Emacs (Client).app"
+echo "Creating Emacs (Client).app at $CLIENT_APP..."
+
+# Remove old client app if it exists
+rm -rf "$CLIENT_APP"
+
+# Create the app bundle structure
+mkdir -p "$CLIENT_APP/Contents/MacOS"
+mkdir -p "$CLIENT_APP/Contents/Resources"
+
+# Create Info.plist
+cat > "$CLIENT_APP/Contents/Info.plist" << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>emacs-client-launcher</string>
+    <key>CFBundleIconFile</key>
+    <string>Emacs.icns</string>
+    <key>CFBundleIdentifier</key>
+    <string>org.gnu.Emacs.client.v2</string>
+    <key>CFBundleName</key>
+    <string>Emacs (Client)</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>10.12</string>
+    <key>LSArchitecturePriority</key>
+    <array>
+        <string>arm64</string>
+        <string>x86_64</string>
+    </array>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>LSUIElement</key>
+    <false/>
+</dict>
+</plist>
+EOF
+
+# Copy icon from the main Emacs.app
+if [ -f "$EMACS_APP_PATH/Contents/Resources/Emacs.icns" ]; then
+    cp "$EMACS_APP_PATH/Contents/Resources/Emacs.icns" "$CLIENT_APP/Contents/Resources/"
+fi
+
+# Create the launcher script
+cat > "$CLIENT_APP/Contents/MacOS/emacs-client-launcher" << 'EOF'
+#!/bin/bash
+
+# Get the path to emacsclient from Homebrew
+if command -v brew >/dev/null 2>&1; then
+    BREW_PREFIX="$(brew --prefix)"
+else
+    # Fallback to common locations
+    if [ -x "/opt/homebrew/bin/brew" ]; then
+        BREW_PREFIX="/opt/homebrew"
+    elif [ -x "$HOME/homebrew/bin/brew" ]; then
+        BREW_PREFIX="$HOME/homebrew"
+    else
+        BREW_PREFIX="/usr/local"
+    fi
+fi
+
+EMACSCLIENT="$BREW_PREFIX/bin/emacsclient"
+EMACS="$BREW_PREFIX/bin/emacs"
+
+# Check if emacsclient exists
+if [ ! -x "$EMACSCLIENT" ]; then
+    osascript -e 'display alert "Emacs Client Error" message "emacsclient not found. Please ensure Emacs is installed via Homebrew."'
+    exit 1
+fi
+
+# Check if daemon is running
+if ! "$EMACSCLIENT" -e "(boundp 'server-process)" 2>/dev/null | grep -q 't'; then
+    # Start emacs daemon
+    "$EMACS" --daemon 2>/dev/null &
+    
+    # Wait for the daemon to be ready
+    for i in {1..20}; do
+        if "$EMACSCLIENT" -e "(boundp 'server-process)" 2>/dev/null | grep -q 't'; then
+            break
+        fi
+        sleep 0.5
+    done
+fi
+
+# Create a new frame or focus existing one
+# Important: Don't use exec here - it causes the app to terminate incorrectly on macOS
+"$EMACSCLIENT" -c -n "$@"
+EOF
+
+# Make the launcher executable
+chmod +x "$CLIENT_APP/Contents/MacOS/emacs-client-launcher"
+
+# Touch the app to update Spotlight/LaunchServices
+touch "$CLIENT_APP"
+
+# Register with LaunchServices for immediate availability
+# Now safe to use since we've added LSArchitecturePriority to prevent Rosetta
+if [ -x "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister" ]; then
+    /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister \
+        -f "$CLIENT_APP" 2>/dev/null || true
+fi
+
+echo "✅ Emacs (Client).app created successfully at $CLIENT_APP"
+echo "   This app will:"
+echo "   - Start the Emacs daemon if not running"
+echo "   - Connect to the existing daemon if running"
+echo "   - Open a new GUI frame"
+
+{{- end }}

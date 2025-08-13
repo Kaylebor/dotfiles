@@ -1,0 +1,34 @@
+# pgFormatter configuration file
+# See: https://github.com/darold/pgFormatter/blob/master/doc/pg_format.conf.sample
+
+# Case formatting
+keyword-case=2      # Uppercase keywords (SELECT, FROM, WHERE)
+type-case=2         # Uppercase data types (VARCHAR, INTEGER)
+function-case=1     # Lowercase function names (count(), sum())
+
+# Indentation
+spaces=2            # 2-space indentation (matching your sql-formatter config)
+tabs=0              # Use spaces, not tabs
+
+# Line wrapping
+wrap-limit=120      # Wrap at 120 characters (more generous for keeping things inline)
+wrap-after=10       # Keep up to 10 items on same line (columns, tables, etc.)
+format-type=1       # Alternative formatting (keeps GROUP BY on single line, etc.)
+wrap-comment=0      # Don't reformat comments
+
+# Comma placement
+comma=end           # Commas at end of lines (more common style)
+comma-break=0       # Don't force newline after each comma in INSERT
+
+# Statement spacing
+nogrouping=0        # Group statements in transactions
+format-type=0       # Standard formatting
+
+# Keep formatting
+keep-newline=1      # Preserve intentional blank lines
+
+# Don't anonymize data
+anonymize=0
+
+# Output format
+format=text         # Plain text output (not HTML)
