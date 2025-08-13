@@ -15,21 +15,90 @@ $env.PATH = ($env.PATH | split row (char esep) | prepend ["/usr/local/sbin", "/u
 {{- end }}
 
 # Core environment variables
-$env.EDITOR = "{{ if lookPath "nvim" }}nvim{{ else if lookPath "vim" }}vim{{ else }}vi{{ end }}"
+# Set EDITOR with emacsclient preference and fallback
+{{- if lookPath "emacsclient" }}
+{{- $fallbackEditor := "" }}
+{{- $tuiEditors := list "helix" "hx" "nvim" "vim" "vi" }}
+{{- range $editor := $tuiEditors }}
+{{- if and (not $fallbackEditor) (lookPath $editor) }}
+{{- $fallbackEditor = $editor }}
+{{- end }}
+{{- end }}
+$env.EDITOR = "emacsclient -t{{ if $fallbackEditor }} --alternate-editor='{{ $fallbackEditor }}'{{ end }}"
+{{- else }}
+{{- $tuiEditors := list "helix" "hx" "nvim" "vim" "vi" }}
+{{- range $editor := $tuiEditors }}
+{{- if lookPath $editor }}
+$env.EDITOR = "{{ $editor }}"
+{{- break }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+# Set VISUAL with GUI preference and fallback
+{{- if lookPath "emacsclient" }}
+{{- $fallbackEditor := "" }}
+{{- if lookPath "zed" }}
+{{- $fallbackEditor = "zed -w" }}
+{{- else }}
+{{- $visualEditors := list "helix" "hx" "nvim" "vim" "vi" }}
+{{- range $editor := $visualEditors }}
+{{- if and (not $fallbackEditor) (lookPath $editor) }}
+{{- $fallbackEditor = $editor }}
+{{- end }}
+{{- end }}
+{{- end }}
+$env.VISUAL = "emacsclient -c{{ if $fallbackEditor }} --alternate-editor='{{ $fallbackEditor }}'{{ end }}"
+{{- else if lookPath "zed" }}
+$env.VISUAL = "zed -w"
+{{- else }}
 $env.VISUAL = $env.EDITOR
+{{- end }}
 $env.PAGER = "{{ if lookPath "bat" }}bat --style=plain{{ else if lookPath "less" }}less -R{{ else }}more{{ end }}"
 $env.LANG = "en_US.UTF-8"
 $env.LC_ALL = "en_US.UTF-8"
 
 # Path configuration
 $env.PATH = ($env.PATH | split row (char esep) | prepend [
+    {{- if stat (joinPath .chezmoi.homeDir ".local" "bin") }}
     "{{ .chezmoi.homeDir }}/.local/bin"
+    {{- end }}
+    {{- if stat (joinPath .chezmoi.homeDir "bin") }}
     "{{ .chezmoi.homeDir }}/bin"
+    {{- end }}
+    {{- if stat (joinPath .chezmoi.homeDir ".local" "share" "google-cloud-sdk" "bin") }}
+    "{{ .chezmoi.homeDir }}/.local/share/google-cloud-sdk/bin"
+    {{- end }}
+    {{- if stat (joinPath .chezmoi.homeDir ".local" "share" "yabridge") }}
+    "{{ .chezmoi.homeDir }}/.local/share/yabridge"
+    {{- end }}
+    {{- if stat (joinPath .chezmoi.homeDir ".rd" "bin") }}
+    "{{ .chezmoi.homeDir }}/.rd/bin"
+    {{- end }}
+    {{- if stat (joinPath .chezmoi.homeDir ".deno" "bin") }}
+    "{{ .chezmoi.homeDir }}/.deno/bin"
+    {{- end }}
+    {{- if stat (joinPath .chezmoi.homeDir ".bun" "bin") }}
+    "{{ .chezmoi.homeDir }}/.bun/bin"
+    {{- end }}
+    {{- if stat (joinPath .chezmoi.homeDir ".mix" "escripts") }}
+    "{{ .chezmoi.homeDir }}/.mix/escripts"
+    {{- end }}
     {{- if lookPath "mise" }}
     "{{ .chezmoi.homeDir }}/.local/share/mise/shims"
     {{- end }}
 ] | uniq)
 
+{{- if eq .chezmoi.os "darwin" }}
+# Add GNU utils to PATH on macOS
+{{- $gnuUtils := list "coreutils" "findutils" "gnu-sed" "gawk" "grep" }}
+{{- range $util := $gnuUtils }}
+{{- $gnuBinPath := printf "%s/opt/%s/libexec/gnubin" (or (and (stat (joinPath $.chezmoi.homeDir ".homebrew")) (joinPath $.chezmoi.homeDir ".homebrew")) (and (stat (joinPath $.chezmoi.homeDir "homebrew")) (joinPath $.chezmoi.homeDir "homebrew")) (and (stat "/opt/homebrew") "/opt/homebrew") "/usr/local") $util }}
+{{- if stat $gnuBinPath }}
+$env.PATH = ($env.PATH | split row (char esep) | prepend "{{ $gnuBinPath }}" | uniq)
+{{- end }}
+{{- end }}
+{{- end }}
 
 # 1Password SSH Agent
 {{- if not .skip1Password }}
@@ -42,6 +111,37 @@ $env.SSH_AUTH_SOCK = "{{ .chezmoi.homeDir }}/.1password/agent.sock"
 
 {{- if lookPath "gpg" }}
 $env.GPG_TTY = (tty)
+{{- end }}
+
+# Git and PSQL editors (prefer TUI for these)
+$env.GIT_EDITOR = $env.EDITOR
+$env.PSQL_EDITOR = $env.EDITOR
+
+{{- if lookPath "bat" }}
+# Bat as man pager
+$env.MANPAGER = "sh -c 'col -bx | bat -l man -p'"
+{{- end }}
+
+{{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
+# Homebrew Cask installation directory for MDM-restricted systems
+$env.HOMEBREW_CASK_OPTS = "--appdir={{ .chezmoi.homeDir }}/Applications"
+
+# GCC environment variables for alternative Homebrew installations
+{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc") }}
+{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "lib" "gcc" "current") }}
+$env.LIBRARY_PATH = "{{ .chezmoi.homeDir }}/{{ .homebrewPath }}/opt/gcc/lib/gcc/current:($env.LIBRARY_PATH? | default '')"
+{{- end }}
+{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "include") }}
+$env.C_INCLUDE_PATH = "{{ .chezmoi.homeDir }}/{{ .homebrewPath }}/opt/gcc/include:($env.C_INCLUDE_PATH? | default '')"
+{{- end }}
+{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "include" "c++" "15") }}
+$env.CPLUS_INCLUDE_PATH = "{{ .chezmoi.homeDir }}/{{ .homebrewPath }}/opt/gcc/include/c++/15:($env.CPLUS_INCLUDE_PATH? | default '')"
+{{- end }}
+{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "bin" "gcc-15") }}
+$env.CC = "gcc-15"
+$env.CXX = "g++-15"
+{{- end }}
+{{- end }}
 {{- end }}
 
 # Carapace bridges for additional shell completions
@@ -131,6 +231,15 @@ $env.config = {
     ]
 }
 
+# Mise runtime management integration
+{{- if lookPath "mise" }}
+# Load mise activation script (generated by run_onchange script)
+{{- $miseInit := joinPath .chezmoi.homeDir ".local/share/nushell/vendor/autoload/mise.nu" }}
+{{- if stat $miseInit }}
+source "{{ $miseInit }}"
+{{- end }}
+{{- end }}
+
 # Load Starship prompt (generated by run_before script)
 {{- if lookPath "starship" }}
 {{- $starshipInit := joinPath .chezmoi.homeDir ".local/share/nushell/vendor/autoload/starship.nu" }}
@@ -165,10 +274,14 @@ alias diff = delta
 # Utility aliases
 alias q = exit
 alias ":q" = exit
+
+# Clipboard alias
 {{- if lookPath "pbcopy" }}
 alias cb = pbcopy
 {{- else if lookPath "xclip" }}
 alias cb = xclip -selection clipboard
+{{- else if lookPath "clipboard" }}
+alias cb = clipboard
 {{- end }}
 
 {{- if lookPath "emacsclient" }}
