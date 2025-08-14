@@ -51,3 +51,28 @@ When Claude Code is opened from within Emacs (vs a normal terminal), additional 
 - **mcp__ide__getDiagnostics** - LSP diagnostics and linting warnings
 
 These tools provide deep code analysis and navigation when available. Use them for understanding large codebases and finding symbol relationships.
+
+## AI Agents (Subagents)
+
+Claude Code automatically delegates to specialized agents based on task context:
+
+### Language Experts
+- **rails-expert**: Rails 7+, ActiveRecord, RSpec testing (auto: .rb files)
+- **angular-primeng**: Angular 18, PrimeNG 17, Jest/Karma (auto: .ts files)  
+- **go-services**: Go microservices, testing, concurrency (auto: .go files)
+
+### Infrastructure
+- **db-architect**: Database design, optimization, migrations
+- **performance-profiler**: Bottleneck analysis, profiling, optimization
+
+### Quality Assurance
+- **code-reviewer**: Code quality, best practices, coverage
+- **security-auditor**: Vulnerability scanning, OWASP compliance
+- **api-designer**: API architecture, OpenAPI documentation
+
+### Workflow
+- **git-workflow**: Git operations, branching, PR management
+- **docs-architect**: Documentation generation and maintenance
+
+Explicit invocation: "Use the [agent-name] agent to..."
+View available agents: Run `/agents` command
