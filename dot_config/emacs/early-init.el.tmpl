@@ -69,9 +69,10 @@
                        (format "%s:%s" value (getenv var-name))
                      value)))
 
-;; Use runtime-detected Homebrew path for GCC libraries
+{{- if eq .chezmoi.os "darwin" }}
+;; Use template-detected Homebrew path for GCC libraries
 ;; Need to include the actual GCC subdirectory where libemutls_w.a lives
-(let* ((homebrew-prefix (string-trim (shell-command-to-string "brew --prefix")))
+(let* ((homebrew-prefix "{{ if lookPath "brew" }}{{ output "brew" "--prefix" | trim }}{{ else }}/opt/homebrew{{ end }}")
        (gcc-base (concat homebrew-prefix "/lib/gcc/current"))
        (gcc-lib-base (concat gcc-base "/gcc"))
        (gcc-subdir (when (file-directory-p gcc-lib-base)
@@ -97,6 +98,7 @@
       (setq native-comp-driver-options
             (append native-comp-driver-options
                     (list (concat "-B" homebrew-prefix "/bin/")))))))
+{{- end }}
 {{- end }}
 
 ;;; Security

@@ -11,8 +11,9 @@
 
 ;; PACKAGES
 {{- if eq .chezmoi.os "darwin" }}
-;; Improves some MacOS defaults
-(elpaca exec-path-from-shell (exec-path-from-shell-initialize))
+;; Template-based PATH setup for macOS (eliminates exec-path-from-shell runtime subprocess)
+(setq exec-path '({{- range (env "PATH" | splitList ":") -}}"{{ . }}" {{ end }}))
+(setenv "PATH" "{{ env "PATH" }}")
 {{- else }}
 ;; Only load exec-path-from-shell in daemon mode on non-macOS
 (when (daemonp) (elpaca exec-path-from-shell (exec-path-from-shell-initialize)))
