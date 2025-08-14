@@ -64,6 +64,10 @@ fi
 
 # Runtime version managers (mise/rtx)
 if command -v mise &>/dev/null; then
+    TOTAL_TOOLS=$(mise list --current 2>/dev/null | wc -l | tr -d ' ')
     MISE_TOOLS=$(mise list --current 2>/dev/null | head -5 | awk '{printf "%s@%s ", $1, $2}' | sed 's/ $//')
-    [[ -n "$MISE_TOOLS" ]] && echo "Active tools: $MISE_TOOLS"
+    if [[ -n "$MISE_TOOLS" ]]; then
+        echo "Active tools ($TOTAL_TOOLS total): $MISE_TOOLS"
+        [[ "$TOTAL_TOOLS" -gt 5 ]] && echo "  → Run 'mise list --current' to see all tools"
+    fi
 fi
