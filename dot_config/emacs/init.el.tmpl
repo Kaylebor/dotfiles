@@ -323,7 +323,8 @@
 {{- end }}
 
 ;; Hide some Emacs-native modes from modeline
-(delight '((eldoc-mode nil "eldoc")))
+(with-eval-after-load 'delight
+  (delight '((eldoc-mode nil "eldoc"))))
 
 ;; Disable menu bar
 (menu-bar-mode -1)
