@@ -262,9 +262,11 @@
   :init
   (global-mise-mode))
 
+{{- if not .skip1Password }}
 ;; 1Password integration
 (elpaca (auth-source-1password :host github :repo "dlobraico/auth-source-1password" :build t)
   (auth-source-1password-enable))
+{{- end }}
 
 ;; GPT and family
 (load-file (expand-file-name "gptel-init.el" user-emacs-directory))

@@ -211,9 +211,11 @@
 ;; Magit config
 (setopt magit-define-global-key-bindings 'recommended)
 
+{{- if not .skip1Password }}
 ;; 1Password config
 (setopt auth-source-1password-vault "Private")
 (setopt auth-source-1password-construct-secret-reference #'auth-source-1password--1password-construct-query-path-escaped)
+{{- end }}
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
