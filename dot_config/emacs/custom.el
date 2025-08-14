@@ -221,8 +221,7 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    '("9b21c848d09ba7df8af217438797336ac99cbbbc87a08dc879e9291673a6a631"
-     "fc1275617f9c8d1c8351df9667d750a8e3da2658077cfdda2ca281a2ebc914e0" default))
- '(helm-minibuffer-history-key "M-p"))
+     "fc1275617f9c8d1c8351df9667d750a8e3da2658077cfdda2ca281a2ebc914e0" default)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

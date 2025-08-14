@@ -144,6 +144,7 @@
   (setopt lsp-keymap-prefix "C-c l")
   (lsp-keep-workspace-alive nil) ;; close LSP servers after last buffer is closed
   (lsp-ruby-lsp-use-bundler nil) ;; use global ruby-lsp with composed bundle
+  (lsp-completion-provider :none) ;; Use corfu instead of company-mode
   :hook
   (ruby-ts-mode . lsp)
   (html-ts-mode . lsp)
@@ -153,10 +154,18 @@
   (gdscript-ts-mode . lsp)
   (rust-ts-mode . lsp)
   (lsp-mode . lsp-enable-which-key-integration)
+  (lsp-mode . lsp-headerline-breadcrumb-mode)
   :config
   ;; Enable breadcrumb in header line with icons
   (setq lsp-headerline-breadcrumb-enable t)
   (setq lsp-headerline-breadcrumb-icons-enable t)
+  
+  ;; Suppress company-mode warnings since we're using corfu
+  (setq lsp-warn-no-matched-clients nil)
+  
+  ;; Configure go.mod files - disable LSP for them as gopls doesn't support them well
+  (add-to-list 'lsp-language-id-configuration '(go-mod-mode . "go.mod"))
+  (add-hook 'go-mod-ts-mode-hook (lambda () (lsp-mode -1)))
   
   ;; Ensure TypeScript is found properly
   (setq lsp-clients-typescript-server-args '("--stdio"))
@@ -254,9 +263,30 @@ This is intended to be run on startup to avoid delays when opening the first Rub
   :defer t
   :after lsp-mode)
 
-(use-package helm-lsp :ensure t
-  :defer t
-  :after (helm lsp-mode))
+;; Corfu for in-buffer completion (works great with LSP)
+(use-package corfu :ensure t
+  :custom
+  (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
+  (corfu-auto t)                 ;; Enable auto completion
+  (corfu-separator ?\s)          ;; Orderless field separator
+  ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
+  ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
+  ;; (corfu-preview-current nil)    ;; Disable current candidate preview
+  ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
+  ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
+  ;; (corfu-scroll-margin 5)        ;; Use scroll margin
+  :init
+  (global-corfu-mode))
+
+;; Add extensions
+(use-package corfu-popupinfo :ensure nil
+  :after corfu
+  :hook (corfu-mode . corfu-popupinfo-mode)
+  :custom
+  (corfu-popupinfo-delay '(0.25 . 0.1))
+  (corfu-popupinfo-hide nil)
+  :config
+  (corfu-popupinfo-mode))
 
 ;; DAP debugging - only loads when needed
 (use-package dap-mode :ensure t

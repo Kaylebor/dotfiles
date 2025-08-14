@@ -58,6 +58,8 @@
   :init
   ;; Enable projectile-mode and set up keymap before other packages can use it
   (projectile-mode +1)
+  ;; Use default Emacs completion system (works with vertico/consult)
+  (setq projectile-completion-system 'default)
   (with-eval-after-load 'projectile
     (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map))
   :config
@@ -101,57 +103,66 @@
   :config
   (treemacs-load-theme "nerd-icons"))
 
-;; helm icons support using nerd-icons
-(elpaca (helm-icons 
-         :host github 
-         :repo "yyoncho/helm-icons")
-  (use-package helm-icons
-    :after nerd-icons
-    :custom
-    (helm-icons-provider 'nerd-icons)
-    :config
-    (helm-icons-enable)))
-
-;; helm for incremental completion
-(use-package helm :ensure t
-  :after helm-icons  ; Load helm-icons first
-  :delight
-  :demand t  ; Load immediately, don't wait for keybindings
-  :bind
-  (("C-x C-f" . helm-find-files)
-   ("C-x b" . helm-buffers-list)
-   ("M-x" . helm-M-x))
+;; Modern completion framework stack
+(use-package vertico :ensure t
   :custom
-  (completions-detailed t)
-  (elm-M-x-show-short-doc t)
-  (helm-mode-fuzzy-match t)
-  (helm-completion-in-region-fuzzy-match t)
-  :config
-  (helm-mode 1)
-  (helm-popup-tip-mode))
-(use-package helm-projectile :ensure t
-  :after (helm projectile)  ; Ensure both are loaded first
-  :demand t  ; Force immediate loading to avoid lazy loading issues
+  (vertico-cycle t)  ; Enable cycling for `vertico-next/previous'
   :init
-  ;; Ensure projectile uses helm before helm-projectile-on is called
-  (with-eval-after-load 'projectile
-    (setq projectile-completion-system 'helm))
-  :config
-  ;; Initialize helm-projectile - this replaces projectile commands with helm versions
-  ;; This should now work because the keymap is already defined
-  (helm-projectile-on))
+  (vertico-mode))
 
-;; Add nerd-icons support for completion frameworks including helm
+(use-package consult :ensure t
+  :bind (("C-x b" . consult-buffer)
+         ("M-g g" . consult-goto-line)
+         ("M-g M-g" . consult-goto-line)
+         ("M-s l" . consult-line)         ; Standard consult-line binding
+         ("M-s f" . consult-find)
+         ("M-s r" . consult-ripgrep)
+         ("M-y" . consult-yank-pop))
+  :init
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+  :config
+  ;; Configure project buffer support - consult-buffer will automatically include project buffers
+  ;; Add project buffer switching with C-x p b
+  (define-key global-map (kbd "C-x p b") 
+    (lambda () (interactive) 
+      (let ((consult-buffer-sources '(consult--source-project-buffer)))
+        (consult-buffer)))))
+
+(use-package marginalia :ensure t
+  :init
+  (marginalia-mode))
+
+(use-package orderless :ensure t
+  :custom
+  ;; Configure a custom style dispatcher (see the Consult wiki)
+  ;; (orderless-style-dispatchers '(+orderless-dispatch))
+  ;; (orderless-component-separator #'orderless-escapable-split-on-space)
+  (completion-styles '(orderless basic))
+  (completion-category-defaults nil)
+  (completion-category-overrides '((file (styles partial-completion)))))
+
+(use-package embark :ensure t
+  :bind
+  (("C-." . embark-act)         ;; pick some comfortable binding
+   ("C-;" . embark-dwim)        ;; good alternative: M-.
+   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+  :init
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command))
+
+(use-package embark-consult :ensure t
+  :after (embark consult)
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+
+;; Add nerd-icons support for completion frameworks
 (use-package nerd-icons-completion :ensure t
   :after nerd-icons
   :config
   (nerd-icons-completion-mode))
 
-;; company for completion UI
-(use-package company :ensure t
-  :delight
-  :config
-  (global-company-mode))
 
 ;; Emacs minibuffer configurations.
 (use-package emacs
