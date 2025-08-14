@@ -14,6 +14,8 @@ Chezmoi-managed dotfiles for cross-platform development (macOS/Arch Linux) using
 
 Note: `chezmoi apply` works from any directory - it automatically uses `~/.local/share/chezmoi` as source and `$HOME` as target.
 
+**Important**: If `chezmoi apply` fails with 1Password errors related to TTY availability, Claude Code cannot run it directly. In this case, ask the user to run the command manually in their terminal.
+
 ## Architecture
 
 ### File Structure
