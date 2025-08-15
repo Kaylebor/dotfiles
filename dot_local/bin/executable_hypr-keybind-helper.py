@@ -24,6 +24,10 @@ DESCRIPTIONS = {
     "up, movefocus, u": "Focus upper window",
     "down, movefocus, d": "Focus lower window",
     
+    # Window cycling
+    "ALT, Tab, cyclenext,": "Cycle to next window (Alt-Tab)",
+    "ALT SHIFT, Tab, cyclenext, prev": "Cycle to previous window (Alt-Shift-Tab)",
+    
     # Window resizing
     "ALT, left, resizeactive, -50 0": "Resize window smaller horizontally",
     "ALT, right, resizeactive, 50 0": "Resize window larger horizontally",
