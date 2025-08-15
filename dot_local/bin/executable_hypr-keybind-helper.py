@@ -12,6 +12,7 @@ DESCRIPTIONS = {
     "C, killactive,": "Close window",
     "M, exit,": "Exit Hyprland",
     "E, exec, $fileManager": "Open file manager",
+    "SHIFT, E, exec, emacsclient -c": "Open Emacs client",
     "V, togglefloating,": "Toggle floating mode",
     "Space, exec, $menu": "Open app launcher",
     "P, pseudo,": "Toggle pseudo-tiling",

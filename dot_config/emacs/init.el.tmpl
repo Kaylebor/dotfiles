@@ -182,8 +182,6 @@
   :bind
   (("C-c t" . vterm)))
 
-;; eat - Emulate A Terminal (for claude-code-ide)
-(use-package eat :ensure t)
 
 ;; Claude Code IDE integration
 (elpaca (claude-code-ide 
@@ -192,8 +190,10 @@
   (use-package claude-code-ide
     :bind ("C-c C-'" . claude-code-ide-menu)
     :custom
-    ;; Use eat as terminal backend for better evil-mode integration and smoother display
-    (claude-code-ide-terminal-backend 'eat)
+    ;; Use vterm as terminal backend with anti-flicker optimization for resize stability
+    (claude-code-ide-terminal-backend 'vterm)
+    (claude-code-ide-vterm-anti-flicker t)
+    (claude-code-ide-vterm-render-delay 0.005)
     ;; Claude CLI is available via mise - use executable-find to locate it
     (claude-code-ide-cli-executable (executable-find "claude"))
     ;; Optional: Enable debug mode initially to verify setup
