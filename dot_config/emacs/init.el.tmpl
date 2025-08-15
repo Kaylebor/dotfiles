@@ -204,6 +204,10 @@
     :config
     ;; Enable Emacs tools integration for advanced features
     (claude-code-ide-emacs-tools-setup)
+    
+    ;; Load and enable custom LSP MCP tools
+    (load-file (expand-file-name "claude-code-ide-custom-tools.el" user-emacs-directory))
+    (claude-code-ide-custom-tools-setup)
     ;; Optional: Customize window placement
     (setq claude-code-ide-window-placement 'right)
     
