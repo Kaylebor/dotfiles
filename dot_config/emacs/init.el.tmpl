@@ -102,7 +102,9 @@
 (use-package treemacs-magit :ensure t)
 (use-package treemacs-nerd-icons :ensure t
   :config
-  (treemacs-load-theme "nerd-icons"))
+  (treemacs-load-theme "nerd-icons")
+  ;; Enable automatic project following when switching buffers
+  (treemacs-project-follow-mode 1))
 
 ;; Modern completion framework stack
 (use-package vertico :ensure t
@@ -157,6 +159,7 @@
   :after (embark consult)
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
+
 
 ;; Add nerd-icons support for completion frameworks
 (use-package nerd-icons-completion :ensure t
@@ -229,6 +232,18 @@
   ;; Show word-level differences within changed lines
   (magit-diff-refine-hunk t))
 
+;; Structural diff with difftastic
+(use-package difftastic :ensure t
+  :demand t
+  :bind (:map magit-blame-read-only-mode-map
+         ("D" . difftastic-magit-show)
+         ("S" . difftastic-magit-show))
+  :config
+  (eval-after-load 'magit-diff
+    '(transient-append-suffix 'magit-diff '(-1 -1)
+       [("D" "Difftastic diff (dwim)" difftastic-magit-diff)
+        ("S" "Difftastic show" difftastic-magit-show)])))
+
 ;; which-key for command discovery
 (use-package which-key :ensure t
   :delight
@@ -253,6 +268,19 @@
   :custom
   (grip-command 'go-grip) ;; auto, grip, go-grip or mdopen
   :hook (markdown-ts-mode . grip-mode))
+
+;; Quick navigation with Avy
+(use-package avy :ensure t
+  :bind (("M-j" . avy-goto-char-timer)
+         ("M-g w" . avy-goto-word-1)
+         ("M-g l" . avy-goto-line))
+  :custom
+  (avy-timeout-seconds 0.5))
+
+;; Incremental text selection
+(use-package expand-region :ensure t
+  :bind (("C-=" . er/expand-region)
+         ("C--" . er/contract-region)))
 
 ;; Spelling
 (use-package jinx :ensure t)

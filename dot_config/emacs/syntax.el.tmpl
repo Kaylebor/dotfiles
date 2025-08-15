@@ -266,17 +266,36 @@ This is intended to be run on startup to avoid delays when opening the first Rub
 ;; Corfu for in-buffer completion (works great with LSP)
 (use-package corfu :ensure t
   :custom
-  (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
-  (corfu-auto t)                 ;; Enable auto completion
-  (corfu-separator ?\s)          ;; Orderless field separator
-  ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
-  ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
-  ;; (corfu-preview-current nil)    ;; Disable current candidate preview
-  ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
-  ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
-  ;; (corfu-scroll-margin 5)        ;; Use scroll margin
+  (corfu-cycle t)                    ;; Enable cycling for `corfu-next/previous'
+  (corfu-auto t)                     ;; Enable auto completion
+  (corfu-auto-delay 0.3)             ;; Delay before auto completion
+  (corfu-auto-prefix 2)              ;; Minimum prefix length for auto completion
+  (corfu-separator ?\s)              ;; Orderless field separator
+  (corfu-quit-at-boundary 'separator) ;; Quit at completion boundary
+  (corfu-quit-no-match 'separator)   ;; Quit when no match with separator
+  (corfu-preview-current 'insert)    ;; Preview current candidate on insert
+  (corfu-preselect 'prompt)          ;; Preselect the prompt
+  (corfu-on-exact-match nil)         ;; Don't auto-select exact matches
+  (corfu-scroll-margin 5)            ;; Use scroll margin
+  :bind
+  ;; Configure Tab/S-Tab behavior
+  (:map corfu-map
+        ("TAB" . corfu-next)
+        ([tab] . corfu-next)
+        ("S-TAB" . corfu-previous)
+        ([backtab] . corfu-previous)
+        ("RET" . corfu-insert)
+        ("M-SPC" . corfu-insert-separator))
   :init
-  (global-corfu-mode))
+  (global-corfu-mode)
+  
+  ;; Enable Corfu in minibuffer for eval-expression etc.
+  (defun corfu-enable-in-minibuffer ()
+    "Enable Corfu in the minibuffer if `completion-at-point' is bound."
+    (when (where-is-internal #'completion-at-point (list (current-local-map)))
+      (setq-local corfu-auto nil)  ; Disable auto completion
+      (corfu-mode 1)))
+  (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer))
 
 ;; Add extensions
 (use-package corfu-popupinfo :ensure nil
@@ -287,6 +306,37 @@ This is intended to be run on startup to avoid delays when opening the first Rub
   (corfu-popupinfo-hide nil)
   :config
   (corfu-popupinfo-mode))
+
+;; Corfu terminal support
+(use-package corfu-terminal :ensure t
+  :if (not (display-graphic-p))
+  :config
+  (corfu-terminal-mode +1))
+
+;; Icons in completion
+(use-package kind-icon :ensure t
+  :after corfu
+  :custom
+  (kind-icon-default-face 'corfu-default) ; Use corfu face as background
+  (kind-icon-use-icons t)
+  (kind-icon-blend-background t)
+  :config
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
+
+;; Cape completion extensions
+(use-package cape :ensure t
+  :init
+  ;; Add to the global default value of `completion-at-point-functions' which is
+  ;; used by `completion-at-point'.  The order of the functions matters, the
+  ;; first function returning a result wins.  Note that the list of buffer-local
+  ;; completion functions takes precedence over the global list.
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-elisp-block)
+  ;; cape-keyword for programming modes
+  (add-hook 'prog-mode-hook
+            (lambda ()
+              (add-to-list 'completion-at-point-functions #'cape-keyword t))))
 
 ;; DAP debugging - only loads when needed
 (use-package dap-mode :ensure t

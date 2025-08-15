@@ -32,6 +32,10 @@
   (keymap-set evil-normal-state-map "g l f" #'gptel-add-file)
   (keymap-set evil-normal-state-map "M-?" #'which-key-show-top-level)
   
+  ;; Avy navigation
+  (keymap-set evil-normal-state-map "g s" #'avy-goto-char-timer)
+  (keymap-set evil-visual-state-map "g s" #'avy-goto-char-timer)
+  
   ;; Claude Code IDE bindings
   (keymap-set evil-normal-state-map "g l c" #'claude-code-ide-menu)
   (keymap-set evil-normal-state-map "g l C" #'claude-code-ide)
