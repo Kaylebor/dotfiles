@@ -16,6 +16,13 @@
         tool-path
       tool))) ; fallback to global
 
+;; Org file navigation with consult
+(defun my/consult-org-files ()
+  "Find org files with consult in ~/org directory."
+  (interactive)
+  (let ((consult-find-args "find . -not ( -path */.*/* -prune ) -type f -name *.org"))
+    (consult-find "~/org/")))
+
 ;; LSP booster integration
 (defun lsp-booster--advice-json-parse (old-fn &rest args)
   "Try to parse bytecode instead of json."

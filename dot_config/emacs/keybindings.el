@@ -30,6 +30,8 @@
   (keymap-set evil-normal-state-map "g l s" #'gptel-send)
   (keymap-set evil-normal-state-map "g l a" #'gptel-add)
   (keymap-set evil-normal-state-map "g l f" #'gptel-add-file)
+  (keymap-set evil-normal-state-map "g l d" #'gptel-multimodal-debug)
+  (keymap-set evil-normal-state-map "g l p" #'gptel-quick-preset)
   (keymap-set evil-normal-state-map "M-?" #'which-key-show-top-level)
   
   ;; Avy navigation
@@ -54,6 +56,9 @@
   (keymap-set completion-preview-active-mode-map "M-p" #'completion-preview-prev-candidate)
   ;; Convenient alternative to C-i after typing one of the above
   (keymap-set completion-preview-active-mode-map "M-i" #'completion-preview-insert))
+
+;; Org file navigation
+(global-set-key (kbd "C-c o f") #'my/consult-org-files)
 
 ;; Claude Code IDE evil-mode vterm integration
 ;; Make C-c C-c send escape to Claude (for canceling operations)
