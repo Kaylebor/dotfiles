@@ -1,5 +1,10 @@
 {{- $ollamaModels := (fromYaml (include ".chezmoidata/ollama-models.yml")) -}}
-{{- if ne .ollamaHost "" }}
+{{- if .useLlamaSwap }}
+# Llama-swap + Cloud configuration (both available)
+model: openai/qwen3coder-a3b-q4-16l-256k-kq8fa
+openai-api-base: {{ .llamaSwapApiBase }}
+openai-api-key: dummy
+{{- else if ne .ollamaHost "" }}
 # Ollama configuration
 model: ollama/{{ $ollamaModels.defaults.aider }}
 {{-   if ne .ollamaHost "localhost:11434" }}

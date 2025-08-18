@@ -1,4 +1,184 @@
-{{- if .pullOllamaModels }}
+{{- if .useLlamaSwap }}
+# Llama-swap OpenAI-compatible models (new naming convention)
+
+# ===== DEEPSEEK-R1 Models =====
+- name: openai/deepseek-r1-q4-54l-16k-fa
+  edit_format: diff
+  use_repo_map: true
+  use_temperature: false
+  extra_params:
+    max_tokens: 4096
+
+- name: openai/deepseek-r1-q4-40l-32k-fa
+  edit_format: diff
+  use_repo_map: true
+  use_temperature: false
+  extra_params:
+    max_tokens: 8192
+
+- name: openai/deepseek-r1-q4-16l-128k-kq8fa
+  edit_format: diff
+  use_repo_map: true
+  use_temperature: false
+  extra_params:
+    max_tokens: 16384
+
+- name: openai/deepseek-r1-q4-16l-256k-kq8fa
+  edit_format: diff
+  use_repo_map: true
+  use_temperature: false
+  extra_params:
+    max_tokens: 32768
+
+# ===== QWEN3-A3B Models =====
+- name: openai/qwen3-a3b-q4-54l-16k-fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 4096
+
+- name: openai/qwen3-a3b-q4-40l-32k-fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 8192
+
+- name: openai/qwen3-a3b-q4-16l-128k-kq8fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 16384
+
+- name: openai/qwen3-a3b-q4-16l-256k-kq4fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 32768
+
+- name: openai/qwen3-a3b-q4-20l-1m-yarn-kq4fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 65536
+
+# ===== QWEN3-CODER Models =====
+- name: openai/qwen3coder-a3b-q4-54l-16k-fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 4096
+
+- name: openai/qwen3coder-a3b-q4-40l-32k-fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 8192
+
+- name: openai/qwen3coder-a3b-q4-16l-128k-kq8fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 16384
+
+- name: openai/qwen3coder-a3b-q4-16l-256k-kq8fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 32768
+
+- name: openai/qwen3coder-a3b-q4-8l-512k-kq4fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 65536
+
+- name: openai/qwen3coder-a3b-q4-20l-768k-kq4fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 98304
+
+- name: openai/qwen3coder-a3b-q4-20l-900k-kq4fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 115200
+
+- name: openai/qwen3coder-a3b-q4-20l-1m-kq4fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 131072
+
+# ===== GPT-OSS Standard Models =====
+- name: openai/gptoss-std-q4-72l-16k-fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 4096
+
+- name: openai/gptoss-std-q4-56l-32k-fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 8192
+
+- name: openai/gptoss-std-q4-16l-128k-kq8fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 16384
+
+- name: openai/gptoss-std-q4-16l-256k-kq4fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 32768
+
+- name: openai/gptoss-std-q4-16l-768k-kq4fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 98304
+
+- name: openai/gptoss-std-q4-40l-512k-kq4fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 65536
+
+- name: openai/gptoss-std-q4-40l-1m-kq4fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 131072
+
+# ===== GPT-OSS Uncensored Models =====
+- name: openai/gptoss-unc-q4-72l-32k-fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 8192
+
+- name: openai/gptoss-unc-q8-56l-16k-fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 4096
+
+- name: openai/gptoss-unc-q4-16l-128k-kq8fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 16384
+
+- name: openai/gptoss-unc-q4-16l-256k-kq4fa
+  edit_format: diff
+  use_repo_map: true
+  extra_params:
+    max_tokens: 32768
+
+{{- else if .pullOllamaModels }}
 {{- $ollamaModels := (fromYaml (include ".chezmoidata/ollama-models.yml")) -}}
 # Context window configuration for Ollama models
 {{- range $ollamaModels.models }}

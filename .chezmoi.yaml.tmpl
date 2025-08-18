@@ -47,6 +47,22 @@
 {{-   end }}
 {{- end }}
 
+{{- $useLlamaSwap := false }}
+{{- if hasKey . "useLlamaSwap" }}
+{{-   $useLlamaSwap = .useLlamaSwap }}
+{{- else }}
+{{-   $useLlamaSwap = promptBool "Use llama-swap for Aider instead of cloud models?" false }}
+{{- end }}
+
+{{- $llamaSwapApiBase := "http://localhost:8080/v1" }}
+{{- if $useLlamaSwap }}
+{{-   if hasKey . "llamaSwapApiBase" }}
+{{-     $llamaSwapApiBase = .llamaSwapApiBase }}
+{{-   else }}
+{{-     $llamaSwapApiBase = promptString "Enter llama-swap API base URL" "http://localhost:8080/v1" }}
+{{-   end }}
+{{- end }}
+
 data:
 {{- if eq .chezmoi.os "darwin" }}
   homebrewInstallType: {{ $homebrewInstallType | quote }}
@@ -62,3 +78,5 @@ data:
   ollamaHost: {{ $ollamaHost | quote }}
   ollamaApiBase: {{ printf "http://%s" $ollamaHost | quote }}
   pullOllamaModels: {{ $pullOllamaModels }}
+  useLlamaSwap: {{ $useLlamaSwap }}
+  llamaSwapApiBase: {{ $llamaSwapApiBase | quote }}
