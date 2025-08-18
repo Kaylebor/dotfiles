@@ -36,6 +36,13 @@ tv init fish > ~/.config/fish/conf.d/television.fish
 # Run the fish environment setup
 fish -c "source {{ .chezmoi.sourceDir }}/.fish_env.fish"
 
+{{- if .useLlamaSwap }}
+# Configure qwen-code for llama-swap
+fish -c "set -Ux OPENAI_BASE_URL '{{ .llamaSwapApiBase }}'"
+fish -c "set -Ux OPENAI_API_KEY 'dummy'"
+fish -c "set -Ux OPENAI_MODEL 'qwen3coder-a3b-q4-16l-256k-kq8fa'"
+{{- end }}
+
 {{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
 # Ensure ~/Applications directory exists for Homebrew Casks
 mkdir -p "$HOME/Applications"
