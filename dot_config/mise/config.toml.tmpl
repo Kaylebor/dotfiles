@@ -44,6 +44,7 @@ experimental = true
 idiomatic_version_file_enable_tools = ["ruby"]
 
 [env]
+MISE_NODE_COREPACK=true
 {{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.idLike "arch") }}
 KERL_CONFIGURE_OPTIONS="--with-odbc=/var/lib/pacman/local/unixodbc-{{ output "pacman" "-Q" "unixodbc" | trim | splitList " " | last }}"
 {{- end }}
