@@ -438,9 +438,7 @@
 ;; Keybindings go here
 (load-file (expand-file-name "keybindings.el" user-emacs-directory))
 
-;; Manually process elpaca queues now before loading customizations
-;; Keybindings may go above this line if they depend on extra packages
-(elpaca-process-queues)
+;; Elpaca queues are processed via after-init-hook in elpaca-init.el
 
 ;; Performance optimizations
 
@@ -451,10 +449,7 @@
                   gc-cons-percentage 0.1)
             (message "GC threshold reset to %s" gc-cons-threshold)))
 
-;; Better pixel-precision scrolling (Emacs 29+) - benefits all platforms
-(when (fboundp 'pixel-scroll-precision-mode)
-  (pixel-scroll-precision-mode 1)
-  (setq pixel-scroll-precision-interpolate-page t))
+;; Pixel-precision scrolling configured in custom.el
 
 ;; Version control optimizations - only track Git
 (setq vc-handled-backends '(Git))
