@@ -4,7 +4,7 @@
   :defer t  ; Don't load until needed
   :init
   ;; Add treesitter grammars so Emacs knows where to find them
-  (setopt treesit-language-source-alist'((bash "https://github.com/tree-sitter/tree-sitter-bash" "v0.23.3")
+  (setopt treesit-language-source-alist '((bash "https://github.com/tree-sitter/tree-sitter-bash" "v0.23.3")
                                          (cmake "https://github.com/uyha/tree-sitter-cmake" "v0.5.0")
                                          (css "https://github.com/tree-sitter/tree-sitter-css" "v0.23.2")
                                          (elixir "https://github.com/elixir-lang/tree-sitter-elixir" "v0.3.4")
@@ -151,6 +151,8 @@
   (ruby-ts-mode . lsp)
   (html-ts-mode . lsp)
   (typescript-ts-mode . lsp)
+  (tsx-ts-mode . lsp)
+  (javascript-ts-mode . lsp)
   (go-ts-mode . lsp)
   (elixir-ts-mode . lsp)
   (gdscript-ts-mode . lsp)
