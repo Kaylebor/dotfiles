@@ -1,7 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 
-(use-package tree-sitter :ensure t
-  :defer t  ; Don't load until needed
+(use-package emacs :ensure nil
   :init
   ;; Add treesitter grammars so Emacs knows where to find them
   (setopt treesit-language-source-alist '((bash "https://github.com/tree-sitter/tree-sitter-bash" "v0.23.3")
@@ -153,6 +152,7 @@
   (typescript-ts-mode . lsp)
   (tsx-ts-mode . lsp)
   (javascript-ts-mode . lsp)
+  (js-jsx-mode . lsp)
   (go-ts-mode . lsp)
   (elixir-ts-mode . lsp)
   (gdscript-ts-mode . lsp)
