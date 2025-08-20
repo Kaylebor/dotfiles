@@ -398,6 +398,24 @@
   (auth-source-1password-enable))
 {{- end }}
 
+;; Org Babel: Mermaid support (diagram rendering via mmdc)
+(use-package ob-mermaid
+  :ensure (:host github :repo "arnm/ob-mermaid")
+  :after org
+  :init
+  ;; Ensure mermaid is included in org-babel languages without clobbering others
+  (with-eval-after-load 'org
+    (add-to-list 'org-babel-load-languages '(mermaid . t)))
+  :config
+  ;; Load languages now (merges with existing list)
+  (when (fboundp 'org-babel-do-load-languages)
+    (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages))
+  ;; Prefer mise-managed mmdc if available
+  (when (boundp 'ob-mermaid-cli-path)
+    (setq ob-mermaid-cli-path
+          (or (and (fboundp 'my-mise-which) (my-mise-which "mmdc"))
+              (executable-find "mmdc")))))
+
 ;; GPT and family
 (load-file (expand-file-name "gptel-init.el" user-emacs-directory))
 
