@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# Cursor settings merge script
+# Merges Chezmoi-managed base settings with existing Cursor settings
+
+set -euo pipefail
+
+# Determine OS-specific Cursor settings path
+{{- if eq .chezmoi.os "darwin" }}
+CURSOR_SETTINGS_PATH="$HOME/Library/Application Support/Cursor/User/settings.json"
+{{- else if eq .chezmoi.os "linux" }}
+CURSOR_SETTINGS_PATH="$HOME/.config/Cursor/User/settings.json"
+{{- else }}
+echo "Unsupported OS: {{ .chezmoi.os }}"
+exit 1
+{{- end }}
+
+# Ensure Cursor settings directory exists
+CURSOR_SETTINGS_DIR="$(dirname "$CURSOR_SETTINGS_PATH")"
+mkdir -p "$CURSOR_SETTINGS_DIR"
+
+# Generate base settings from Chezmoi template and remove comments
+echo "Generating base Cursor settings from template..."
+chezmoi execute-template -f "{{ .chezmoi.sourceDir }}/dot_cursor/settings.json.tmpl" | sed '/^[[:space:]]*\/\//d' > /tmp/cursor-settings-base.json
+
+# Check if existing settings exist
+if [[ -f "$CURSOR_SETTINGS_PATH" ]]; then
+    echo "Found existing Cursor settings, merging..."
+    
+    # Remove comments from existing settings and merge
+    sed '/^[[:space:]]*\/\//d' "$CURSOR_SETTINGS_PATH" > /tmp/cursor-settings-existing.json
+    jq -s '.[0] * .[1]' /tmp/cursor-settings-base.json /tmp/cursor-settings-existing.json > /tmp/cursor-settings-merged.json
+    
+    # Check for differences
+    if ! diff -q /tmp/cursor-settings-merged.json "$CURSOR_SETTINGS_PATH" > /dev/null; then
+        echo "Changes detected in Cursor settings:"
+        echo "======================================"
+        {{- if lookPath "difft" }}
+        difft "$CURSOR_SETTINGS_PATH" /tmp/cursor-settings-merged.json
+        {{- else }}
+        diff "$CURSOR_SETTINGS_PATH" /tmp/cursor-settings-merged.json
+        {{- end }}
+        echo "======================================"
+        
+        read -p "Apply these changes? (y/N): " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            cp /tmp/cursor-settings-merged.json "$CURSOR_SETTINGS_PATH"
+            echo "Cursor settings updated successfully."
+        else
+            echo "Changes cancelled."
+        fi
+    else
+        echo "No changes detected in Cursor settings."
+    fi
+else
+    echo "No existing Cursor settings found, creating new file..."
+    cp /tmp/cursor-settings-base.json "$CURSOR_SETTINGS_PATH"
+    echo "Cursor settings created successfully."
+fi
+
+# Cleanup
+rm -f /tmp/cursor-settings-base.json /tmp/cursor-settings-merged.json /tmp/cursor-settings-existing.json

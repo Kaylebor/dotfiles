@@ -9,6 +9,9 @@ COMPANY_DOTFILES_PLAN.md
 scripts/
 docs/
 
+# Cursor settings template (managed manually via script)
+dot_cursor/settings.json.tmpl
+
 # macOS-specific files to ignore on non-macOS systems
 {{ if ne .chezmoi.os "darwin" -}}
 # Currently no macOS-only files

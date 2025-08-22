@@ -1,0 +1,39 @@
+{
+  // Cursor settings for Mise PATH integration
+  // Managed by Chezmoi - disable Cursor settings sync for this file
+  // Note: This configuration is macOS-specific as Linux IDEs inherit shell environment properly
+  
+  // User's existing settings (excluding SonarLint)
+  "window.commandCenter": true,
+  "git.autofetch": true,
+  "git.blame.editorDecoration.enabled": true,
+  
+  {{- if eq .chezmoi.os "darwin" }}
+  // Terminal environment - include Mise shims path (macOS only)
+  "terminal.integrated.env.osx": {
+    "PATH": "{{ .chezmoi.homeDir }}/.local/share/mise/shims:/usr/local/bin:/usr/bin:/bin"
+  },
+  
+  // Language server configurations - point directly to Mise shims (macOS only)
+  "python.defaultInterpreterPath": "{{ .chezmoi.homeDir }}/.local/share/mise/shims/python",
+  "go.goroot": "{{ .chezmoi.homeDir }}/.local/share/mise/installs/go/latest",
+  "go.gopath": "{{ .chezmoi.homeDir }}/go",
+  
+  // Node.js configuration (macOS only)
+  "debug.javascript.defaultRuntimeExecutable": {
+    "pwa-node": "{{ .chezmoi.homeDir }}/.local/share/mise/shims/node"
+  },
+  
+  // Go tools (macOS only)
+  "go.alternateTools": {
+    "go": "{{ .chezmoi.homeDir }}/.local/share/mise/shims/go",
+    "gopls": "{{ .chezmoi.homeDir }}/.local/share/mise/shims/gopls"
+  },
+  {{- end }}
+  
+  // Shell configuration for all platforms
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  
+  // Ensure terminal inherits environment
+  "terminal.integrated.inheritEnv": true
+}
