@@ -9,8 +9,9 @@ COMPANY_DOTFILES_PLAN.md
 scripts/
 docs/
 
-# Cursor settings template (managed manually via script)
-dot_cursor/settings.json.tmpl
+# Cursor settings templates (managed manually via script)
+.cursor/settings.json
+.cursor/mcp.json
 
 # macOS-specific files to ignore on non-macOS systems
 {{ if ne .chezmoi.os "darwin" -}}
