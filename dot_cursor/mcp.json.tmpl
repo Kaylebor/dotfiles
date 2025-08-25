@@ -15,6 +15,12 @@
     "agent-knowledge": {
       "command": "uvx",
       "args": ["agent-knowledge-mcp"]
-    }
+    }{{- if or (ne (env "CHEZMOI_GITHUB_PAT") "") (ne (lower (env "CHEZMOI_SKIP_1PASSWORD")) "true") }},
+    "github": {
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer {{ template "onepassword_safe" dict "opPath" "op://Private/GitHub MCP/credential" "envVar" "CHEZMOI_GITHUB_PAT" "context" . }}"
+      }
+    }{{- end }}
   }
 }

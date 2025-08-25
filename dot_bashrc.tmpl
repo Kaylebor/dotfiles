@@ -81,3 +81,10 @@ export OPENAI_MODEL="qwen3coder-a3b-q4-16l-256k-kq8fa"
 
 # Set up aliases
 [[ $- == *i* ]] && source $HOME/.config/zsh/aliases.zsh
+
+# Machine-specific bash configuration
+{{- if stat (joinPath .chezmoi.homeDir ".config" "bash" ".bashrc.local") }}
+source $HOME/.config/bash/.bashrc.local
+{{- else }}
+# Note: To add local config, create $HOME/.config/bash/.bashrc.local
+{{- end }}

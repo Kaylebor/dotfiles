@@ -2,6 +2,12 @@
 # Cursor settings merge script
 # Merges Chezmoi-managed base settings with existing Cursor settings
 
+# hash: {{ include "dot_cursor/settings.json.tmpl" | sha256sum }}
+# hash: {{ include "dot_cursor/mcp.json.tmpl" | sha256sum }}
+# hash: {{ env "CHEZMOI_GITHUB_PAT" | sha256sum }}
+# hash: {{ .skip1Password | toString | sha256sum }}
+# hash: {{ env "CHEZMOI_SKIP_1PASSWORD" | sha256sum }}
+
 set -euo pipefail
 
 # Function to merge Chezmoi template with existing file
