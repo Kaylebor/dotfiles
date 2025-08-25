@@ -7,14 +7,6 @@
     "playwright": {
       "command": "bunx",
       "args": ["-y", "@playwright/mcp"]
-    },
-    "serena": {
-      "command": "uvx",
-      "args": ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "ide-assistant"]
-    },
-    "agent-knowledge": {
-      "command": "uvx",
-      "args": ["agent-knowledge-mcp"]
     }{{- if or (ne (env "CHEZMOI_GITHUB_PAT") "") (ne (lower (env "CHEZMOI_SKIP_1PASSWORD")) "true") }},
     "github": {
       "url": "https://api.githubcopilot.com/mcp/",
