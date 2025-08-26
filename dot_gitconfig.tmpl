@@ -28,24 +28,18 @@
   {{- end }}
 [github]
   user = "Kaylebor"
-[include]
-  path = ~/.local/share/delta/catppuccin.gitconfig
 [includeIf "gitdir/i:~/work/"]
   path = ~/work/.gitconfig
 [push]
   autoSetupRemote = true
   default = simple
 [core]
-  pager = delta
+  pager = cat
   excludesfile = ~/.gitignore
 [interactive]
-  diffFilter = delta --color-only
+  diffFilter = cat
 [diff]
   external = difft
-[delta]
-  navigate = true
-  side-by-side = true
-  features = catppuccin-frappe
 [merge]
   conflictStyle = zdiff3
 [diff]
