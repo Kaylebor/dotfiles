@@ -16,7 +16,8 @@ packages:
       - "binutils"
       - "btop"
       - "carapace"
-      - "cmake"
+      - name: "cmake"
+        install_order: 30
       - "coreutils"
       - "curl"
       - "curlie"
@@ -68,7 +69,6 @@ packages:
       - "screen"
       - "shared-mime-info"
       - "shellcheck"
-      - "sqlite"
       - "sql-formatter"
       - "starship"
       - "television"
@@ -90,6 +90,7 @@ packages:
       - "age"
       - "antidote"
       - name: "aspell"
+        watch_versions: true
         alternative_only:
           env:
             HOMEBREW_MAKE_JOBS: "1"
@@ -125,6 +126,7 @@ packages:
       - "fzf"
       - "gawk"
       - name: "gcc"
+        install_order: 10
         alternative_only:
           args:
             - "build-from-source"
@@ -154,7 +156,10 @@ packages:
       - "gzip"
       - "hunspell"
       - "ijq"
-      - "imagemagick@6"
+      - name: "imagemagick@6"
+        watch_versions: true
+      - name: "imagemagick"
+        watch_versions: true
       - "jc"
       - "lapack"
       - "less"
@@ -164,7 +169,8 @@ packages:
       - "libvterm"
       - "lima"
       - "little-cms2"
-      - "llvm"
+      - name: "llvm"
+        install_order: 20
       - "make"
       - "mediainfo"
       - "miller"
@@ -175,7 +181,8 @@ packages:
       - "openblas"
       - "pgcli"
       - "pgformatter"
-      - "pkgconfig"
+      - name: "pkgconfig"
+        install_order: 40
       - "poppler"
       - "postgresql@17"
       - "prettier"
@@ -186,7 +193,6 @@ packages:
       - "shared-mime-info"
       - "shellcheck"
       - "shfmt"
-      - "sqlite"
       - "sql-formatter"
       - "starship"
       - "television"

@@ -2,6 +2,15 @@
 {{/* Script to check OS and install packages based on OS */}}
 # hash: {{ include ".chezmoidata/packages.yml" | sha256sum }}
 
+{{/* Track versions of packages that should trigger re-runs when updated (alternative Homebrew only) */}}
+{{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
+{{- range .packages.darwin.brews }}
+{{- if and (kindIs "map" .) (hasKey . "watch_versions") (eq .watch_versions true) }}
+# {{ .name }}_version: $(brew list --versions {{ .name }} 2>/dev/null || echo "not_installed")
+{{- end }}
+{{- end }}
+{{- end }}
+
 {{/* 
   Environment variables for package reinstallation:
   - CHEZMOI_REINSTALL_PACKAGES: comma-separated list of packages to reinstall using 'brew reinstall'
@@ -85,6 +94,40 @@ brew tap {{ . }}
 {{ end -}}
 {{- end }}
 
+{{/* Ensure uv is available for Python scripts */}}
+{{ if eq .chezmoi.os "darwin" -}}
+# Install uv on macOS
+if ! command -v uv >/dev/null 2>&1; then
+  echo "Installing uv for Python scripts..."
+  if command -v brew >/dev/null 2>&1; then
+    brew install uv
+  else
+    echo "Error: Homebrew not available, cannot install uv"
+    exit 1
+  fi
+fi
+{{ else if eq .chezmoi.os "linux" -}}
+{{- if or (eq .chezmoi.osRelease.idLike "arch") (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.id "cachyos") }}
+# Install uv on Linux (Arch-based)
+if ! command -v uv >/dev/null 2>&1; then
+  echo "Installing uv for Python scripts..."
+  if command -v pacman >/dev/null 2>&1; then
+    sudo pacman -S --needed --noconfirm uv
+  else
+    echo "Error: No package manager found, cannot install uv"
+    exit 1
+  fi
+fi
+{{- else }}
+echo "Error: Unsupported Linux distribution for uv installation"
+exit 1
+{{- end }}
+{{ end }}
+
+# Initialize SQLite database (idempotent)
+echo "Initializing SQLite database..."
+"{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-sqlite" init
+
 # Handle package reinstalls
 # CHEZMOI_REINSTALL_PACKAGES: comma-separated list of packages to reinstall (uses brew reinstall)
 # CHEZMOI_FORCE_REINSTALL_PACKAGES: comma-separated list of packages to uninstall then install
@@ -100,78 +143,49 @@ if [ -n "$CHEZMOI_REINSTALL_PACKAGES" ]; then
   done
 fi
 
-echo "DEBUG: CHEZMOI_FORCE_REINSTALL_PACKAGES='$CHEZMOI_FORCE_REINSTALL_PACKAGES'"
-if [ -n "$CHEZMOI_FORCE_REINSTALL_PACKAGES" ]; then
-  echo "Force reinstalling packages (uninstall + install): $CHEZMOI_FORCE_REINSTALL_PACKAGES"
-  IFS=',' read -ra PACKAGES <<< "$CHEZMOI_FORCE_REINSTALL_PACKAGES"
-  # First uninstall all packages
-  for pkg in "${PACKAGES[@]}"; do
-    pkg=$(echo "$pkg" | tr -d ' ')  # Trim whitespace
-    if brew list --formula | grep -q "^${pkg}$"; then
-      echo "Uninstalling $pkg for clean reinstall..."
-      brew uninstall --ignore-dependencies "$pkg"
-    fi
-  done
-  # Install packages in dependency order
-  # Critical build tools first
-  CRITICAL_PACKAGES=("gcc" "llvm" "cmake" "pkg-config")
-  
-  echo "Installing critical build tools first..."
-  for critical in "${CRITICAL_PACKAGES[@]}"; do
-    for pkg in "${PACKAGES[@]}"; do
-      pkg=$(echo "$pkg" | tr -d ' ')
-      if [[ "$pkg" == "$critical" ]]; then
-        echo "Installing critical package: $pkg..."
-        brew install "$pkg"
-        eval "$(brew shellenv)"
-        brew link "$pkg" 2>/dev/null || true
-        
-        # Special handling for gcc - ensure gfortran symlinks exist
-        if [[ "$pkg" == "gcc" ]]; then
-          echo "Setting up gcc/gfortran symlinks..."
-          # Find the latest gcc version
-          BREW_PREFIX="$(brew --prefix)"
-          GCC_VERSION=$(ls -1 "$BREW_PREFIX/bin"/gcc-* 2>/dev/null | grep -E 'gcc-[0-9]+$' | sort -V | tail -1 | sed 's/.*gcc-//')
-          if [[ -n "$GCC_VERSION" ]]; then
-            echo "Found gcc version: $GCC_VERSION"
-            # Create symlinks for gcc tools
-            for tool in gcc g++ gfortran; do
-              if [[ -f "$BREW_PREFIX/bin/${tool}-${GCC_VERSION}" ]]; then
-                echo "Creating symlink: $BREW_PREFIX/bin/${tool} -> ${tool}-${GCC_VERSION}"
-                ln -sf "$BREW_PREFIX/bin/${tool}-${GCC_VERSION}" "$BREW_PREFIX/bin/${tool}"
-              fi
-            done
-            # Set Fortran compiler environment variables
-            export FC="$BREW_PREFIX/bin/gfortran"
-            export F77="$BREW_PREFIX/bin/gfortran"
-            export F90="$BREW_PREFIX/bin/gfortran"
-          fi
-        fi
-      fi
-    done
-  done
-  
-  # Then install remaining packages
-  echo "Installing remaining packages..."
-  for pkg in "${PACKAGES[@]}"; do
-    pkg=$(echo "$pkg" | tr -d ' ')
-    is_critical=0
-    for critical in "${CRITICAL_PACKAGES[@]}"; do
-      [[ "$pkg" == "$critical" ]] && is_critical=1 && break
-    done
-    if [[ $is_critical -eq 0 ]]; then
-      echo "Installing $pkg..."
-      # For packages that need Fortran, ensure the compiler is found
-      if [[ "$pkg" == "lapack" ]] || [[ "$pkg" == "openblas" ]] || [[ "$pkg" == "octave" ]]; then
-        echo "Installing $pkg with Fortran compiler configuration..."
-        BREW_PREFIX="$(brew --prefix)"
-        FC="$BREW_PREFIX/bin/gfortran" F77="$BREW_PREFIX/bin/gfortran" F90="$BREW_PREFIX/bin/gfortran" brew install "$pkg"
-      else
-        brew install "$pkg"
-      fi
-    fi
-  done
-fi
+{{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
+{{- $script_path := printf "%s/dot_local/bin/executable_chezmoi-sqlite" .chezmoi.sourceDir }}
+{{- $trigger_id := "" }}
+{{- $is_new_id := false }}
+{{- if env "CHEZMOI_FORCE_REINSTALL_PACKAGES" }}
+{{- /* Env present: generate new ID and store in SQLite */}}
+{{- $trigger_id = printf "force_reinstall_%s_%s" (env "CHEZMOI_FORCE_REINSTALL_PACKAGES" | sha256sum | substr 0 8) (now | date "20060102150405") }}
+{{- $_ := output $script_path "add" $trigger_id (env "CHEZMOI_FORCE_REINSTALL_PACKAGES") }}
+{{- $is_new_id = true }}
+{{- else }}
+{{- /* Env missing: REUSE existing ID from SQLite (mandatory step!) */}}
+{{- $trigger_id = output $script_path "get-latest-force-reinstall" | trim }}
+{{- /* If no existing ID in SQLite, generate new one and save it */}}
+{{- if not $trigger_id }}
+{{- $trigger_id = printf "force_reinstall_none_%s" (now | date "20060102150405") }}
+{{- $_ := output $script_path "add" $trigger_id "none" }}
+{{- $is_new_id = true }}
+{{- end }}
+{{- end }}
+
+# Force reinstall trigger management - ID: {{ $trigger_id }}
+{{- if env "CHEZMOI_FORCE_REINSTALL_PACKAGES" }}
+# Environment variable present: running package installation
+echo "Using Python package installer for complex installation logic..."
+IFS=',' read -ra PACKAGES <<< "$CHEZMOI_FORCE_REINSTALL_PACKAGES"
+"{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-package-installer" force-reinstall "${PACKAGES[@]}"
+{{- end }}
+{{- else }}
+{{- if env "CHEZMOI_FORCE_REINSTALL_PACKAGES" }}
+# Standard Homebrew or non-Darwin systems - simple installation
+echo "Force reinstalling packages (simple uninstall + install): $CHEZMOI_FORCE_REINSTALL_PACKAGES"
+IFS=',' read -ra PACKAGES <<< "$CHEZMOI_FORCE_REINSTALL_PACKAGES"
+for pkg in "${PACKAGES[@]}"; do
+  pkg=$(echo "$pkg" | tr -d ' ')
+  if brew list --formula | grep -q "^${pkg}$"; then
+    echo "Uninstalling $pkg for clean reinstall..."
+    brew uninstall --ignore-dependencies "$pkg"
+  fi
+  echo "Installing $pkg..."
+  brew install "$pkg"
+done
+{{- end }}
+{{- end }}
 
 # Install packages with environment variables and patches first (individual installs)
 {{ range .packages.darwin.brews -}}

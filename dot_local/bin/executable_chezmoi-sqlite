@@ -1,0 +1,406 @@
+#!/usr/bin/env python3
+"""
+Safe SQLite wrapper for Chezmoi force reinstall triggers.
+Provides sane defaults when sqlite3 is not available.
+"""
+
+import os
+import sys
+import sqlite3
+import subprocess
+import platform
+from pathlib import Path
+from typing import Optional, List, Tuple
+import argparse
+from datetime import datetime
+
+
+class ChezmoiSQLite:
+    def __init__(self):
+        self.db_file = Path.home() / ".local" / "share" / "chezmoi-homebrew-state.db"
+        self.os_type = platform.system()
+        
+    def install_sqlite3(self) -> bool:
+        """Install sqlite3 based on OS."""
+        try:
+            if self.os_type == "Darwin":
+                return self._install_sqlite3_macos()
+            elif self.os_type == "Linux":
+                return self._install_sqlite3_linux()
+            else:
+                print(f"Error: Unsupported operating system: {self.os_type}")
+                return False
+        except Exception as e:
+            print(f"Error installing sqlite3: {e}")
+            return False
+    
+    def _install_sqlite3_macos(self) -> bool:
+        """Install sqlite3 on macOS using Homebrew."""
+        if not self._check_command("brew"):
+            print("Error: Homebrew not found on macOS")
+            return False
+        
+        print("Installing sqlite via Homebrew...")
+        result = subprocess.run(["brew", "install", "sqlite"], 
+                              capture_output=True, text=True)
+        
+        if result.returncode == 0:
+            # Verify sqlite3 is now available
+            if self._check_sqlite3():
+                return True
+            else:
+                # Try to find and add to PATH
+                brew_prefix = self._get_brew_prefix()
+                if brew_prefix:
+                    sqlite_path = brew_prefix / "opt" / "sqlite" / "bin"
+                    if sqlite_path.exists():
+                        # Update PATH for this process
+                        os.environ["PATH"] = f"{sqlite_path}:{os.environ.get('PATH', '')}"
+                        # Verify again
+                        if self._check_sqlite3():
+                            return True
+                print("Warning: sqlite3 installed but not found in PATH")
+                return False
+        else:
+            print(f"Error installing sqlite: {result.stderr}")
+            return False
+    
+    def _install_sqlite3_linux(self) -> bool:
+        """Install sqlite3 on Linux using appropriate package manager."""
+        os_release = self._get_os_release()
+        if not os_release:
+            print("Error: Cannot detect Linux distribution")
+            return False
+        
+        distro_id = os_release.get("ID", "").lower()
+        distro_like = os_release.get("ID_LIKE", "").lower()
+        
+        # Check if it's an Arch-based distribution
+        arch_based = (distro_id in ["arch", "manjaro", "endeavouros", "cachyos"] or 
+                     "arch" in distro_like)
+        
+        if arch_based:
+            return self._install_sqlite3_arch()
+        else:
+            print(f"Error: Unsupported Linux distribution: {distro_id} (ID_LIKE: {distro_like})")
+            return False
+    
+    def _install_sqlite3_arch(self) -> bool:
+        """Install sqlite3 on Arch-based distributions."""
+        package_managers = ["paru", "yay", "pacman"]
+        
+        for pm in package_managers:
+            if self._check_command(pm):
+                print(f"Installing sqlite via {pm}...")
+                if pm == "pacman":
+                    cmd = ["sudo", pm, "-S", "--needed", "--noconfirm", "sqlite"]
+                else:
+                    cmd = [pm, "-S", "--needed", "--noconfirm", "sqlite"]
+                
+                result = subprocess.run(cmd, capture_output=True, text=True)
+                if result.returncode == 0:
+                    return True
+                else:
+                    print(f"Error with {pm}: {result.stderr}")
+        
+        print("Error: No package manager found (paru/yay/pacman)")
+        return False
+    
+    def _get_os_release(self) -> Optional[dict]:
+        """Get OS release information."""
+        try:
+            os_release_file = Path("/etc/os-release")
+            if not os_release_file.exists():
+                return None
+            
+            os_release = {}
+            with open(os_release_file) as f:
+                for line in f:
+                    if "=" in line:
+                        key, value = line.strip().split("=", 1)
+                        # Remove quotes from value
+                        value = value.strip('"\'')
+                        os_release[key] = value
+            return os_release
+        except Exception:
+            return None
+    
+    def _get_brew_prefix(self) -> Optional[Path]:
+        """Get Homebrew prefix."""
+        try:
+            result = subprocess.run(["brew", "--prefix"], 
+                                  capture_output=True, text=True)
+            if result.returncode == 0:
+                return Path(result.stdout.strip())
+        except Exception:
+            pass
+        
+        # Fallback to common prefixes
+        common_prefixes = [
+            Path("/opt/homebrew"),
+            Path.home() / "homebrew",
+            Path("/usr/local")
+        ]
+        
+        for prefix in common_prefixes:
+            if (prefix / "bin" / "brew").exists():
+                return prefix
+        
+        return None
+    
+    def _check_command(self, command: str) -> bool:
+        """Check if a command is available."""
+        try:
+            subprocess.run([command, "--version"], 
+                         capture_output=True, check=True)
+            return True
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            return False
+    
+    def _check_sqlite3(self) -> bool:
+        """Check if sqlite3 is available."""
+        return self._check_command("sqlite3")
+    
+    def init_database(self) -> bool:
+        """Initialize the database."""
+        if not self._check_sqlite3():
+            print("sqlite3 not available, attempting to install...")
+            if not self.install_sqlite3():
+                print("Failed to install sqlite3, skipping database initialization")
+                return False
+            print("sqlite3 installed successfully")
+        
+        try:
+            self.db_file.parent.mkdir(parents=True, exist_ok=True)
+            
+            with sqlite3.connect(self.db_file) as conn:
+                conn.execute("""
+CREATE TABLE IF NOT EXISTS force_reinstall_triggers (
+    id INTEGER PRIMARY KEY,
+    trigger_id TEXT UNIQUE NOT NULL,
+    packages TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    active BOOLEAN DEFAULT 1
+                    )
+                """)
+                conn.execute("""
+                    CREATE INDEX IF NOT EXISTS idx_trigger_id 
+                    ON force_reinstall_triggers(trigger_id)
+                """)
+                conn.execute("""
+                    CREATE INDEX IF NOT EXISTS idx_active 
+                    ON force_reinstall_triggers(active)
+                """)
+                conn.commit()
+            return True
+        except Exception as e:
+            print(f"Error initializing database: {e}")
+            return False
+    
+    def check_trigger(self, trigger_id: str) -> str:
+        """Check if a trigger is active."""
+        if not self._check_sqlite3():
+            return "disabled"
+        
+        if not self.db_file.exists():
+            return "disabled"
+        
+        try:
+            with sqlite3.connect(self.db_file) as conn:
+                cursor = conn.execute(
+                    "SELECT trigger_id FROM force_reinstall_triggers "
+                    "WHERE trigger_id = ? AND active = 1",
+                    (trigger_id,)
+                )
+                result = cursor.fetchone()
+                return result[0] if result else "disabled"
+        except Exception:
+            return "disabled"
+    
+    def add_trigger(self, trigger_id: str, packages: str) -> bool:
+        """Add a new trigger."""
+        # Validate inputs
+        if not trigger_id or not trigger_id.strip():
+            print("Error: trigger_id cannot be empty")
+            return False
+        
+        if not packages or not packages.strip():
+            print("Error: packages cannot be empty")
+            return False
+        
+        # Sanitize trigger_id (only allow alphanumeric, underscore, hyphen)
+        if not trigger_id.replace('_', '').replace('-', '').isalnum():
+            print("Error: trigger_id contains invalid characters (only alphanumeric, underscore, hyphen allowed)")
+            return False
+        
+        if not self._check_sqlite3():
+            print("sqlite3 not available, attempting to install...")
+            if not self.install_sqlite3():
+                print("Failed to install sqlite3, cannot add trigger")
+                return False
+        
+        if not self.init_database():
+            return False
+        
+        try:
+            with sqlite3.connect(self.db_file) as conn:
+                conn.execute(
+                    "INSERT OR REPLACE INTO force_reinstall_triggers "
+                    "(trigger_id, packages) VALUES (?, ?)",
+                    (trigger_id.strip(), packages.strip())
+                )
+                conn.commit()
+            print(f"Added trigger: {trigger_id} for packages: {packages}")
+            return True
+        except Exception as e:
+            print(f"Error adding trigger: {e}")
+            return False
+    
+    def clear_trigger(self, trigger_id: str) -> bool:
+        """Clear a trigger (mark as inactive)."""
+        if not self._check_sqlite3():
+            print("sqlite3 not available, attempting to install...")
+            if not self.install_sqlite3():
+                print("Failed to install sqlite3, cannot clear trigger")
+                return False
+        
+        if not self.db_file.exists():
+            return False
+        
+        try:
+            with sqlite3.connect(self.db_file) as conn:
+                conn.execute(
+                    "UPDATE force_reinstall_triggers SET active = 0 "
+                    "WHERE trigger_id = ?",
+                    (trigger_id,)
+                )
+                conn.commit()
+            print(f"Cleared trigger: {trigger_id}")
+            return True
+        except Exception as e:
+            print(f"Error clearing trigger: {e}")
+            return False
+    
+    def list_triggers(self) -> str:
+        """List all active triggers."""
+        if not self._check_sqlite3():
+            return "No active triggers"
+        
+        if not self.db_file.exists():
+            return "No active triggers"
+        
+        try:
+            with sqlite3.connect(self.db_file) as conn:
+                cursor = conn.execute(
+                    "SELECT trigger_id, packages, created_at "
+                    "FROM force_reinstall_triggers "
+                    "WHERE active = 1 "
+                    "ORDER BY created_at DESC"
+                )
+                results = cursor.fetchall()
+                
+                if not results:
+                    return "No active triggers"
+                
+                output = []
+                for trigger_id, packages, created_at in results:
+                    output.append(f"{trigger_id}|{packages}|{created_at}")
+                return "\n".join(output)
+        except Exception:
+            return "No active triggers"
+    
+    def get_latest_force_reinstall(self) -> str:
+        """Get the most recent force reinstall trigger ID."""
+        if not self._check_sqlite3():
+            return ""
+        
+        if not self.db_file.exists():
+            return ""
+        
+        try:
+            with sqlite3.connect(self.db_file) as conn:
+                cursor = conn.execute(
+                    "SELECT trigger_id FROM force_reinstall_triggers "
+                    "WHERE active = 1 "
+                    "ORDER BY created_at DESC "
+                    "LIMIT 1"
+                )
+                result = cursor.fetchone()
+                return result[0] if result else ""
+        except Exception:
+            return ""
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Safe SQLite wrapper for Chezmoi force reinstall triggers"
+    )
+    parser.add_argument(
+        "command",
+        choices=["init", "check", "add", "clear", "list", "get-latest-force-reinstall", "help"],
+        help="Command to execute"
+    )
+    parser.add_argument("trigger_id", nargs="?", help="Trigger ID")
+    parser.add_argument("packages", nargs="?", help="Package list")
+    
+    args = parser.parse_args()
+    
+    if args.command == "help":
+        print("Usage: chezmoi-sqlite {init|check|add|clear|list|help}")
+        print("")
+        print("Commands:")
+        print("  init                    - Initialize the database (auto-installs sqlite3 if needed)")
+        print("  check <trigger_id>      - Check if a trigger is active")
+        print("  add <trigger_id> <pkgs> - Add a new trigger (auto-installs sqlite3 if needed)")
+        print("  clear <trigger_id>      - Clear a trigger (auto-installs sqlite3 if needed)")
+        print("  list                    - List all active triggers")
+        print("  help                    - Show this help message")
+        print("")
+        print("Examples:")
+        print("  chezmoi-sqlite add force_reinstall_abc123_20250827123456 'emacs-plus@31,imagemagick'")
+        print("  chezmoi-sqlite check force_reinstall_abc123_20250827123456")
+        print("  chezmoi-sqlite clear force_reinstall_abc123_20250827123456")
+        print("  chezmoi-sqlite list")
+        print("")
+        print("Note: sqlite will be automatically installed via the appropriate package manager")
+        print("  if not available (Homebrew on macOS, paru/yay/pacman on Arch-based distros)")
+        return
+    
+    sqlite_wrapper = ChezmoiSQLite()
+    
+    if args.command == "init":
+        success = sqlite_wrapper.init_database()
+        sys.exit(0 if success else 1)
+    
+    elif args.command == "check":
+        if not args.trigger_id:
+            print("Error: trigger_id required for check command")
+            sys.exit(1)
+        result = sqlite_wrapper.check_trigger(args.trigger_id)
+        print(result)
+    
+    elif args.command == "add":
+        if not args.trigger_id or not args.packages:
+            print("Error: trigger_id and packages required for add command")
+            sys.exit(1)
+        success = sqlite_wrapper.add_trigger(args.trigger_id, args.packages)
+        sys.exit(0 if success else 1)
+    
+    elif args.command == "clear":
+        if not args.trigger_id:
+            print("Error: trigger_id required for clear command")
+            sys.exit(1)
+        success = sqlite_wrapper.clear_trigger(args.trigger_id)
+        sys.exit(0 if success else 1)
+    
+    elif args.command == "list":
+        result = sqlite_wrapper.list_triggers()
+        print(result)
+    
+    elif args.command == "get-latest-force-reinstall":
+        result = sqlite_wrapper.get_latest_force_reinstall()
+        print(result)
+
+
+if __name__ == "__main__":
+    main()
