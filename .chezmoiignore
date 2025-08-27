@@ -17,11 +17,11 @@ docs/
 {{ if ne .chezmoi.os "darwin" -}}
 # Currently no macOS-only files
 # Note: The "brew" named scripts are actually cross-platform package installers
-{{ if ne .homebrewInstallType "alternative" -}}
-# Alternative Homebrew installation
-{{ end }}
-{{- end }}
+# Alternative Homebrew installation files (only ignore if not alternative install)
+{{- if and (hasKey . "homebrewInstallType") (ne .homebrewInstallType "alternative") }}
 .local/share/chezmoi-homebrew-state.db
+{{- end }}
+{{- end }}
 
 # Linux-specific files to ignore on non-Linux systems
 {{ if ne .chezmoi.os "linux" -}}
