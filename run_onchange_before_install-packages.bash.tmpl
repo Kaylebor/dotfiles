@@ -284,17 +284,36 @@ fi
 sudo pacman -S --needed --noconfirm base-devel
 {{- end }}
 
-# Install paru AUR helper
-{{- if (not (lookPath "paru")) }}
-curl -L "https://aur.archlinux.org/cgit/aur.git/snapshot/paru.tar.gz" | tar xz
-cd paru
-makepkg -si --noconfirm
-cd ..
-rm -rf paru
+# Determine AUR helper (paru or yay)
+{{- $aur_helper := "" }}
+{{- if (lookPath "paru") }}
+{{- $aur_helper = "paru" }}
+{{- else if (lookPath "yay") }}
+{{- $aur_helper = "yay" }}
+{{- else }}
+{{- $aur_helper = "none" }}
 {{- end }}
 
+{{- if eq $aur_helper "none" }}
+echo "Error: Neither paru nor yay AUR helper found. Please install one of them first."
+echo "To install paru: curl -L 'https://aur.archlinux.org/cgit/aur.git/snapshot/paru.tar.gz' | tar xz && cd paru && makepkg -si --noconfirm && cd .. && rm -rf paru"
+echo "To install yay: sudo pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si --noconfirm && cd .. && rm -rf yay"
+exit 1
+{{- end }}
+
+echo "Using AUR helper: {{ $aur_helper }}"
+
 # Install packages defined in the configuration file
-paru -S --needed --noconfirm {{ range .packages.arch.aur -}} {{ . }} {{ end }}
+# Extract package names, ignoring install_order and other metadata for Arch
+{{- $arch_packages := list }}
+{{- range .packages.arch.aur }}
+{{- if kindIs "string" . }}
+{{- $arch_packages = append $arch_packages . }}
+{{- else if kindIs "map" . }}
+{{- $arch_packages = append $arch_packages .name }}
+{{- end }}
+{{- end }}
+{{ $aur_helper }} -S --needed --noconfirm {{ range $arch_packages -}} {{ . }} {{ end }}
 
 {{- end }}
 

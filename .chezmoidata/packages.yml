@@ -16,8 +16,7 @@ packages:
       - "binutils"
       - "btop"
       - "carapace"
-      - name: "cmake"
-        install_order: 30
+      - "cmake"
       - "coreutils"
       - "curl"
       - "curlie"
