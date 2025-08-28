@@ -204,9 +204,9 @@
 
 ;; Force Emacs to use a POSIX shell
 (setopt shell-file-name (executable-find "bash"))
-;; Switch vterm to fish shell
-(setopt vterm-shell (executable-find "fish"))
-(setopt explicit-shell-file-name (executable-find "fish"))
+;; Switch vterm to preferred shell
+(setopt vterm-shell {{ .preferredShell | quote }})
+(setopt explicit-shell-file-name {{ .preferredShell | quote }})
 
 ;; Magit config
 (setopt magit-define-global-key-bindings 'recommended)

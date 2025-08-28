@@ -1410,15 +1410,7 @@ background_opacity 0.9
 
 #: Advanced {{{
 
-<<- if lookPath "fish" >>
-shell << lookPath "fish" >>
-<<- else if lookPath "zsh" >>
-shell << lookPath "zsh" >>
-<<- else if lookPath "bash" >>
-shell << lookPath "bash" >>
-<<- else >>
-# shell .
-<<- end >>
+shell << .preferredShell >>
 
 #: The shell program to execute. The default value of . means to use
 #: the value of of the SHELL environment variable or if unset,

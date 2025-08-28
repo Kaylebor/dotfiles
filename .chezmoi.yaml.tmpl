@@ -63,6 +63,15 @@
 {{-   end }}
 {{- end }}
 
+{{- $preferredShell := "/bin/sh" }}
+{{- if lookPath "fish" }}
+{{-   $preferredShell = lookPath "fish" }}
+{{- else if lookPath "zsh" }}
+{{-   $preferredShell = lookPath "zsh" }}
+{{- else if lookPath "bash" }}
+{{-   $preferredShell = lookPath "bash" }}
+{{- end }}
+
 data:
 {{- if eq .chezmoi.os "darwin" }}
   homebrewInstallType: {{ $homebrewInstallType | quote }}
@@ -80,3 +89,4 @@ data:
   pullOllamaModels: {{ $pullOllamaModels }}
   useLlamaSwap: {{ $useLlamaSwap }}
   llamaSwapApiBase: {{ $llamaSwapApiBase | quote }}
+  preferredShell: {{ $preferredShell | quote }}
