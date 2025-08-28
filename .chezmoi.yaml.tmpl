@@ -111,13 +111,13 @@ data:
     nushellVendorAutoload: {{ joinPath .chezmoi.homeDir ".local" "share" "nushell" "vendor" "autoload" | quote }}
     nushellScripts: {{ joinPath .chezmoi.homeDir ".config" "nushell" "scripts" | quote }}
     nushellThemes: {{ joinPath .chezmoi.homeDir ".config" "nushell" "themes" | quote }}
-{{- if eq .homebrewInstallType "alternative" }}
+{{- if and (eq .chezmoi.os "darwin") (eq $homebrewInstallType "alternative") }}
   # Alternative Homebrew paths
   homebrewPaths:
-    base: {{ joinPath .chezmoi.homeDir .homebrewPath | quote }}
-    gccBase: {{ joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" | quote }}
-    gccLib: {{ joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "lib" "gcc" "current" | quote }}
-    gccInclude: {{ joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "include" | quote }}
-    gccCppInclude: {{ joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "include" "c++" "15" | quote }}
-    gccBin: {{ joinPath .chezmoi.homeDir .homebrewPath "bin" "gcc-15" | quote }}
+    base: {{ joinPath .chezmoi.homeDir $homebrewPath | quote }}
+    gccBase: {{ joinPath .chezmoi.homeDir $homebrewPath "opt" "gcc" | quote }}
+    gccLib: {{ joinPath .chezmoi.homeDir $homebrewPath "opt" "gcc" "lib" "gcc" "current" | quote }}
+    gccInclude: {{ joinPath .chezmoi.homeDir $homebrewPath "opt" "gcc" "include" | quote }}
+    gccCppInclude: {{ joinPath .chezmoi.homeDir $homebrewPath "opt" "gcc" "include" "c++" "15" | quote }}
+    gccBin: {{ joinPath .chezmoi.homeDir $homebrewPath "bin" "gcc-15" | quote }}
 {{- end }}

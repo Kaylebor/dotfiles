@@ -122,12 +122,12 @@ $env.PSQL_EDITOR = $env.EDITOR
 $env.MANPAGER = "sh -c 'col -bx | bat -l man -p'"
 {{- end }}
 
-{{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
+{{- if and (eq .chezmoi.os "darwin") (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
 # Homebrew Cask installation directory for MDM-restricted systems
 $env.HOMEBREW_CASK_OPTS = "--appdir={{ .chezmoi.homeDir }}/Applications"
 
 # GCC environment variables for alternative Homebrew installations
-{{- if stat .homebrewPaths.gccBase }}
+{{- if and (hasKey . "homebrewPaths") (stat .homebrewPaths.gccBase) }}
 {{- if stat .homebrewPaths.gccLib }}
 $env.LIBRARY_PATH = "{{ .homebrewPaths.gccLib }}:($env.LIBRARY_PATH? | default '')"
 {{- end }}

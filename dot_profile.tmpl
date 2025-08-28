@@ -12,8 +12,8 @@ ulimit -n 65536 2>/dev/null || true
 
 # Set up gcc paths for alternative Homebrew installations
 export LANG=en_US.UTF-8
-{{- if eq .homebrewInstallType "alternative" }}
-{{- if stat .homebrewPaths.gccBase }}
+{{- if and (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
+{{- if and (hasKey . "homebrewPaths") (stat .homebrewPaths.gccBase) }}
 # Library paths
 {{- if stat .homebrewPaths.gccLib }}
 export LIBRARY_PATH="$HOME/{{ .homebrewPath }}/opt/gcc/lib/gcc/current:$LIBRARY_PATH"

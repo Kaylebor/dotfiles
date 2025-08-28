@@ -1,7 +1,7 @@
 {{- template "brew_eval" . }}
 eval "$(mise activate bash)" # Mise [https://mise.jdx.dev]
 
-{{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
+{{- if and (eq .chezmoi.os "darwin") (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
 # Install Homebrew Casks to home directory (MDM-restricted systems use alternative installation)
 export HOMEBREW_CASK_OPTS="--appdir=$HOME/Applications"
 {{- end }}
@@ -35,8 +35,8 @@ PATH="${XDG_DATA_HOME:-$HOME/.local/share}/google-cloud-sdk/bin:$PATH" # Google 
 {{- end }}
 {{- if eq .chezmoi.os "darwin" }}
 {{-   $brewPrefix := "" }}
-{{-   if eq .homebrewInstallType "alternative" }}
-{{-     if stat .homebrewPaths.base }}
+{{-   if and (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
+{{-     if and (hasKey . "homebrewPaths") (stat .homebrewPaths.base) }}
 {{-       $brewPrefix = .homebrewPaths.base }}
 {{-     end }}
 {{-   else }}
@@ -67,8 +67,8 @@ export LANG=en_US.UTF-8
 
 # Erlang/ODBC settings
 {{- $brewPrefix := "" }}
-{{- if eq .homebrewInstallType "alternative" }}
-{{-   if stat .homebrewPaths.base }}
+{{- if and (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
+{{-   if and (hasKey . "homebrewPaths") (stat .homebrewPaths.base) }}
 {{-     $brewPrefix = .homebrewPaths.base }}
 {{-   end }}
 {{- else }}
@@ -84,8 +84,8 @@ export CPPFLAGS="${CPPFLAGS+"$CPPFLAGS "}-I${UNIXODBCHOME}/include"
 export LDFLAGS="${LDFLAGS+"$LDFLAGS "}-L${UNIXODBCHOME}/lib"
 export KERL_CONFIGURE_OPTIONS="--with-odbc=${UNIXODBCHOME}"
 {{- end }}
-{{- if eq .homebrewInstallType "alternative" }}
-{{- if stat .homebrewPaths.gccBase }}
+{{- if and (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
+{{- if and (hasKey . "homebrewPaths") (stat .homebrewPaths.gccBase) }}
 # Library paths
 {{- if stat .homebrewPaths.gccLib }}
 export LIBRARY_PATH="$HOME/{{ .homebrewPath }}/opt/gcc/lib/gcc/current:$LIBRARY_PATH"
