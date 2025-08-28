@@ -21,11 +21,6 @@ echo 'end' >> ~/.config/fish/conf.d/mise.fish
 carapace _carapace fish > ~/.config/fish/conf.d/carapace.fish
 {{- end }}
 
-{{/* History lookup */}}
-{{- if lookPath "fzf" }}
-# Integrate fzf
-fzf --fish > ~/.config/fish/conf.d/0fzf_key_bindings.fish
-{{- end }}
 
 {{/* Television integration */}}
 {{- if lookPath "tv" }}

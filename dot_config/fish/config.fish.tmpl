@@ -9,10 +9,6 @@ source /usr/share/cachyos-fish-config/cachyos-config.fish
 ulimit -n 65536 2>/dev/null || true
 {{- end }}
 
-# Force EZA variables here, since the fish-eza plugin INSISTS on overriding my values on shell load
-# with invalid ones
-set -e EZA_STANDARD_OPTIONS
-set -Ux EZA_STANDARD_OPTIONS --smart-group --header --group-directories-first --hyperlink --time-style=long-iso --icons=always
 
 {{/* Prompt */}}
 {{- if lookPath "starship" }}
