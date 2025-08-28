@@ -28,7 +28,7 @@ PATH="$HOME/.local/share/yabridge:$PATH" # Yabridge for VST plugins
 {{- end }}
 {{- $xdgDataHome := env "XDG_DATA_HOME" }}
 {{- if not $xdgDataHome }}
-{{-   $xdgDataHome = joinPath .chezmoi.homeDir ".local" "share" }}
+{{-   $xdgDataHome = .paths.localShare }}
 {{- end }}
 {{- if stat (joinPath $xdgDataHome "google-cloud-sdk" "bin") }}
 PATH="${XDG_DATA_HOME:-$HOME/.local/share}/google-cloud-sdk/bin:$PATH" # Google Cloud SDK
@@ -36,8 +36,8 @@ PATH="${XDG_DATA_HOME:-$HOME/.local/share}/google-cloud-sdk/bin:$PATH" # Google 
 {{- if eq .chezmoi.os "darwin" }}
 {{-   $brewPrefix := "" }}
 {{-   if eq .homebrewInstallType "alternative" }}
-{{-     if stat (joinPath .chezmoi.homeDir .homebrewPath) }}
-{{-       $brewPrefix = joinPath .chezmoi.homeDir .homebrewPath }}
+{{-     if stat .homebrewPaths.base }}
+{{-       $brewPrefix = .homebrewPaths.base }}
 {{-     end }}
 {{-   else }}
 {{-     if stat "/opt/homebrew" }}
@@ -68,8 +68,8 @@ export LANG=en_US.UTF-8
 # Erlang/ODBC settings
 {{- $brewPrefix := "" }}
 {{- if eq .homebrewInstallType "alternative" }}
-{{-   if stat (joinPath .chezmoi.homeDir .homebrewPath) }}
-{{-     $brewPrefix = joinPath .chezmoi.homeDir .homebrewPath }}
+{{-   if stat .homebrewPaths.base }}
+{{-     $brewPrefix = .homebrewPaths.base }}
 {{-   end }}
 {{- else }}
 {{-   if stat "/opt/homebrew" }}

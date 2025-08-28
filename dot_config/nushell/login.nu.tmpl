@@ -55,7 +55,7 @@ if ($env.TERM? | is-empty) or ($env.TERM == "dumb") {
 }
 
 # Machine-specific login configuration
-{{- $localLogin := joinPath .chezmoi.homeDir ".config/nushell/login.local.nu" }}
+{{- $localLogin := joinPath .paths.configDir "nushell/login.local.nu" }}
 {{- if stat $localLogin }}
 source "{{ $localLogin }}"
 {{- else }}

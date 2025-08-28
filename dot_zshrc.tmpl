@@ -46,8 +46,8 @@ setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording en
 {{- if eq .chezmoi.os "darwin" }}
 {{-   $brewPrefix := "" }}
 {{-   if eq .homebrewInstallType "alternative" }}
-{{-     if stat (joinPath .chezmoi.homeDir .homebrewPath) }}
-{{-       $brewPrefix = joinPath .chezmoi.homeDir .homebrewPath }}
+{{-     if stat .homebrewPaths.base }}
+{{-       $brewPrefix = .homebrewPaths.base }}
 {{-     end }}
 {{-   else }}
 {{-     if stat "/opt/homebrew" }}
@@ -120,8 +120,8 @@ export MANPAGER="sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p
 {{- end }}
 
 
-{{- if stat (joinPath .chezmoi.homeDir ".config" "op" "plugins.sh") }}
-source $HOME/.config/op/plugins.sh
+{{- if stat (joinPath .paths.configDir "op" "plugins.sh") }}
+source {{ .paths.configDir }}/op/plugins.sh
 {{- end }}
 
 # Emacs vterm helper function
@@ -148,8 +148,8 @@ export OPENAI_MODEL="qwen3coder-a3b-q4-16l-256k-kq8fa"
 # Set up aliases
 [[ $- == *i* ]] && source $HOME/.config/zsh/aliases.zsh
 
-{{- if stat (joinPath .chezmoi.homeDir ".config" "zsh" ".zshrc.local") }}
+{{- if stat (joinPath .paths.configDir "zsh" ".zshrc.local") }}
 # Per-machine configuration
-source $HOME/.config/zsh/.zshrc.local
+source {{ .paths.configDir }}/zsh/.zshrc.local
 {{- end }}
 

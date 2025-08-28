@@ -107,6 +107,10 @@ data:
     mixEscripts: {{ joinPath .chezmoi.homeDir ".mix" "escripts" | quote }}
     rdBin: {{ joinPath .chezmoi.homeDir ".rd" "bin" | quote }}
     yabridge: {{ joinPath .chezmoi.homeDir ".local" "share" "yabridge" | quote }}
+    cacheDir: {{ joinPath .chezmoi.homeDir ".cache" | quote }}
+    nushellVendorAutoload: {{ joinPath .chezmoi.homeDir ".local" "share" "nushell" "vendor" "autoload" | quote }}
+    nushellScripts: {{ joinPath .chezmoi.homeDir ".config" "nushell" "scripts" | quote }}
+    nushellThemes: {{ joinPath .chezmoi.homeDir ".config" "nushell" "themes" | quote }}
 {{- if eq .homebrewInstallType "alternative" }}
   # Alternative Homebrew paths
   homebrewPaths:

@@ -52,8 +52,8 @@ KERL_CONFIGURE_OPTIONS="--with-odbc=/var/lib/pacman/local/unixodbc-{{ output "pa
 {{- if (eq .chezmoi.os "darwin") }}
 {{- $brewPrefix := "" }}
 {{- if eq .homebrewInstallType "alternative" }}
-{{-   if stat (joinPath .chezmoi.homeDir .homebrewPath) }}
-{{-     $brewPrefix = joinPath .chezmoi.homeDir .homebrewPath }}
+{{-   if stat .homebrewPaths.base }}
+{{-     $brewPrefix = .homebrewPaths.base }}
 {{-   end }}
 {{- else }}
 {{-   if stat "/opt/homebrew" }}

@@ -54,8 +54,8 @@ export MANPAGER="sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p
 {{- end }}
 
 
-{{- if stat (joinPath .chezmoi.homeDir ".config" "op" "plugins.sh") }}
-source $HOME/.config/op/plugins.sh
+{{- if stat (joinPath .paths.configDir "op" "plugins.sh") }}
+source {{ .paths.configDir }}/op/plugins.sh
 {{- end }}
 
 # Emacs vterm helper function
@@ -83,8 +83,8 @@ export OPENAI_MODEL="qwen3coder-a3b-q4-16l-256k-kq8fa"
 [[ $- == *i* ]] && source $HOME/.config/zsh/aliases.zsh
 
 # Machine-specific bash configuration
-{{- if stat (joinPath .chezmoi.homeDir ".config" "bash" ".bashrc.local") }}
-source $HOME/.config/bash/.bashrc.local
+{{- if stat (joinPath .paths.configDir "bash" ".bashrc.local") }}
+source {{ .paths.configDir }}/bash/.bashrc.local
 {{- else }}
 # Note: To add local config, create $HOME/.config/bash/.bashrc.local
 {{- end }}
