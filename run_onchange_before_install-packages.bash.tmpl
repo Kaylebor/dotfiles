@@ -24,7 +24,7 @@
 
 {{/* MacOS setup commands */}}
 {{ if eq .chezmoi.os "darwin" -}}
-{{- if not (stat .brewBin) }}
+{{- if not (and (hasKey . "brewBin") (stat .brewBin)) }}
 # Install Homebrew
 {{- if eq .homebrewInstallType "alternative" }}
 # Alternative installation to {{ $.homebrewPath }} (for MDM setups)
@@ -33,7 +33,9 @@ mkdir -p "$HOME/{{ $.homebrewPath }}"
 curl -L {{ .urls.homebrew.tarball }} | tar xz --strip-components 1 -C "$HOME/{{ $.homebrewPath }}"
 eval "$($HOME/{{ $.homebrewPath }}/bin/brew shellenv)"
 brew update --force --quiet
+{{- if and (hasKey . "brewBin") .brewBin }}
 chmod -R go-w "$({{ .brewBin }} --prefix)/share/zsh" 2>/dev/null || true
+{{- end }}
 {{- else }}
 # Standard installation
 /bin/bash -c "$(curl -fsSL {{ .urls.homebrew.install }})"

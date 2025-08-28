@@ -8,7 +8,7 @@ set -euo pipefail
 echo "Setting up Emacs Client app..."
 
 # Determine Applications directory based on installation type
-{{- if eq .homebrewInstallType "alternative" }}
+{{- if and (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
 APPS_DIR="$HOME/Applications"
 {{- else }}
 APPS_DIR="/Applications"
@@ -19,11 +19,13 @@ mkdir -p "$APPS_DIR"
 
 # Find the actual Emacs.app location
 EMACS_APP_PATH=""
+{{- if and (hasKey . "brewBin") .brewBin }}
 if [ -d "$({{ .brewBin }} --prefix emacs-plus@31)/Emacs.app" ]; then
     EMACS_APP_PATH="$({{ .brewBin }} --prefix emacs-plus@31)/Emacs.app"
 elif [ -d "$({{ .brewBin }} --cellar emacs-plus@31)/$({{ .brewBin }} list --versions emacs-plus@31 | awk '{print $2}')/Emacs.app" ]; then
     EMACS_APP_PATH="$({{ .brewBin }} --cellar emacs-plus@31)/$({{ .brewBin }} list --versions emacs-plus@31 | awk '{print $2}')/Emacs.app"
 fi
+{{- end }}
 
 if [ -z "$EMACS_APP_PATH" ]; then
     echo "Could not find Emacs.app in Homebrew installation"
@@ -94,7 +96,7 @@ fi
 cat > "$CLIENT_APP/Contents/MacOS/emacs-client-launcher" << 'EOF'
 #!/bin/bash
 
-{{- if .brewBin }}
+{{- if and (hasKey . "brewBin") .brewBin }}
 # Homebrew detected at template time
 BREW_PREFIX="{{ output .brewBin "--prefix" | trim }}"
 {{- else }}
