@@ -52,7 +52,7 @@ fish -c "set -Ux HOMEBREW_CASK_OPTS '--appdir=$HOME/Applications'"
 
 {{- if eq .chezmoi.os "darwin" }}
 # MacOS-specific variable configuration
-fish -l -c "fish_add_path -Uam (brew --prefix sqlite)/bin"
+fish -l -c "fish_add_path -Uam ({{ .brewBin }} --prefix sqlite)/bin"
 {{- end }}
 
 {{- if and (lookPath "lima") (not (lookPath "nerdctl")) }}

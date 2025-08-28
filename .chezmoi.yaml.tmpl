@@ -77,10 +77,16 @@ data:
   homebrewInstallType: {{ $homebrewInstallType | quote }}
 {{-   if eq $homebrewInstallType "alternative" }}
   homebrewPath: {{ $homebrewPath | quote }}
-  brewBin: {{ printf "$HOME/%s/bin/brew" $homebrewPath | quote }}
-{{-   else }}
-  brewBin: "brew"
 {{-   end }}
+{{-   $brewBin := "" }}
+{{-   if lookPath "brew" }}
+{{-     $brewBin = lookPath "brew" }}
+{{-   else if eq $homebrewInstallType "alternative" }}
+{{-     $brewBin = printf "%s/%s/bin/brew" .chezmoi.homeDir $homebrewPath }}
+{{-   else }}
+{{-     $brewBin = "/opt/homebrew/bin/brew" }}
+{{-   end }}
+  brewBin: {{ $brewBin | quote }}
 {{- end }}
   skip1Password: {{ $skip1Password }}
   prewarmRubyLSP: {{ $prewarmRubyLSP }}

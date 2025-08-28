@@ -19,10 +19,10 @@ mkdir -p "$APPS_DIR"
 
 # Find the actual Emacs.app location
 EMACS_APP_PATH=""
-if [ -d "$(brew --prefix emacs-plus@31)/Emacs.app" ]; then
-    EMACS_APP_PATH="$(brew --prefix emacs-plus@31)/Emacs.app"
-elif [ -d "$(brew --cellar emacs-plus@31)/$(brew list --versions emacs-plus@31 | awk '{print $2}')/Emacs.app" ]; then
-    EMACS_APP_PATH="$(brew --cellar emacs-plus@31)/$(brew list --versions emacs-plus@31 | awk '{print $2}')/Emacs.app"
+if [ -d "$({{ .brewBin }} --prefix emacs-plus@31)/Emacs.app" ]; then
+    EMACS_APP_PATH="$({{ .brewBin }} --prefix emacs-plus@31)/Emacs.app"
+elif [ -d "$({{ .brewBin }} --cellar emacs-plus@31)/$({{ .brewBin }} list --versions emacs-plus@31 | awk '{print $2}')/Emacs.app" ]; then
+    EMACS_APP_PATH="$({{ .brewBin }} --cellar emacs-plus@31)/$({{ .brewBin }} list --versions emacs-plus@31 | awk '{print $2}')/Emacs.app"
 fi
 
 if [ -z "$EMACS_APP_PATH" ]; then
@@ -94,19 +94,13 @@ fi
 cat > "$CLIENT_APP/Contents/MacOS/emacs-client-launcher" << 'EOF'
 #!/bin/bash
 
-# Get the path to emacsclient from Homebrew
-if command -v brew >/dev/null 2>&1; then
-    BREW_PREFIX="$(brew --prefix)"
-else
-    # Fallback to common locations
-    if [ -x "/opt/homebrew/bin/brew" ]; then
-        BREW_PREFIX="/opt/homebrew"
-    elif [ -x "$HOME/homebrew/bin/brew" ]; then
-        BREW_PREFIX="$HOME/homebrew"
-    else
-        BREW_PREFIX="/usr/local"
-    fi
-fi
+{{- if .brewBin }}
+# Homebrew detected at template time
+BREW_PREFIX="{{ output .brewBin "--prefix" | trim }}"
+{{- else }}
+# No Homebrew available, use fallback
+BREW_PREFIX="/usr/local"
+{{- end }}
 
 EMACSCLIENT="$BREW_PREFIX/bin/emacsclient"
 
