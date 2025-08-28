@@ -8,22 +8,22 @@ export HOMEBREW_CASK_OPTS="--appdir=$HOME/Applications"
 
 ## PATH
 # Add each of the specified directories to PATH if they exist
-{{- if stat (joinPath .chezmoi.homeDir ".local" "bin") }}
+{{- if stat .paths.localBin }}
 PATH="$HOME/.local/bin:$PATH" # User-installed binaries
 {{- end }}
-{{- if stat (joinPath .chezmoi.homeDir ".mix" "escripts") }}
+{{- if stat .paths.mixEscripts }}
 PATH="$HOME/.mix/escripts:$PATH" # Mix escripts (Elixir)
 {{- end }}
-{{- if stat (joinPath .chezmoi.homeDir ".bun" "bin") }}
+{{- if stat .paths.bunBin }}
 PATH="$HOME/.bun/bin:$PATH" # Bun JavaScript runtime
 {{- end }}
-{{- if stat (joinPath .chezmoi.homeDir ".deno" "bin") }}
+{{- if stat .paths.denoBin }}
 PATH="$HOME/.deno/bin:$PATH" # Deno JavaScript runtime
 {{- end }}
-{{- if stat (joinPath .chezmoi.homeDir ".rd" "bin") }}
+{{- if stat .paths.rdBin }}
 PATH="$HOME/.rd/bin:$PATH" # Rancher Desktop for Docker management
 {{- end }}
-{{- if stat (joinPath .chezmoi.homeDir ".local" "share" "yabridge") }}
+{{- if stat .paths.yabridge }}
 PATH="$HOME/.local/share/yabridge:$PATH" # Yabridge for VST plugins
 {{- end }}
 {{- $xdgDataHome := env "XDG_DATA_HOME" }}
@@ -85,22 +85,22 @@ export LDFLAGS="${LDFLAGS+"$LDFLAGS "}-L${UNIXODBCHOME}/lib"
 export KERL_CONFIGURE_OPTIONS="--with-odbc=${UNIXODBCHOME}"
 {{- end }}
 {{- if eq .homebrewInstallType "alternative" }}
-{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc") }}
+{{- if stat .homebrewPaths.gccBase }}
 # Library paths
-{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "lib" "gcc" "current") }}
+{{- if stat .homebrewPaths.gccLib }}
 export LIBRARY_PATH="$HOME/{{ .homebrewPath }}/opt/gcc/lib/gcc/current:$LIBRARY_PATH"
 {{- end }}
 
 # C/C++ include paths
-{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "include") }}
+{{- if stat .homebrewPaths.gccInclude }}
 export C_INCLUDE_PATH="$HOME/{{ .homebrewPath }}/opt/gcc/include:$C_INCLUDE_PATH"
 {{- end }}
-{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "include" "c++" "15") }}
+{{- if stat .homebrewPaths.gccCppInclude }}
 export CPLUS_INCLUDE_PATH="$HOME/{{ .homebrewPath }}/opt/gcc/include/c++/15:$CPLUS_INCLUDE_PATH"
 {{- end }}
 
 # Set CC and CXX to use the Homebrew gcc
-{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "bin" "gcc-15") }}
+{{- if stat .homebrewPaths.gccBin }}
 export CC=gcc-15
 export CXX=g++-15
 {{- end }}

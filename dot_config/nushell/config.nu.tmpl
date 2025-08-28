@@ -60,10 +60,10 @@ $env.LC_ALL = "en_US.UTF-8"
 
 # Path configuration
 $env.PATH = ($env.PATH | split row (char esep) | prepend [
-    {{- if stat (joinPath .chezmoi.homeDir ".local" "bin") }}
+    {{- if stat .paths.localBin }}
     "{{ .chezmoi.homeDir }}/.local/bin"
     {{- end }}
-    {{- if stat (joinPath .chezmoi.homeDir "bin") }}
+    {{- if stat .paths.binDir }}
     "{{ .chezmoi.homeDir }}/bin"
     {{- end }}
     {{- if stat (joinPath .chezmoi.homeDir ".local" "share" "google-cloud-sdk" "bin") }}
@@ -75,13 +75,13 @@ $env.PATH = ($env.PATH | split row (char esep) | prepend [
     {{- if stat (joinPath .chezmoi.homeDir ".rd" "bin") }}
     "{{ .chezmoi.homeDir }}/.rd/bin"
     {{- end }}
-    {{- if stat (joinPath .chezmoi.homeDir ".deno" "bin") }}
+    {{- if stat .paths.denoBin }}
     "{{ .chezmoi.homeDir }}/.deno/bin"
     {{- end }}
-    {{- if stat (joinPath .chezmoi.homeDir ".bun" "bin") }}
+    {{- if stat .paths.bunBin }}
     "{{ .chezmoi.homeDir }}/.bun/bin"
     {{- end }}
-    {{- if stat (joinPath .chezmoi.homeDir ".mix" "escripts") }}
+    {{- if stat .paths.mixEscripts }}
     "{{ .chezmoi.homeDir }}/.mix/escripts"
     {{- end }}
     {{- if lookPath "mise" }}

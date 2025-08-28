@@ -96,3 +96,24 @@ data:
   useLlamaSwap: {{ $useLlamaSwap }}
   llamaSwapApiBase: {{ $llamaSwapApiBase | quote }}
   preferredShell: {{ $preferredShell | quote }}
+  # Precalculated common paths
+  paths:
+    localBin: {{ joinPath .chezmoi.homeDir ".local" "bin" | quote }}
+    localShare: {{ joinPath .chezmoi.homeDir ".local" "share" | quote }}
+    configDir: {{ joinPath .chezmoi.homeDir ".config" | quote }}
+    binDir: {{ joinPath .chezmoi.homeDir "bin" | quote }}
+    bunBin: {{ joinPath .chezmoi.homeDir ".bun" "bin" | quote }}
+    denoBin: {{ joinPath .chezmoi.homeDir ".deno" "bin" | quote }}
+    mixEscripts: {{ joinPath .chezmoi.homeDir ".mix" "escripts" | quote }}
+    rdBin: {{ joinPath .chezmoi.homeDir ".rd" "bin" | quote }}
+    yabridge: {{ joinPath .chezmoi.homeDir ".local" "share" "yabridge" | quote }}
+{{- if eq .homebrewInstallType "alternative" }}
+  # Alternative Homebrew paths
+  homebrewPaths:
+    base: {{ joinPath .chezmoi.homeDir .homebrewPath | quote }}
+    gccBase: {{ joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" | quote }}
+    gccLib: {{ joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "lib" "gcc" "current" | quote }}
+    gccInclude: {{ joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "include" | quote }}
+    gccCppInclude: {{ joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "include" "c++" "15" | quote }}
+    gccBin: {{ joinPath .chezmoi.homeDir .homebrewPath "bin" "gcc-15" | quote }}
+{{- end }}

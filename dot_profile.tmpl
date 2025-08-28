@@ -13,22 +13,22 @@ ulimit -n 65536 2>/dev/null || true
 # Set up gcc paths for alternative Homebrew installations
 export LANG=en_US.UTF-8
 {{- if eq .homebrewInstallType "alternative" }}
-{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc") }}
+{{- if stat .homebrewPaths.gccBase }}
 # Library paths
-{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "lib" "gcc" "current") }}
+{{- if stat .homebrewPaths.gccLib }}
 export LIBRARY_PATH="$HOME/{{ .homebrewPath }}/opt/gcc/lib/gcc/current:$LIBRARY_PATH"
 {{- end }}
 
 # C/C++ include paths
-{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "include") }}
+{{- if stat .homebrewPaths.gccInclude }}
 export C_INCLUDE_PATH="$HOME/{{ .homebrewPath }}/opt/gcc/include:$C_INCLUDE_PATH"
 {{- end }}
-{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "opt" "gcc" "include" "c++" "15") }}
+{{- if stat .homebrewPaths.gccCppInclude }}
 export CPLUS_INCLUDE_PATH="$HOME/{{ .homebrewPath }}/opt/gcc/include/c++/15:$CPLUS_INCLUDE_PATH"
 {{- end }}
 
 # Set CC and CXX to use the Homebrew gcc
-{{- if stat (joinPath .chezmoi.homeDir .homebrewPath "bin" "gcc-15") }}
+{{- if stat .homebrewPaths.gccBin }}
 export CC=gcc-15
 export CXX=g++-15
 {{- end }}
