@@ -1,9 +1,9 @@
 {{- template "brew_eval" . }}
 eval "$(mise activate zsh)" # Mise [https://mise.jdx.dev]
 
-{{- if and (eq .chezmoi.os "darwin") (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
-# Install Homebrew Casks to home directory (MDM-restricted systems use alternative installation)
-export HOMEBREW_CASK_OPTS="--appdir=$HOME/Applications"
+{{- if and (hasKey . "homebrewPaths") (hasKey . "brewBin") .brewBin (stat .brewBin) }}
+# Install Homebrew Casks to specified directory
+export HOMEBREW_CASK_OPTS="--appdir={{ .homebrewPaths.applicationsPath }}"
 {{- end }}
 
 ## PATH

@@ -273,6 +273,36 @@ if [ -d "$HOME/Applications" ]; then
   mdimport "$HOME/Applications" 2>/dev/null || true
 fi
 {{- end }}
+
+# Fix kitty TERMINFO for Emacs compatibility
+if command -v brew >/dev/null 2>&1 && brew list --cask | grep -q "^kitty$"; then
+  KITTY_TERMINFO_PATH="{{ .homebrewPaths.applicationsPath }}/kitty.app/Contents/Resources/kitty/terminfo"
+  if [ -d "$KITTY_TERMINFO_PATH" ]; then
+    echo "Setting up kitty TERMINFO database for Emacs compatibility..."
+    
+    # Create terminfo directories (idempotent)
+    mkdir -p "$HOME/.terminfo/x" "$HOME/.terminfo/78"
+    
+    # Copy kitty terminfo from bundle (always copy to get updates)
+    if [ -f "$KITTY_TERMINFO_PATH/78/xterm-kitty" ]; then
+      cp "$KITTY_TERMINFO_PATH/78/xterm-kitty" "$HOME/.terminfo/x/xterm-kitty"
+      echo "Updated kitty terminfo at ~/.terminfo/x/xterm-kitty"
+      
+      # Create/update symlink for hex-based lookup  
+      ln -snf "$HOME/.terminfo/x/xterm-kitty" "$HOME/.terminfo/78/xterm-kitty"
+      echo "Updated symlink ~/.terminfo/78/xterm-kitty -> ~/.terminfo/x/xterm-kitty"
+      
+      echo "✅ Kitty TERMINFO setup complete - Emacs should work properly in terminal mode"
+    else
+      echo "⚠️  Warning: kitty terminfo file not found at expected location: $KITTY_TERMINFO_PATH/78/xterm-kitty"
+    fi
+  else
+    echo "⚠️  Warning: kitty terminfo directory not found: $KITTY_TERMINFO_PATH"
+  fi
+else
+  echo "Skipping kitty TERMINFO setup (kitty not installed via Homebrew)"
+fi
+
 {{ end -}}
 
 {{/* Linux setup commands */}}

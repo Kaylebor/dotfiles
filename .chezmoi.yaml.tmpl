@@ -115,9 +115,14 @@ data:
   # Alternative Homebrew paths
   homebrewPaths:
     base: {{ joinPath .chezmoi.homeDir $homebrewPath | quote }}
+    applicationsPath: {{ joinPath .chezmoi.homeDir "Applications" | quote }}
     gccBase: {{ joinPath .chezmoi.homeDir $homebrewPath "opt" "gcc" | quote }}
     gccLib: {{ joinPath .chezmoi.homeDir $homebrewPath "opt" "gcc" "lib" "gcc" "current" | quote }}
     gccInclude: {{ joinPath .chezmoi.homeDir $homebrewPath "opt" "gcc" "include" | quote }}
     gccCppInclude: {{ joinPath .chezmoi.homeDir $homebrewPath "opt" "gcc" "include" "c++" "15" | quote }}
     gccBin: {{ joinPath .chezmoi.homeDir $homebrewPath "bin" "gcc-15" | quote }}
+{{- else if eq .chezmoi.os "darwin" }}
+  # Standard Homebrew paths
+  homebrewPaths:
+    applicationsPath: "/Applications"
 {{- end }}

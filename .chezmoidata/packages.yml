@@ -220,3 +220,4 @@ packages:
       - "cursor-cli"
       - "font-maple-mono"
       - "font-maple-mono-nf"
+      - "kitty"

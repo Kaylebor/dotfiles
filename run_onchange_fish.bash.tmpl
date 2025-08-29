@@ -38,11 +38,9 @@ fish -c "set -Ux OPENAI_API_KEY 'dummy'"
 fish -c "set -Ux OPENAI_MODEL 'qwen3coder-a3b-q4-16l-256k-kq8fa'"
 {{- end }}
 
-{{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
-# Ensure ~/Applications directory exists for Homebrew Casks
-mkdir -p "$HOME/Applications"
-# Set Homebrew Cask options for home directory installation (MDM-restricted systems)
-fish -c "set -Ux HOMEBREW_CASK_OPTS '--appdir=$HOME/Applications'"
+{{- if and (hasKey . "homebrewPaths") (hasKey . "brewBin") .brewBin (stat .brewBin) }}
+# Set Homebrew Cask options for consistent app directory installation
+fish -c "set -Ux HOMEBREW_CASK_OPTS '--appdir={{ .homebrewPaths.applicationsPath }}'"
 {{- end }}
 
 {{- if eq .chezmoi.os "darwin" }}
