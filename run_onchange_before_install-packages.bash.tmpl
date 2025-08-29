@@ -22,80 +22,6 @@
     Use when: Need clean installation, changing installation options, or package requires full removal
 */}}
 
-{{/* MacOS setup commands */}}
-{{ if eq .chezmoi.os "darwin" -}}
-{{- if not (and (hasKey . "brewBin") (stat .brewBin)) }}
-# Install Homebrew
-{{- if eq .homebrewInstallType "alternative" }}
-# Alternative installation to {{ $.homebrewPath }} (for MDM setups)
-echo "Installing Homebrew to {{ $.homebrewPath }} for MDM compatibility..."
-mkdir -p "$HOME/{{ $.homebrewPath }}"
-curl -L {{ .urls.homebrew.tarball }} | tar xz --strip-components 1 -C "$HOME/{{ $.homebrewPath }}"
-eval "$($HOME/{{ $.homebrewPath }}/bin/brew shellenv)"
-brew update --force --quiet
-{{- if and (hasKey . "brewBin") .brewBin }}
-chmod -R go-w "$({{ .brewBin }} --prefix)/share/zsh" 2>/dev/null || true
-{{- end }}
-{{- else }}
-# Standard installation
-/bin/bash -c "$(curl -fsSL {{ .urls.homebrew.install }})"
-{{- end }}
-{{- end }}
-{{- template "brew_eval" . }}
-
-{{/* Check for Homebrew path migrations and packages needing rebuild */}}
-{{- template "homebrew-migration-check" . }}
-
-# Apply formula patches for alternative Homebrew
-{{- if eq .homebrewInstallType "alternative" }}
-echo "Applying formula patches for alternative Homebrew..."
-
-{{- if .formula_patches }}
-# Verify formula hashes before patching
-{{- range $formula, $config := .formula_patches }}
-if ! brew list {{ $formula }} &>/dev/null; then
-    echo "Verifying {{ $formula }} formula hash..."
-    FORMULA_PATH="$(brew --repository homebrew/core)/Formula/{{ $formula | substr 0 1 }}/{{ $formula }}.rb"
-    if [[ -f "$FORMULA_PATH" ]]; then
-        ACTUAL_HASH=$(shasum -a 256 "$FORMULA_PATH" | cut -d' ' -f1)
-        EXPECTED_HASH="{{ $config.expected_hash }}"
-        if [[ "$ACTUAL_HASH" != "$EXPECTED_HASH" ]]; then
-            echo "❌ Hash mismatch for {{ $formula }}!"
-            echo "   Expected: $EXPECTED_HASH"
-            echo "   Actual:   $ACTUAL_HASH"
-            echo "   Description: {{ $config.description }}"
-            {{- if hasKey $config "issue_url" }}
-            echo "   Related issue: {{ $config.issue_url }}"
-            {{- end }}
-            echo "   The formula may have been updated upstream."
-            echo "   Please update the patch and expected hash."
-            exit 1
-        else
-            echo "✅ {{ $formula }} formula hash verified"
-            echo "   Patch: {{ $config.description }}"
-        fi
-    else
-        echo "⚠️  Formula not found: $FORMULA_PATH"
-    fi
-fi
-{{- end }}
-{{- end }}
-
-{{/* Execute the patch script template */}}
-{{- template "patch-homebrew-formulas" . }}
-
-# Set environment variable to force Homebrew to use local formulas instead of API
-export HOMEBREW_NO_INSTALL_FROM_API=1
-echo "Set HOMEBREW_NO_INSTALL_FROM_API=1 to use local formula modifications"
-{{- end }}
-
-# Install Homebrew taps first
-{{- if .packages.darwin.taps }}
-{{ range .packages.darwin.taps -}}
-brew tap {{ . }}
-{{ end -}}
-{{- end }}
-
 {{/* Ensure uv is available for Python scripts */}}
 {{ if eq .chezmoi.os "darwin" -}}
 # Install uv on macOS
@@ -130,19 +56,13 @@ exit 1
 echo "Initializing SQLite database..."
 "{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-sqlite" init
 
-# Handle package reinstalls
-# CHEZMOI_REINSTALL_PACKAGES: comma-separated list of packages to reinstall (uses brew reinstall)
-# CHEZMOI_FORCE_REINSTALL_PACKAGES: comma-separated list of packages to uninstall then install
+{{/* MacOS setup commands - delegated to Python script */}}
+{{ if eq .chezmoi.os "darwin" -}}
+# Handle package reinstalls (legacy environment variables)
 if [ -n "$CHEZMOI_REINSTALL_PACKAGES" ]; then
   echo "Reinstalling packages (brew reinstall): $CHEZMOI_REINSTALL_PACKAGES"
   IFS=',' read -ra PACKAGES <<< "$CHEZMOI_REINSTALL_PACKAGES"
-  for pkg in "${PACKAGES[@]}"; do
-    pkg=$(echo "$pkg" | tr -d ' ')  # Trim whitespace
-    if brew list --formula | grep -q "^${pkg}$"; then
-      echo "Reinstalling $pkg..."
-      brew reinstall "$pkg"
-    fi
-  done
+  "{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-homebrew-manager" simple-reinstall "${PACKAGES[@]}"
 fi
 
 {{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
@@ -170,138 +90,58 @@ fi
 # Environment variable present: running package installation
 echo "Using Python package installer for complex installation logic..."
 IFS=',' read -ra PACKAGES <<< "$CHEZMOI_FORCE_REINSTALL_PACKAGES"
-"{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-package-installer" force-reinstall "${PACKAGES[@]}"
+"{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-homebrew-manager" force-reinstall "${PACKAGES[@]}"
 {{- end }}
 {{- else }}
 {{- if env "CHEZMOI_FORCE_REINSTALL_PACKAGES" }}
-# Standard Homebrew or non-Darwin systems - simple installation
-echo "Force reinstalling packages (simple uninstall + install): $CHEZMOI_FORCE_REINSTALL_PACKAGES"
+# Standard Homebrew - use Python script for consistency
+echo "Force reinstalling packages: $CHEZMOI_FORCE_REINSTALL_PACKAGES"
 IFS=',' read -ra PACKAGES <<< "$CHEZMOI_FORCE_REINSTALL_PACKAGES"
-for pkg in "${PACKAGES[@]}"; do
-  pkg=$(echo "$pkg" | tr -d ' ')
-  if brew list --formula | grep -q "^${pkg}$"; then
-    echo "Uninstalling $pkg for clean reinstall..."
-    brew uninstall --ignore-dependencies "$pkg"
-  fi
-  echo "Installing $pkg..."
-  brew install "$pkg"
-done
+"{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-homebrew-manager" force-reinstall "${PACKAGES[@]}"
 {{- end }}
 {{- end }}
 
-# Install packages with environment variables and patches first (individual installs)
-{{ range .packages.darwin.brews -}}
-{{- if kindIs "map" . }}
-{{- $hasEnv := false }}
-{{- $hasAlternativeEnv := false }}
-{{- if hasKey . "env" }}
-{{- $hasEnv = true }}
-{{- end }}
-{{- if hasKey . "alternative_only" }}
-{{- if hasKey .alternative_only "env" }}
-{{- $hasAlternativeEnv = true }}
-{{- end }}
-{{- end }}
-{{- if or $hasEnv $hasAlternativeEnv }}
+# Extract runtime configuration for Python script
+{{- template "brew_eval" . }}
 
-# Install {{ .name }}{{- if or $hasEnv $hasAlternativeEnv }} with isolated environment{{- end }}
-{{- if or $hasEnv $hasAlternativeEnv }}
-({{- if $hasEnv }}{{- range $key, $value := .env }} {{ $key }}={{ $value | quote }}{{- end }}{{- end }}{{- if and $hasAlternativeEnv (eq $.homebrewInstallType "alternative") }}{{- range $key, $value := .alternative_only.env }} {{ $key }}={{ $value | quote }}{{- end }}{{- end }}; brew install {{ .name | quote }}{{- if hasKey . "args" }} {{ range .args }} --{{ . }}{{ end }}{{- end }}{{- if and (hasKey . "alternative_only") (eq $.homebrewInstallType "alternative") }}{{- if hasKey .alternative_only "args" }} {{ range .alternative_only.args }} --{{ . }}{{ end }}{{- end }}{{- end }})
-{{- else }}
-brew install {{ .name | quote }}{{- if hasKey . "args" }} {{ range .args }} --{{ . }}{{ end }}{{- end }}{{- if and (hasKey . "alternative_only") (eq $.homebrewInstallType "alternative") }}{{- if hasKey .alternative_only "args" }} {{ range .alternative_only.args }} --{{ . }}{{ end }}{{- end }}{{- end }}
-{{- end }}
+echo "Using Python script for comprehensive Homebrew management..."
 
-{{- end }}
-{{- end }}
-{{ end -}}
+{{/* Check for Homebrew path migrations and packages needing rebuild */}}
+{{- template "homebrew-migration-check" . }}
 
-# Install remaining packages with brew bundle
-brew bundle --file=- <<EOF
-{{ range .packages.darwin.brews -}}
-{{- if kindIs "string" . }}
-brew {{ . | quote }}
-{{- else if kindIs "map" . }}
-{{- $hasEnv := false }}
-{{- $hasAlternativeEnv := false }}
-{{- if hasKey . "env" }}
-{{- $hasEnv = true }}
-{{- end }}
-{{- if hasKey . "alternative_only" }}
-{{- if hasKey .alternative_only "env" }}
-{{- $hasAlternativeEnv = true }}
-{{- end }}
-{{- end }}
-{{- if not (or $hasEnv $hasAlternativeEnv) }}
-brew {{ .name | quote }}{{- if hasKey . "args" }}, args: [{{ range $i, $arg := .args }}{{if $i}}, {{end}}{{ $arg | quote }}{{ end }}]{{- end }}{{- if and (hasKey . "alternative_only") (eq $.homebrewInstallType "alternative") }}{{- if hasKey .alternative_only "args" }}, args: [{{ range $i, $arg := .alternative_only.args }}{{if $i}}, {{end}}{{ $arg | quote }}{{ end }}]{{- end }}{{- end }}
-{{- end }}
-{{- end }}
-{{ end -}}
-{{ range .packages.darwin.casks -}}
-{{- if kindIs "string" . }}
-cask {{ . | quote }}
-{{- else if kindIs "map" . }}
-{{- if hasKey . "skip_if_installed" }}
-{{- $shouldSkip := false }}
-{{- if kindIs "slice" .skip_if_installed }}
-{{- range .skip_if_installed }}
-{{- if stat . }}
-{{- $shouldSkip = true }}
-{{- end }}
-{{- end }}
-{{- else }}
-{{- if stat .skip_if_installed }}
-{{- $shouldSkip = true }}
-{{- end }}
-{{- end }}
-{{- if not $shouldSkip }}
-cask {{ .name | quote }}
-{{- end }}
-{{- else }}
-cask {{ .name | quote }}
-{{- end }}
-{{- end }}
-{{ end -}}
-EOF
-
+{{/* Execute the patch script template */}}
 {{- if eq .homebrewInstallType "alternative" }}
-# Update homebrew state file after successful installation
-update_homebrew_state
-
-# Index ~/Applications for Spotlight so newly installed apps are searchable
-if [ -d "$HOME/Applications" ]; then
-  echo "Indexing ~/Applications for Spotlight..."
-  mdimport "$HOME/Applications" 2>/dev/null || true
-fi
+{{- template "patch-homebrew-formulas" . }}
 {{- end }}
 
-# Fix kitty TERMINFO for Emacs compatibility
-if command -v brew >/dev/null 2>&1 && brew list --cask | grep -q "^kitty$"; then
-  KITTY_TERMINFO_PATH="{{ .homebrewPaths.applicationsPath }}/kitty.app/Contents/Resources/kitty/terminfo"
-  if [ -d "$KITTY_TERMINFO_PATH" ]; then
-    echo "Setting up kitty TERMINFO database for Emacs compatibility..."
-    
-    # Create terminfo directories (idempotent)
-    mkdir -p "$HOME/.terminfo/x" "$HOME/.terminfo/78"
-    
-    # Copy kitty terminfo from bundle (always copy to get updates)
-    if [ -f "$KITTY_TERMINFO_PATH/78/xterm-kitty" ]; then
-      cp "$KITTY_TERMINFO_PATH/78/xterm-kitty" "$HOME/.terminfo/x/xterm-kitty"
-      echo "Updated kitty terminfo at ~/.terminfo/x/xterm-kitty"
-      
-      # Create/update symlink for hex-based lookup  
-      ln -snf "$HOME/.terminfo/x/xterm-kitty" "$HOME/.terminfo/78/xterm-kitty"
-      echo "Updated symlink ~/.terminfo/78/xterm-kitty -> ~/.terminfo/x/xterm-kitty"
-      
-      echo "✅ Kitty TERMINFO setup complete - Emacs should work properly in terminal mode"
-    else
-      echo "⚠️  Warning: kitty terminfo file not found at expected location: $KITTY_TERMINFO_PATH/78/xterm-kitty"
-    fi
-  else
-    echo "⚠️  Warning: kitty terminfo directory not found: $KITTY_TERMINFO_PATH"
-  fi
-else
-  echo "Skipping kitty TERMINFO setup (kitty not installed via Homebrew)"
-fi
+# Prepare runtime configuration
+RUNTIME_CONFIG=$(cat << 'EOF'
+{
+  "os": "{{ .chezmoi.os }}",
+  "homebrew_type": "{{ .homebrewInstallType }}",
+  {{- if and (hasKey . "homebrewPaths") (hasKey .homebrewPaths "applicationsPath") }}
+  "applications_path": {{ .homebrewPaths.applicationsPath | toJson }},
+  {{- end }}
+  {{- if and (hasKey . "homebrewPath") .homebrewPath }}
+  "homebrew_path": {{ .homebrewPath | toJson }},
+  {{- end }}
+  {{- if and (hasKey . "urls") (hasKey .urls "homebrew") }}
+  "homebrew_tarball_url": {{ .urls.homebrew.tarball | toJson }},
+  "homebrew_install_url": {{ .urls.homebrew.install | toJson }},
+  {{- end }}
+  {{- if and (hasKey . "brewBin") .brewBin }}
+  "brew_bin": {{ .brewBin | toJson }},
+  "has_brew": {{ stat .brewBin | toJson }},
+  {{- else }}
+  "has_brew": false,
+  {{- end }}
+  "chezmoi_source_dir": {{ .chezmoi.sourceDir | toJson }}
+}
+EOF
+)
+
+# Call comprehensive Python Homebrew manager
+"{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-homebrew-manager" full-install --config "$RUNTIME_CONFIG"
 
 {{ end -}}
 
