@@ -11,6 +11,11 @@ $ruby\
 $golang\
 $nodejs\
 $python\
+$rust\
+$elixir\
+$java\
+$deno\
+$bun\
 $line_break\
 $character"""
 
@@ -37,12 +42,48 @@ format = "([$state( $progress_current/$progress_total)]($style)) "
 
 [ruby]
 format = "[$symbol ($version )]($style)"
+detect_files = ["Gemfile", "*.rb", ".ruby-version", "Rakefile", "*.gemspec"]
+detect_folders = []
 
 [golang]
 format = "[$symbol ($version )]($style)"
+detect_files = ["go.mod", "go.sum", "*.go", "go.work"]
+detect_folders = ["vendor"]
 
 [nodejs]
 format = "[$symbol ($version )]($style)"
+detect_files = ["package.json", "*.js", "*.ts", "*.jsx", "*.tsx", ".node-version", ".nvmrc"]
+detect_folders = ["node_modules"]
+
+[python]
+format = "[$symbol ($version )]($style)"
+detect_files = ["requirements.txt", "pyproject.toml", "*.py", "Pipfile", "tox.ini", "setup.py", "setup.cfg", ".python-version"]
+detect_folders = [".venv", "venv", ".virtualenv", "__pycache__"]
+
+[rust]
+format = "[$symbol ($version )]($style)"
+detect_files = ["Cargo.toml", "*.rs"]
+detect_folders = ["target"]
+
+[elixir]
+format = "[$symbol ($version )]($style)"
+detect_files = ["mix.exs", "*.ex", "*.exs", "*.eex", "*.leex", "*.heex"]
+detect_folders = ["_build", "deps"]
+
+[java]
+format = "[$symbol ($version )]($style)"
+detect_files = ["pom.xml", "build.gradle", "build.gradle.kts", "*.java", "*.class", "*.jar", ".java-version"]
+detect_folders = [".gradle", ".mvn"]
+
+[deno]
+format = "[$symbol ($version )]($style)"
+detect_files = ["deno.json", "deno.jsonc", "deno.lock", "*.ts", "*.tsx"]
+detect_folders = []
+
+[bun]
+format = "[$symbol ($version )]($style)"
+detect_files = ["bun.lockb", "bunfig.toml", "*.bun.ts", "*.bun.js"]
+detect_folders = []
 
 # https://github.com/catppuccin/starship/blob/main/themes/frappe.toml
 [palettes.catppuccin_frappe]
