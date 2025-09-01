@@ -189,12 +189,9 @@
     (setq lsp-clients-typescript-tls-path "mise")
     (setq lsp-clients-typescript-server-args '("exec" "--" "typescript-language-server" "--stdio")))
   
-  ;; Angular language server
+  ;; Angular language server - use npx to ensure proper package resolution
   (setq lsp-clients-angular-language-server-command
-        `("mise" "exec" "--" "ngserver"
-          "--stdio"
-          "--tsProbeLocations" ,(concat (getenv "HOME") "/.local/share/mise/installs/node/")
-          "--ngProbeLocations" ,(concat (getenv "HOME") "/.local/share/mise/installs/node/")))
+        '("mise" "exec" "--" "npx" "--no-install" "ngserver" "--stdio"))
   
   ;; Rust analyzer
   (setq lsp-rust-analyzer-server-command '("mise" "exec" "--" "rust-analyzer"))
