@@ -187,6 +187,9 @@
           "--tsProbeLocations" ,(concat (getenv "HOME") "/.local/share/mise/installs/node/")
           "--ngProbeLocations" ,(concat (getenv "HOME") "/.local/share/mise/installs/node/")))
   
+  ;; Configure rust-analyzer to use mise for proper toolchain management
+  (setq lsp-rust-analyzer-server-command '("mise" "exec" "--" "rust-analyzer"))
+  
   ;; Disable TypeProf and default ruby-lsp to avoid conflicts
   (add-to-list 'lsp-disabled-clients 'typeprof-ls)
   (add-to-list 'lsp-disabled-clients 'ruby-lsp-ls)
@@ -210,7 +213,7 @@
   
   
   (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
-    "Prepend emacs-lsp-booster command to lsp CMD."
+    "Prepend emacs-lsp-booster command to lsp CMD, with mise support."
     (let ((orig-result (funcall old-fn cmd test?)))
       (if (and (not test?)                             ;; for check lsp-server-present?
                (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
@@ -218,10 +221,20 @@
                (not (functionp 'json-rpc-connection))  ;; native json-rpc
                (executable-find "emacs-lsp-booster"))
           (progn
-            (when-let* ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
-              (setcar orig-result command-from-exec-path))
-            (message "Using emacs-lsp-booster for %s!" orig-result)
-            (append '("emacs-lsp-booster" "--disable-bytecode" "--") orig-result))
+            ;; If command starts with mise exec, we need to insert lsp-booster after mise exec
+            (if (and (listp orig-result)
+                     (>= (length orig-result) 3)
+                     (string= (car orig-result) "mise")
+                     (string= (cadr orig-result) "exec"))
+                ;; mise exec -- <cmd> becomes mise exec -- emacs-lsp-booster -- <cmd>
+                (append '("mise" "exec" "--" "emacs-lsp-booster" "--disable-bytecode" "--")
+                        (nthcdr 3 orig-result))
+              ;; Regular command: prepend emacs-lsp-booster
+              (progn
+                (when-let* ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
+                  (setcar orig-result command-from-exec-path))
+                (message "Using emacs-lsp-booster for %s!" orig-result)
+                (append '("emacs-lsp-booster" "--disable-bytecode" "--") orig-result))))
         orig-result)))
   (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command))
 
