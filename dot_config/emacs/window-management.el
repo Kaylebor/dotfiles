@@ -4,23 +4,6 @@
 
 (setopt display-buffer-alist
   `(
-    ;; Magit buffers - dedicated right-side window
-    ("\\*magit: .*\\*"
-     (display-buffer-in-side-window)
-     (side . right)
-     (slot . 0)
-     (window-width . 0.4)
-     (dedicated . t)
-     (preserve-size . (t . nil)))
-    
-    ("\\*magit-.*\\*"
-     (display-buffer-in-side-window)
-     (side . right)
-     (slot . 0)
-     (window-width . 0.4)
-     (dedicated . t)
-     (preserve-size . (t . nil)))
-    
     ;; Vterm buffers - dedicated bottom window
     ("\\*vterm.*\\*"
      (display-buffer-in-side-window)
@@ -162,16 +145,3 @@
      (preserve-size . (nil . t)))
     ))
 
-;;; Utility functions for quick window management
-(defun my/toggle-vterm ()
-  "Toggle vterm window visibility."
-  (interactive)
-  (let ((vterm-window (get-buffer-window "*vterm*")))
-    (if vterm-window
-        (delete-window vterm-window)
-      (vterm))))
-
-(defun my/close-all-side-windows ()
-  "Close all side windows but keep main editing area."
-  (interactive)
-  (window-toggle-side-windows))

@@ -66,12 +66,4 @@
 (with-eval-after-load 'vterm
   (define-key vterm-mode-map (kbd "C-c C-c") #'claude-code-ide-send-escape))
 
-;; Window management keybindings
-(global-set-key (kbd "C-c w t") #'my/toggle-vterm)
-(global-set-key (kbd "C-c w c") #'my/close-all-side-windows)
 
-;; Evil mode window management bindings
-(with-eval-after-load 'evil
-  ;; Quick toggle bindings in normal mode
-  (keymap-set evil-normal-state-map "g w t" #'my/toggle-vterm)
-  (keymap-set evil-normal-state-map "g w c" #'my/close-all-side-windows))

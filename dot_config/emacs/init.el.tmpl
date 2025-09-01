@@ -255,6 +255,8 @@
   {{- end }}
   ;; Show word-level differences within changed lines
   (magit-diff-refine-hunk t)
+  ;; Reuse current window except for diffs
+  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
   :config
   ;; which-key description for magit prefix (C-x g already bound)
   (which-key-add-key-based-replacements "C-x g" "magit"))
