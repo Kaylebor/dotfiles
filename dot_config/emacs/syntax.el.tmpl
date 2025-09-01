@@ -166,7 +166,7 @@
   
   ;; Suppress company-mode warnings since we're using corfu
   (setq lsp-warn-no-matched-clients nil)
-  
+
   ;; Monorepo workflow: LSP will prompt you to select the correct project root
   ;; the first time you open a file in each subproject. Your choices are saved
   ;; in ~/.emacs.d/.lsp-session-v1 and remembered across Emacs sessions.
@@ -189,9 +189,10 @@
     (setq lsp-clients-typescript-tls-path "mise")
     (setq lsp-clients-typescript-server-args '("exec" "--" "typescript-language-server" "--stdio")))
   
-  ;; Angular language server - use npx to ensure proper package resolution
-  (setq lsp-clients-angular-language-server-command
-        '("mise" "exec" "--" "npx" "--no-install" "ngserver" "--stdio"))
+  ;; Angular language server - let lsp-angular auto-detect with mise
+  (setq lsp-clients-angular-node-get-prefix-command 
+        "mise exec -- sh -c 'dirname $(dirname $(which node))'")
+  (setq lsp-clients-angular-language-server-command nil)
   
   ;; Rust analyzer
   (setq lsp-rust-analyzer-server-command '("mise" "exec" "--" "rust-analyzer"))
