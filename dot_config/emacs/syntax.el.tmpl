@@ -176,18 +176,27 @@
   (add-to-list 'lsp-language-id-configuration '(go-mod-mode . "go.mod"))
   (add-hook 'go-mod-ts-mode-hook (lambda () (lsp-mode -1)))
   
-  ;; Ensure TypeScript is found properly
-  (setq lsp-clients-typescript-server-args '("--stdio"))
-  (setq lsp-typescript-npm (executable-find "npm"))
+  ;; Configure all LSP servers to use mise for consistent environment management
+  ;; This ensures they get the correct versions and environment variables from mise
   
-  ;; Configure Angular language server
+  ;; Go LSP (gopls) - uses separate path and args variables
+  (with-eval-after-load 'lsp-go
+    (setq lsp-go-gopls-server-path "mise")
+    (setq lsp-go-gopls-server-args '("exec" "--" "gopls" "-remote=auto")))
+  
+  ;; TypeScript/JavaScript LSP - uses path and args pattern
+  (with-eval-after-load 'lsp-javascript
+    (setq lsp-clients-typescript-tls-path "mise")
+    (setq lsp-clients-typescript-server-args '("exec" "--" "typescript-language-server" "--stdio")))
+  
+  ;; Angular language server
   (setq lsp-clients-angular-language-server-command
-        `("ngserver"
+        `("mise" "exec" "--" "ngserver"
           "--stdio"
           "--tsProbeLocations" ,(concat (getenv "HOME") "/.local/share/mise/installs/node/")
           "--ngProbeLocations" ,(concat (getenv "HOME") "/.local/share/mise/installs/node/")))
   
-  ;; Configure rust-analyzer to use mise for proper toolchain management
+  ;; Rust analyzer
   (setq lsp-rust-analyzer-server-command '("mise" "exec" "--" "rust-analyzer"))
   
   ;; Disable TypeProf and default ruby-lsp to avoid conflicts
