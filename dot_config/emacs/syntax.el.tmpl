@@ -199,6 +199,53 @@
   ;; Rust analyzer
   (setq lsp-rust-analyzer-server-command '("mise" "exec" "--" "rust-analyzer"))
   
+  ;; Re-register HTML/CSS/JSON servers to use mise exec for consistent environment
+  (with-eval-after-load 'lsp-html
+    (lsp-register-client
+     (make-lsp-client 
+      :new-connection (lsp-stdio-connection
+                       '("mise" "exec" "--" "vscode-html-language-server" "--stdio"))
+      :activation-fn (lsp-activate-on "html")
+      :priority -4
+      :completion-in-comments? t
+      :server-id 'html-ls
+      :initialization-options (lambda ()
+                                (list :dataPaths lsp-html-custom-data))
+      :async-request-handlers (ht ("html/customDataContent" #'lsp-html--get-content))
+      :initialized-fn (lambda (w)
+                        (with-lsp-workspace w
+                          (lsp--set-configuration
+                           (lsp-configuration-section "html")))))))
+  
+  (with-eval-after-load 'lsp-css
+    (lsp-register-client
+     (make-lsp-client
+      :new-connection (lsp-stdio-connection
+                       '("mise" "exec" "--" "vscode-css-language-server" "--stdio"))
+      :activation-fn (lsp-activate-on "css" "scss" "sass" "less")
+      :priority -1
+      :action-handlers (lsp-ht ("_css.applyCodeAction" #'lsp-css--apply-code-action))
+      :server-id 'css-ls)))
+  
+  (with-eval-after-load 'lsp-json
+    (lsp-register-client
+     (make-lsp-client
+      :new-connection (lsp-stdio-connection
+                       '("mise" "exec" "--" "vscode-json-language-server" "--stdio"))
+      :activation-fn (lsp-activate-on "json" "jsonc")
+      :server-id 'json-ls
+      :priority 0
+      :multi-root t
+      :completion-in-comments? t
+      :initialization-options lsp-json--extra-init-params
+      :async-request-handlers (ht ("vscode/content" #'lsp-json--get-content))
+      :initialized-fn (lambda (w)
+                        (with-lsp-workspace w
+                          (lsp--set-configuration
+                           (ht-merge (lsp-configuration-section "json")
+                                     (lsp-configuration-section "http")))
+                          (lsp-notify "json/schemaAssociations" lsp-json--schema-associations))))))
+  
   ;; Disable TypeProf and default ruby-lsp to avoid conflicts
   (add-to-list 'lsp-disabled-clients 'typeprof-ls)
   (add-to-list 'lsp-disabled-clients 'ruby-lsp-ls)
