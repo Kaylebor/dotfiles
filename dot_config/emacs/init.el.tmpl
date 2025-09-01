@@ -435,6 +435,9 @@
   :init
   (load-theme 'catppuccin :no-confirm))
 
+;; Window management configuration
+(load-file (expand-file-name "window-management.el" user-emacs-directory))
+
 ;; Keybindings go here
 (load-file (expand-file-name "keybindings.el" user-emacs-directory))
 
