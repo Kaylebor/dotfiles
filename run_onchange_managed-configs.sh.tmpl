@@ -1,0 +1,204 @@
+#!/usr/bin/env bash
+# Generic JSON configuration merge script
+# Merges Chezmoi-managed base settings with existing device-specific settings
+# Configuration driven by .chezmoidata/managed-configs.yaml
+
+# Hash-based change detection for all managed templates and metadata
+# hash: {{ include ".chezmoidata/managed-configs.yaml" | sha256sum }}
+{{- range $configName, $config := .managed_configs }}
+# hash: {{ include $config.template | sha256sum }}
+{{- end }}
+# Environment-based hashes for dynamic content
+# hash: {{ env "CHEZMOI_GITHUB_PAT" | sha256sum }}
+# hash: {{ .skip1Password | toString | sha256sum }}
+# hash: {{ env "CHEZMOI_SKIP_1PASSWORD" | sha256sum }}
+
+set -euo pipefail
+
+# Color output helpers
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[1;33m'
+readonly BLUE='\033[0;34m'
+readonly NC='\033[0m' # No Color
+
+log_info() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+log_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+log_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# Function to create jq filter for merging configurations
+# Uses the same approach as the original Cursor script: template * existing
+# This naturally preserves existing fields while adding new template fields
+create_merge_filter() {
+    # Simple merge: template gets overridden by existing file values
+    # This preserves all existing device-specific settings automatically
+    echo '.[0] * .[1]'
+}
+
+# Function to merge configuration file
+merge_config_file() {
+    local config_name="$1"
+    local template_path="$2"
+    local dest_path="$3"
+    local preserve_fields_str="$4"
+    local merge_strategy="$5"
+    local description="$6"
+    
+    log_info "Processing $config_name ($description)..."
+    
+    # Note: preserve_fields_str is kept for compatibility but not used in simple merge
+    # The simple merge (template * existing) preserves all existing fields naturally
+    
+    # Ensure destination directory exists
+    local dest_dir="$(dirname "$dest_path")"
+    mkdir -p "$dest_dir"
+    
+    # Generate base file from Chezmoi template and remove JSON comments
+    local temp_base="/tmp/managed-config-${config_name}-base.json"
+    log_info "Generating base configuration from template..."
+    if ! chezmoi execute-template -f "$template_path" | sed '/^[[:space:]]*\/\//d' > "$temp_base"; then
+        log_error "Failed to generate template for $config_name"
+        return 1
+    fi
+    
+    # Validate generated JSON
+    if ! jq empty "$temp_base" 2>/dev/null; then
+        log_error "Generated template for $config_name is not valid JSON"
+        cat "$temp_base"
+        return 1
+    fi
+    
+    # Check if existing file exists
+    if [[ -f "$dest_path" ]]; then
+        log_info "Found existing configuration, merging with preserved fields..."
+        
+        local temp_existing="/tmp/managed-config-${config_name}-existing.json"
+        local temp_merged="/tmp/managed-config-${config_name}-merged.json"
+        
+        # Remove comments from existing file and validate
+        sed '/^[[:space:]]*\/\//d' "$dest_path" > "$temp_existing"
+        if ! jq empty "$temp_existing" 2>/dev/null; then
+            log_warning "Existing $config_name file has invalid JSON, backing up and using template only"
+            cp "$dest_path" "${dest_path}.backup.$(date +%s)"
+            cp "$temp_base" "$dest_path"
+            log_success "$config_name updated (existing file backed up)"
+            rm -f "$temp_base" "$temp_existing"
+            return 0
+        fi
+        
+        # Create merge filter - use simple approach from original Cursor script
+        local merge_filter=$(create_merge_filter)
+        
+        # Perform merge
+        if ! jq -s "$merge_filter" "$temp_base" "$temp_existing" > "$temp_merged"; then
+            log_error "Failed to merge $config_name configurations"
+            rm -f "$temp_base" "$temp_existing" "$temp_merged"
+            return 1
+        fi
+        
+        # Validate merged JSON
+        if ! jq empty "$temp_merged" 2>/dev/null; then
+            log_error "Merged configuration for $config_name is not valid JSON"
+            rm -f "$temp_base" "$temp_existing" "$temp_merged"
+            return 1
+        fi
+        
+        # Check for differences (compare formatted JSON to avoid whitespace issues)
+        local current_formatted="/tmp/managed-config-${config_name}-current.json"
+        local merged_formatted="/tmp/managed-config-${config_name}-merged-formatted.json"
+        
+        jq --sort-keys . "$dest_path" > "$current_formatted" 2>/dev/null || cp "$dest_path" "$current_formatted"
+        jq --sort-keys . "$temp_merged" > "$merged_formatted"
+        
+        if ! diff -q "$current_formatted" "$merged_formatted" > /dev/null 2>&1; then
+            echo
+            echo "======================================"
+            log_info "Changes detected in $config_name:"
+            echo "======================================"
+            {{- if lookPath "difft" }}
+            difft "$current_formatted" "$merged_formatted" 2>/dev/null || diff -u "$current_formatted" "$merged_formatted"
+            {{- else }}
+            diff -u "$current_formatted" "$merged_formatted"
+            {{- end }}
+            echo "======================================"
+            echo
+            
+            read -p "Apply these changes? (y/N): " -n 1 -r
+            echo
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                cp "$temp_merged" "$dest_path"
+                log_success "$config_name updated successfully"
+            else
+                log_info "$config_name changes cancelled"
+            fi
+        else
+            log_success "$config_name - no changes detected"
+        fi
+        
+        # Cleanup
+        rm -f "$temp_base" "$temp_existing" "$temp_merged" "$current_formatted" "$merged_formatted"
+        
+    else
+        log_info "No existing configuration found, creating new file..."
+        cp "$temp_base" "$dest_path"
+        log_success "$config_name created successfully"
+        rm -f "$temp_base"
+    fi
+}
+
+# Main execution
+log_info "Starting managed configuration merge process..."
+
+{{- $configs := .managed_configs }}
+{{- if not $configs }}
+log_warning "No managed configurations found in .chezmoidata/managed-configs.yaml"
+exit 0
+{{- end }}
+
+# Determine current OS
+readonly CURRENT_OS="{{ .chezmoi.os }}"
+log_info "Detected OS: $CURRENT_OS"
+
+# Process each managed configuration
+{{- range $configName, $config := $configs }}
+{{- $templatePath := printf "%s/%s" $.chezmoi.sourceDir $config.template }}
+{{- $destPath := "" }}
+{{- if kindIs "string" $config.destination }}
+  {{- $destPath = printf "%s/%s" $.chezmoi.homeDir $config.destination }}
+{{- else if kindIs "map" $config.destination }}
+  {{- if hasKey $config.destination $.chezmoi.os }}
+    {{- $destPath = printf "%s/%s" $.chezmoi.homeDir (index $config.destination $.chezmoi.os) }}
+  {{- else }}
+    {{- $destPath = "" }}
+  {{- end }}
+{{- end }}
+
+{{- if $destPath }}
+# Process {{ $configName }}
+{{- $preserveFieldsStr := join " " ($config.preserve_fields | default list) }}
+merge_config_file \
+    "{{ $configName }}" \
+    "{{ $templatePath }}" \
+    "{{ $destPath }}" \
+    "{{ $preserveFieldsStr }}" \
+    "{{ $config.merge_strategy | default "shallow" }}" \
+    "{{ $config.description | default "Managed configuration" }}"
+
+{{- else }}
+log_warning "Skipping {{ $configName }} - no destination path defined for OS: $CURRENT_OS"
+{{- end }}
+{{- end }}
+
+log_success "Managed configuration merge process completed"

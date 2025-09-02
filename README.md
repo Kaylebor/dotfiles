@@ -101,5 +101,59 @@ Carapace automatically detects and bridges these frameworks, providing better co
 
 The configuration in `.config/carapace/bridges.yaml` maps tools to their frameworks for optimal performance.
 
+## Device-Specific Configuration Management
+
+This repository includes a generalized system for managing JSON configuration files that need both shared settings (managed by Chezmoi) and device-specific settings (preserved per machine).
+
+### How It Works
+
+The system uses a metadata-driven approach:
+
+1. **Configuration metadata** in `.chezmoidata/managed-configs.yaml` defines which files to manage
+2. **Template files** contain shared configuration (without device-specific fields)  
+3. **Merge script** (`run_onchange_managed-configs.sh.tmpl`) automatically merges templates with existing device settings
+4. **Ignored files** in `.chezmoiignore` prevent Chezmoi from directly managing these files
+
+### Supported Applications
+
+Currently manages configurations for:
+- **Claude Code** (`~/.claude/settings.json`) - Preserves model preferences and survey state
+- **Cursor IDE** (`~/Library/Application Support/Cursor/User/settings.json`) - Preserves UI preferences  
+- **Cursor MCP** (`~/.cursor/mcp.json`) - Fully managed (no device-specific fields)
+
+### Key Features
+
+- **Automatic merging**: Template changes trigger automatic merge with existing settings
+- **Device preservation**: Existing device-specific fields are never overwritten
+- **Interactive updates**: Shows diff preview and asks for confirmation before applying changes
+- **Hash-based detection**: Only runs when template content actually changes
+- **JSON validation**: Validates templates and existing files, backs up invalid JSON
+- **Flexible tooling**: Uses `difft` for enhanced diffs, falls back to standard `diff`
+
+### Adding New Configurations
+
+To manage a new JSON configuration file:
+
+1. **Create template**: Convert existing file to `.tmpl` format, remove device-specific fields
+2. **Add to metadata**: Define the configuration in `.chezmoidata/managed-configs.yaml`:
+   ```yaml
+   my_app_settings:
+     template: "dot_config/myapp/settings.json.tmpl"
+     destination: ".config/myapp/settings.json"
+     preserve_fields:
+       - "fontSize"
+       - "theme"
+     merge_strategy: "shallow"
+     description: "My App settings with device-specific preferences"
+   ```
+3. **Update ignore list**: Add the destination file to `.chezmoiignore`
+
+The system will automatically handle the rest - no need to write custom merge scripts!
+
+### Merge Strategies
+
+- **shallow**: Simple merge where existing values override template values (recommended)
+- **deep**: Recursive merge preserving nested structures (planned feature)
+
 ## Extras
 - Fonts: [Maple Mono](https://github.com/subframe7536/maple-font)

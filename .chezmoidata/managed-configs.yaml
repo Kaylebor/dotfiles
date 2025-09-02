@@ -1,0 +1,75 @@
+# Configuration metadata for device-specific JSON file merging
+# This file defines which JSON configuration files should be managed
+# with device-specific field preservation
+
+managed_configs:
+  # Cursor IDE Settings
+  cursor_settings:
+    template: "dot_cursor/settings.json.tmpl"
+    destination:
+      darwin: "Library/Application Support/Cursor/User/settings.json"
+      linux: ".config/Cursor/User/settings.json"
+    preserve_fields:
+      # Preserve user-specific theme and UI preferences
+      - "workbench.colorTheme"
+      - "window.zoomLevel"
+      - "editor.fontSize"
+      - "terminal.integrated.fontSize"
+      # Preserve any manually configured extensions settings
+      - "extensions.*"
+    merge_strategy: "shallow"
+    description: "Cursor IDE settings with device-specific UI preferences"
+    
+  # Cursor MCP Configuration  
+  cursor_mcp:
+    template: "dot_cursor/mcp.json.tmpl"
+    destination: ".cursor/mcp.json"
+    preserve_fields: []
+    merge_strategy: "shallow"
+    description: "Cursor MCP server configuration - fully managed"
+    
+  # Claude Code Settings
+  claude_settings:
+    template: "dot_claude/settings.json.tmpl"
+    destination: ".claude/settings.json"
+    preserve_fields:
+      # Device-specific model preference
+      - "model"
+      # Device-specific survey state
+      - "feedbackSurveyState"
+      # Any custom per-device settings
+      - "customSettings"
+    merge_strategy: "shallow"
+    description: "Claude Code settings with device-specific model preferences"
+
+# Future candidates for managed configs:
+# 
+# zed_settings:
+#   template: "dot_config/zed/private_settings.json.tmpl"
+#   destination: ".config/zed/settings.json"
+#   preserve_fields:
+#     - "ui_font_size"
+#     - "buffer_font_size"
+#     - "theme"
+#     - "context_servers.*.settings"
+#   merge_strategy: "deep"
+#   description: "Zed editor settings with device-specific font and theme preferences"
+#
+# vscode_settings:
+#   template: "dot_vscode/settings.json.tmpl"
+#   destination: ".vscode/settings.json"
+#   preserve_fields:
+#     - "editor.fontSize"
+#     - "terminal.integrated.fontSize"
+#     - "workbench.colorTheme"
+#   merge_strategy: "shallow"
+#   description: "VSCode settings with device-specific UI preferences"
+
+# Merge strategy options:
+# - "shallow": Object.assign-like merge (.[0] * .[1] in jq)
+# - "deep": Recursive merge preserving nested structures
+#
+# Preserve fields support:
+# - Simple field names: "model", "fontSize"
+# - Nested paths: "feedbackSurveyState.lastShownTime"  
+# - Wildcards: "extensions.*", "context_servers.*.settings"
