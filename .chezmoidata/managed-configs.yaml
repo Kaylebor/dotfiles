@@ -2,6 +2,11 @@
 # This file defines which JSON configuration files should be managed
 # with device-specific field preservation
 
+# Global settings for all managed configurations
+global:
+  # Maximum number of backup files to keep (default: 5)
+  max_backups: 5
+
 managed_configs:
   # Cursor IDE Settings
   cursor_settings:
@@ -19,6 +24,7 @@ managed_configs:
       - "extensions.*"
     merge_strategy: "shallow"
     description: "Cursor IDE settings with device-specific UI preferences"
+    max_backups: 3  # Cursor settings change frequently, keep fewer backups
     
   # Cursor MCP Configuration  
   cursor_mcp:
@@ -58,8 +64,9 @@ managed_configs:
       # Other UI-driven settings that may change dynamically
       - "features"
       - "icon_theme"
-    merge_strategy: "shallow"
+    merge_strategy: "shallow"  
     description: "Zed editor settings with device-specific font, theme and service preferences"
+    max_backups: 7  # Zed settings change less often, keep more backups for safety
 
 # Merge strategy options:
 # - "shallow": Object.assign-like merge (.[0] * .[1] in jq)
@@ -78,3 +85,16 @@ managed_configs:
 #
 # Note: preserve_fields is informational only in current implementation
 # The merge strategies naturally preserve existing values
+#
+# Backup configuration:
+# - max_backups: Number of backup files to keep (default: global.max_backups or 5)
+# - Backups are created automatically when invalid JSON is detected
+# - Format: originalfile.backup.timestamp
+# - Rotation removes oldest backups when limit is exceeded
+#
+# Dry-run mode support:
+# - Use 'chezmoi apply --dry-run' to preview changes without applying
+# - All file modifications are skipped in dry-run mode
+# - Shows diffs of proposed changes
+# - Backup operations are previewed but not executed
+# - Use '--verbose' flag for detailed logging

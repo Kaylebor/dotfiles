@@ -12,8 +12,19 @@
 # hash: {{ env "CHEZMOI_GITHUB_PAT" | sha256sum }}
 # hash: {{ .skip1Password | toString | sha256sum }}
 # hash: {{ env "CHEZMOI_SKIP_1PASSWORD" | sha256sum }}
+# Test hash: {{ now | date "2006-01-02-15-04-05" }}
 
 set -euo pipefail
+
+# Parse Chezmoi command line flags
+DRY_RUN=false
+VERBOSE=false
+if [[ " ${CHEZMOI_ARGS:-} " =~ " --dry-run " ]] || [[ " ${CHEZMOI_ARGS:-} " =~ " -n " ]]; then
+    DRY_RUN=true
+fi
+if [[ " ${CHEZMOI_ARGS:-} " =~ " --verbose " ]] || [[ " ${CHEZMOI_ARGS:-} " =~ " -v " ]]; then
+    VERBOSE=true
+fi
 
 # Color output helpers
 readonly RED='\033[0;31m'
@@ -23,7 +34,9 @@ readonly BLUE='\033[0;34m'
 readonly NC='\033[0m' # No Color
 
 log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    if [[ "$VERBOSE" == "true" ]]; then
+        echo -e "${BLUE}[INFO]${NC} $1"
+    fi
 }
 
 log_success() {
@@ -36,6 +49,68 @@ log_warning() {
 
 log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# Always visible info (not controlled by verbose)
+log_always() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+# Function to manage backup rotation (keep only N most recent backups)
+manage_backup_rotation() {
+    local config_file="$1"
+    local max_backups="${2:-5}"  # Default to 5 backups
+    
+    local backup_dir="$(dirname "$config_file")"
+    local backup_basename="$(basename "$config_file")"
+    
+    log_info "Managing backup rotation for $config_file (max: $max_backups)"
+    
+    # Find all backup files for this config (sorted by modification time, newest first)
+    local backup_files=()
+    while IFS= read -r -d '' backup_file; do
+        backup_files+=("$backup_file")
+    done < <(find "$backup_dir" -maxdepth 1 -name "${backup_basename}.backup.*" -type f -print0 2>/dev/null | xargs -0 ls -1t 2>/dev/null)
+    
+    # Remove excess backups
+    if [[ ${#backup_files[@]} -gt $max_backups ]]; then
+        local files_to_remove=${#backup_files[@]}
+        files_to_remove=$((files_to_remove - max_backups))
+        
+        log_info "Found ${#backup_files[@]} backups, removing $files_to_remove oldest files"
+        
+        for ((i = max_backups; i < ${#backup_files[@]}; i++)); do
+            local old_backup="${backup_files[i]}"
+            if [[ "$DRY_RUN" == "true" ]]; then
+                log_info "Would remove old backup: $(basename "$old_backup") (DRY RUN)"
+            else
+                log_info "Removing old backup: $(basename "$old_backup")"
+                rm -f "$old_backup"
+            fi
+        done
+    else
+        log_info "Found ${#backup_files[@]} backups (within limit of $max_backups)"
+    fi
+}
+
+# Function to create backup with rotation
+create_backup_with_rotation() {
+    local source_file="$1"
+    local max_backups="${2:-5}"
+    
+    if [[ -f "$source_file" ]]; then
+        local backup_file="${source_file}.backup.$(date +%s)"
+        
+        if [[ "$DRY_RUN" == "true" ]]; then
+            log_info "Would create backup: $(basename "$backup_file") (DRY RUN)"
+        else
+            log_info "Creating backup: $(basename "$backup_file")"
+            cp "$source_file" "$backup_file"
+        fi
+        
+        # Manage rotation after creating backup
+        manage_backup_rotation "$source_file" "$max_backups"
+    fi
 }
 
 # Function to create jq filter for merging configurations
@@ -74,6 +149,7 @@ merge_config_file() {
     local preserve_fields_str="$4"
     local merge_strategy="$5"
     local description="$6"
+    local max_backups="$7"
     
     log_info "Processing $config_name ($description)..."
     
@@ -109,10 +185,16 @@ merge_config_file() {
         # Remove comments from existing file and validate
         sed '/^[[:space:]]*\/\//d' "$dest_path" > "$temp_existing"
         if ! jq empty "$temp_existing" 2>/dev/null; then
-            log_warning "Existing $config_name file has invalid JSON, backing up and using template only"
-            cp "$dest_path" "${dest_path}.backup.$(date +%s)"
-            cp "$temp_base" "$dest_path"
-            log_success "$config_name updated (existing file backed up)"
+            if [[ "$DRY_RUN" == "true" ]]; then
+                log_warning "Existing $config_name file has invalid JSON - would backup and use template only (DRY RUN)"
+                log_success "$config_name would be updated with backup (DRY RUN)"
+            else
+                log_warning "Existing $config_name file has invalid JSON, backing up and using template only"
+                # Use the new backup function with rotation
+                create_backup_with_rotation "$dest_path" "$max_backups"
+                cp "$temp_base" "$dest_path"
+                log_success "$config_name updated (existing file backed up)"
+            fi
             rm -f "$temp_base" "$temp_existing"
             return 0
         fi
@@ -154,13 +236,17 @@ merge_config_file() {
             echo "======================================"
             echo
             
-            read -p "Apply these changes? (y/N): " -n 1 -r
-            echo
-            if [[ $REPLY =~ ^[Yy]$ ]]; then
-                cp "$temp_merged" "$dest_path"
-                log_success "$config_name updated successfully"
+            if [[ "$DRY_RUN" == "true" ]]; then
+                log_success "$config_name - changes would be applied (DRY RUN)"
             else
-                log_info "$config_name changes cancelled"
+                read -p "Apply these changes? (y/N): " -n 1 -r
+                echo
+                if [[ $REPLY =~ ^[Yy]$ ]]; then
+                    cp "$temp_merged" "$dest_path"
+                    log_success "$config_name updated successfully"
+                else
+                    log_info "$config_name changes cancelled"
+                fi
             fi
         else
             log_success "$config_name - no changes detected"
@@ -170,15 +256,25 @@ merge_config_file() {
         rm -f "$temp_base" "$temp_existing" "$temp_merged" "$current_formatted" "$merged_formatted"
         
     else
-        log_info "No existing configuration found, creating new file..."
-        cp "$temp_base" "$dest_path"
-        log_success "$config_name created successfully"
+        if [[ "$DRY_RUN" == "true" ]]; then
+            log_info "No existing configuration found - would create new file (DRY RUN)"
+            log_success "$config_name would be created successfully (DRY RUN)"
+        else
+            log_info "No existing configuration found, creating new file..."
+            cp "$temp_base" "$dest_path"
+            log_success "$config_name created successfully"
+        fi
         rm -f "$temp_base"
     fi
 }
 
 # Main execution
-log_info "Starting managed configuration merge process..."
+if [[ "$DRY_RUN" == "true" ]]; then
+    log_always "Starting managed configuration merge process (DRY RUN MODE)"
+    log_always "No changes will be made to configuration files"
+else
+    log_always "Starting managed configuration merge process..."
+fi
 
 {{- $configs := .managed_configs }}
 {{- if not $configs }}
@@ -207,13 +303,26 @@ log_info "Detected OS: $CURRENT_OS"
 {{- if $destPath }}
 # Process {{ $configName }}
 {{- $preserveFieldsStr := join " " ($config.preserve_fields | default list) }}
+{{- $configMaxBackups := 0 }}
+{{- if hasKey $config "max_backups" }}
+  {{- $configMaxBackups = $config.max_backups }}
+{{- end }}
+{{- $globalMaxBackups := 5 }}
+{{- if hasKey $.global "max_backups" }}  
+  {{- $globalMaxBackups = $.global.max_backups }}
+{{- end }}
+{{- $maxBackups := $configMaxBackups }}
+{{- if eq $maxBackups 0 }}
+  {{- $maxBackups = $globalMaxBackups }}
+{{- end }}
 merge_config_file \
     "{{ $configName }}" \
     "{{ $templatePath }}" \
     "{{ $destPath }}" \
     "{{ $preserveFieldsStr }}" \
     "{{ $config.merge_strategy | default "shallow" }}" \
-    "{{ $config.description | default "Managed configuration" }}"
+    "{{ $config.description | default "Managed configuration" }}" \
+    "{{ $maxBackups }}"
 
 {{- else }}
 log_warning "Skipping {{ $configName }} - no destination path defined for OS: $CURRENT_OS"
