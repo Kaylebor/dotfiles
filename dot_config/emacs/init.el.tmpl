@@ -196,7 +196,16 @@
 ;; Terminal emulators
 (use-package vterm :ensure t
   :bind
-  (("C-c t" . vterm)))
+  (("C-c t" . vterm))
+  :config
+  ;; Prevent Emacs-in-Emacs deadlock when git tries to open an editor
+  (add-hook 'vterm-mode-hook
+            (lambda ()
+              (setq-local vterm-environment
+                          (append '("EDITOR=nvim"  ; Use nvim as fallback editor in vterm
+                                    "GIT_EDITOR=nvim"
+                                    "VISUAL=nvim")
+                                  vterm-environment)))))
 
 
 ;; Claude Code IDE integration
@@ -456,8 +465,8 @@
 
 ;; Pixel-precision scrolling configured in custom.el
 
-;; Version control optimizations - only track Git
-(setq vc-handled-backends '(Git))
+;; Disable vc-mode entirely since we use Magit exclusively
+(setq vc-handled-backends nil)
 
 {{- if eq .chezmoi.os "darwin" }}
 ;; macOS-specific optimizations
