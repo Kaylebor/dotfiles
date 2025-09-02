@@ -345,7 +345,23 @@ This is intended to be run on startup to avoid delays when opening the first Rub
 
 (use-package lsp-ui :ensure t
   :defer t
-  :after lsp-mode)
+  :after lsp-mode
+  :custom
+  ;; Configure doc to use glance style (floating at point) instead of drawer
+  (lsp-ui-doc-enable t)                 ; Enable documentation
+  (lsp-ui-doc-position 'at-point)       ; Show at point instead of top/bottom
+  (lsp-ui-doc-show-with-cursor t)       ; Show on cursor hover
+  (lsp-ui-doc-show-with-mouse t)        ; Show on mouse hover
+  (lsp-ui-doc-delay 0.5)                ; Small delay before showing
+  
+  ;; Make the doc popup look better
+  (lsp-ui-doc-use-childframe t)         ; Use child frame for better positioning
+  (lsp-ui-doc-max-width 80)             ; Maximum width
+  (lsp-ui-doc-max-height 20)            ; Maximum height
+  
+  ;; Peek configuration
+  (lsp-ui-peek-enable t)                ; Enable peek feature
+  (lsp-ui-peek-show-directory t))
 
 ;; Corfu for in-buffer completion (works great with LSP)
 (use-package corfu :ensure t
