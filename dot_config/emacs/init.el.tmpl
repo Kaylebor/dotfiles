@@ -99,7 +99,7 @@
 (use-package treemacs :ensure t
   :bind
   (("C-x t" . treemacs)))
-(use-package treemacs-evil :ensure t)
+;; treemacs-evil moved to evil-config.el when using Evil
 (use-package treemacs-projectile :ensure t)
 (use-package treemacs-magit :ensure t)
 (use-package treemacs-nerd-icons :ensure t
@@ -449,7 +449,14 @@
 ;; Window management configuration
 (load-file (expand-file-name "window-management.el" user-emacs-directory))
 
-;; Keybindings go here
+;; Modal editing configuration
+;; To switch modal editing systems, comment/uncomment one of these lines and restart Emacs:
+;; - Meow: Modern modal editing with better Emacs integration (no vterm/Magit conflicts)
+;; - Evil: Vim emulation (powerful but can cause conflicts with some packages)
+(load-file (expand-file-name "meow-config.el" user-emacs-directory))
+;; (load-file (expand-file-name "evil-config.el" user-emacs-directory))
+
+;; Mode-agnostic keybindings
 (load-file (expand-file-name "keybindings.el" user-emacs-directory))
 
 ;; Elpaca queues are processed via after-init-hook in elpaca-init.el
