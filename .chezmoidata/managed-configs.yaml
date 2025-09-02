@@ -63,9 +63,18 @@ managed_configs:
 
 # Merge strategy options:
 # - "shallow": Object.assign-like merge (.[0] * .[1] in jq)
-# - "deep": Recursive merge preserving nested structures
+#   Use when: Most configurations, simple key-value overrides
+#   Behavior: Existing top-level fields completely override template fields
+#
+# - "deep": Recursive merge preserving nested structures  
+#   Use when: Complex nested objects where you want template updates to flow through
+#   Behavior: Recursively merges objects, existing values override at all levels
+#   Example: Template adds new nested setting, existing nested settings preserved
 #
 # Preserve fields support:
 # - Simple field names: "model", "fontSize"
 # - Nested paths: "feedbackSurveyState.lastShownTime"  
 # - Wildcards: "extensions.*", "context_servers.*.settings"
+#
+# Note: preserve_fields is informational only in current implementation
+# The merge strategies naturally preserve existing values

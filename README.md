@@ -153,8 +153,8 @@ The system will automatically handle the rest - no need to write custom merge sc
 
 ### Merge Strategies
 
-- **shallow**: Simple merge where existing values override template values (recommended)
-- **deep**: Recursive merge preserving nested structures (planned feature)
+- **shallow**: Simple merge where existing values override template values (recommended for most cases)
+- **deep**: Recursive merge preserving nested structures while allowing template updates to flow through
 
 ## Extras
 - Fonts: [Maple Mono](https://github.com/subframe7536/maple-font)

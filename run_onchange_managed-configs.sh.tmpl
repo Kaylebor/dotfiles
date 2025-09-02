@@ -39,12 +39,31 @@ log_error() {
 }
 
 # Function to create jq filter for merging configurations
-# Uses the same approach as the original Cursor script: template * existing
-# This naturally preserves existing fields while adding new template fields
 create_merge_filter() {
-    # Simple merge: template gets overridden by existing file values
-    # This preserves all existing device-specific settings automatically
-    echo '.[0] * .[1]'
+    local merge_strategy="$1"
+    
+    case "$merge_strategy" in
+        "deep")
+            # Deep merge: recursively merge objects, arrays get replaced
+            # Template provides base, existing values override at all levels
+            echo 'def deep_merge(template; existing):
+                if (template | type) == "object" and (existing | type) == "object" then
+                    template * existing + 
+                    (template | to_entries | map(
+                        select(.value | type == "object") | 
+                        {key: .key, value: deep_merge(.value; existing[.key] // {})}
+                    ) | from_entries)
+                else
+                    existing // template
+                end;
+            deep_merge(.[0]; .[1])'
+            ;;
+        "shallow"|*)
+            # Simple merge: template gets overridden by existing file values
+            # This preserves all existing device-specific settings automatically
+            echo '.[0] * .[1]'
+            ;;
+    esac
 }
 
 # Function to merge configuration file
@@ -98,8 +117,8 @@ merge_config_file() {
             return 0
         fi
         
-        # Create merge filter - use simple approach from original Cursor script
-        local merge_filter=$(create_merge_filter)
+        # Create merge filter based on strategy
+        local merge_filter=$(create_merge_filter "$merge_strategy")
         
         # Perform merge
         if ! jq -s "$merge_filter" "$temp_base" "$temp_existing" > "$temp_merged"; then
