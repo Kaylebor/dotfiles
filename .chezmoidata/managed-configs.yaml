@@ -42,28 +42,24 @@ managed_configs:
     merge_strategy: "shallow"
     description: "Claude Code settings with device-specific model preferences"
 
-# Future candidates for managed configs:
-# 
-# zed_settings:
-#   template: "dot_config/zed/private_settings.json.tmpl"
-#   destination: ".config/zed/settings.json"
-#   preserve_fields:
-#     - "ui_font_size"
-#     - "buffer_font_size"
-#     - "theme"
-#     - "context_servers.*.settings"
-#   merge_strategy: "deep"
-#   description: "Zed editor settings with device-specific font and theme preferences"
-#
-# vscode_settings:
-#   template: "dot_vscode/settings.json.tmpl"
-#   destination: ".vscode/settings.json"
-#   preserve_fields:
-#     - "editor.fontSize"
-#     - "terminal.integrated.fontSize"
-#     - "workbench.colorTheme"
-#   merge_strategy: "shallow"
-#   description: "VSCode settings with device-specific UI preferences"
+  # Zed Editor Settings  
+  zed_settings:
+    template: "dot_config/zed/private_settings.json.tmpl"
+    destination: ".config/zed/settings.json"
+    preserve_fields:
+      # Device-specific UI preferences (changeable via settings UI)
+      - "ui_font_size"
+      - "buffer_font_size" 
+      - "theme"
+      # Device-specific context server configurations
+      - "context_servers"
+      # Device-specific agent/model preferences (changeable via chat UI dropdown)
+      - "agent"
+      # Other UI-driven settings that may change dynamically
+      - "features"
+      - "icon_theme"
+    merge_strategy: "shallow"
+    description: "Zed editor settings with device-specific font, theme and service preferences"
 
 # Merge strategy options:
 # - "shallow": Object.assign-like merge (.[0] * .[1] in jq)

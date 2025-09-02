@@ -120,6 +120,7 @@ Currently manages configurations for:
 - **Claude Code** (`~/.claude/settings.json`) - Preserves model preferences and survey state
 - **Cursor IDE** (`~/Library/Application Support/Cursor/User/settings.json`) - Preserves UI preferences  
 - **Cursor MCP** (`~/.cursor/mcp.json`) - Fully managed (no device-specific fields)
+- **Zed Editor** (`~/.config/zed/settings.json`) - Preserves font sizes, theme, agent/model preferences, and context servers
 
 ### Key Features
 

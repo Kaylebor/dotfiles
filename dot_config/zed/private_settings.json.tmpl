@@ -1,43 +1,11 @@
-// Zed settings
+// Zed shared settings managed by Chezmoi
+// Device-specific fields (agent, context_servers, ui_font_size, theme, features, icon_theme) are preserved during merge
 //
 // For information on how to configure Zed, see the Zed
 // documentation: https://zed.dev/docs/configuring-zed
-//
-// To see all of Zed's default settings without changing your
-// custom settings, run `zed: open default settings` from the
-// command palette (cmd-shift-p / ctrl-shift-p)
 {
-  "icon_theme": "Catppuccin Frappé",
   "vim_mode": true,
-  "features": {
-    "edit_prediction_provider": "copilot",
-    "copilot": true
-  },
-  "agent": {
-    "default_profile": "write",
-    "default_model": {
-      "provider": "copilot_chat",
-      "model": "gpt-4.1"
-    },
-  },
-  "context_servers": {
-    "mcp-server-context7": {
-      "source": "extension",
-      "enabled": true,
-      "settings": {
-        "default_minimum_tokens": "10000"
-      }
-    },
-    "postgres-context-server": {
-      "source": "extension",
-      "settings": {
-        "database_url": "postgresql://kay@localhost:5432/loyal_guru"
-      }
-    }
-  },
-  "ui_font_size": 14,
   "ui_font_family": "Maple Mono NF",
-  // "buffer_font_size": 14,
   "buffer_font_family": "Maple Mono NF",
   "tab_size": 2,
   "terminal": {
@@ -50,11 +18,6 @@
       }
     },
     "font_family": "Maple Mono NF"
-  },
-  "theme": {
-    "mode": "system",
-    "light": "One Light",
-    "dark": "Catppuccin Frappé"
   },
   "languages": {
     "Ruby": {
@@ -108,13 +71,13 @@
     },
     "solargraph": {
       "settings": {
-        "use_bundler": false // Use system solargraph command
+        "use_bundler": false
       }
     },
     "ruby-lsp": {
       "initialization_options": {
         "enabledFeatures": {
-          "diagnostics": false // Zed does not support pull-based diagnostics yet
+          "diagnostics": false
         }
       }
     }
