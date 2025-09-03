@@ -135,6 +135,16 @@
   ;; Disable Ruby checkers that overlap with Ruby LSP
   (setq-default flycheck-disabled-checkers '(ruby-rubocop ruby-standard)))
 
+;; Show flycheck errors inline in the buffer
+(use-package flycheck-inline :ensure t
+  :after flycheck
+  :hook (flycheck-mode . flycheck-inline-mode))
+
+;; Navigate flycheck errors with consult
+(use-package consult-flycheck :ensure t
+  :after (consult flycheck)
+  :bind ("M-g f" . consult-flycheck))
+
 ;; LSP support
 (use-package lsp-mode :ensure t
   :delight

@@ -87,37 +87,34 @@
      '("X" . meow-goto-line)
      '("y" . meow-save)
      '("Y" . meow-sync-grab)
-     '("z" . meow-pop-selection)
+     '("Z" . meow-pop-selection)  ; Moved to capital Z to free up z as prefix
      '("'" . repeat)
-     '("<escape>" . ignore)))
-  
-  ;; Custom keybindings using KEYPAD state for AI tools
-  ;; Access with SPC in NORMAL mode
-  (meow-leader-define-key
-   '("l l" . gptel-menu)
-   '("l s" . gptel-send) 
-   '("l a" . gptel-add)
-   '("l f" . gptel-add-file)
-   '("l d" . gptel-multimodal-debug)
-   '("l p" . gptel-quick-preset)
-   '("l g" . aidermacs-transient-menu)
-   ;; Claude Code IDE
-   '("l c" . claude-code-ide-menu)
-   '("l C" . claude-code-ide)
-   '("l r" . claude-code-ide-resume)
-   '("l b" . claude-code-ide-switch-to-buffer)
-   '("l q" . claude-code-ide-stop)
-   '("l w" . claude-code-ide-toggle-window))
-  
-  ;; Additional useful bindings
-  (meow-normal-define-key
-   '("z a" . treesit-fold-toggle)  ; Folding
-   '("g s" . avy-goto-char-timer)  ; Avy jump
-   '("M-?" . which-key-show-top-level))
-  
-  ;; For sending selection to Claude
-  (meow-leader-define-key
-   '("l i" . claude-code-ide-insert-at-mentioned)))
+     '("<escape>" . ignore))
+    
+    ;; Custom keybindings using KEYPAD state for AI tools
+    ;; Access with SPC in NORMAL mode
+    (meow-leader-define-key
+     '("l l" . gptel-menu)
+     '("l s" . gptel-send) 
+     '("l a" . gptel-add)
+     '("l f" . gptel-add-file)
+     '("l d" . gptel-multimodal-debug)
+     '("l p" . gptel-quick-preset)
+     '("l g" . aidermacs-transient-menu)
+     ;; Claude Code IDE
+     '("l c" . claude-code-ide-menu)
+     '("l C" . claude-code-ide)
+     '("l r" . claude-code-ide-resume)
+     '("l b" . claude-code-ide-switch-to-buffer)
+     '("l q" . claude-code-ide-stop)
+     '("l w" . claude-code-ide-toggle-window)
+     ;; For sending selection to Claude
+     '("l i" . claude-code-ide-insert-at-mentioned))
+    
+    ;; Additional useful bindings
+    (meow-normal-define-key
+     '("z a" . treesit-fold-toggle)  ; Folding (z is now a prefix)
+     '("M-?" . which-key-show-top-level)))
   
   :config
   ;; Call setup and enable meow after package loads
