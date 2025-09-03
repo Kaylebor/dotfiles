@@ -1,9 +1,10 @@
 ;; -*- lexical-binding: t; -*-
 ;; Meow modal editing configuration
 
-(use-package meow :ensure t
+(use-package meow 
+  :ensure (:wait t)  ; Wait for package to fully load before continuing
   :demand t  ; Force immediate loading instead of lazy loading
-  :config
+  :init
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
     (meow-motion-overwrite-define-key
@@ -90,9 +91,6 @@
      '("'" . repeat)
      '("<escape>" . ignore)))
   
-  ;; Enable meow globally
-  (meow-setup)
-  
   ;; Custom keybindings using KEYPAD state for AI tools
   ;; Access with SPC in NORMAL mode
   (meow-leader-define-key
@@ -119,7 +117,11 @@
   
   ;; For sending selection to Claude
   (meow-leader-define-key
-   '("l i" . claude-code-ide-insert-at-mentioned))
+   '("l i" . claude-code-ide-insert-at-mentioned)))
+  
+  :config
+  ;; Call setup and enable meow after package loads
+  (meow-setup)
   
   ;; Ensure Meow doesn't interfere with vterm
   (add-hook 'vterm-mode-hook
@@ -133,6 +135,7 @@
               (when read-only-mode
                 (meow-motion-mode))))
   
+  ;; Enable meow globally
   (meow-global-mode 1))
 
 (provide 'meow-config)
