@@ -109,11 +109,12 @@
      '("b" . consult-buffer)       ; buffer switch
      '("g" . magit-status)         ; git status
      '("x" . execute-extended-command)  ; M-x
-     '("h" . help-command))        ; Help prefix
-     ;; Prefix keymaps:
-     ;; 'f' prefix is handled by file-map bound to C-c f
-     ;; 'l' prefix is handled by ai-llm-map bound to C-c l
-     ;; 'o' prefix is handled by org-map bound to C-c o
+     '("h" . help-command)         ; Help prefix
+     
+     ;; Prefix keymaps for Meow leader
+     '("f" . meow-file-map)         ; files
+     '("l" . meow-ai-llm-map)       ; AI/LLM
+     '("o" . meow-org-map))         ; org
     
     ;; Additional useful bindings  
     (meow-normal-define-key
@@ -124,15 +125,6 @@
   :config
   ;; Call setup and enable meow after package loads
   (meow-setup)
-  
-  ;; The keymaps are now defined in keybindings.el for better organization
-  ;; We just need to create the aliases for Meow's keypad display
-  (when (boundp 'ai-llm-map)
-    (defalias 'meow-ai-llm-map ai-llm-map))
-  (when (boundp 'file-map)
-    (defalias 'meow-file-map file-map))
-  (when (boundp 'org-map)
-    (defalias 'meow-org-map org-map))
   
   ;; Ensure Meow doesn't interfere with vterm
   (add-hook 'vterm-mode-hook

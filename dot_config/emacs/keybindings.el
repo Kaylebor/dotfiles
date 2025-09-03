@@ -191,4 +191,10 @@
   (which-key-add-key-based-replacements "C-c o d" "deadline")
   (which-key-add-key-based-replacements "C-c o o" "open-index"))
 
+;; Create aliases for Meow's keypad display
+;; These must be defined after the keymaps are created
+(defalias 'meow-ai-llm-map ai-llm-map)
+(defalias 'meow-file-map file-map)
+(defalias 'meow-org-map org-map)
+
 (provide 'keybindings)
