@@ -1,13 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 {{- $ollamaModels := (fromYaml (include ".chezmoidata/ollama-models.yml")) }}
 (use-package gptel :ensure t
-  :bind
-  (("C-c C-l l" . gptel-menu)
-   ("C-c C-l s" . gptel-send)
-   ("C-c C-l a" . gptel-add)
-   ("C-c C-l f" . gptel-add-file)
-   ("C-c C-l d" . gptel-multimodal-debug)
-   ("C-c C-l p" . gptel-quick-preset))
   :custom
   {{- if ne .ollamaHost "" }}
   ;; Default to the best general-purpose local model
@@ -35,8 +28,9 @@
           :host "openrouter.ai"
           :endpoint "/api/v1/chat/completions"
           :stream t
-          :key {{- if .skip1Password }} "{{ env "CHEZMOI_OPENROUTER_API_KEY" }}"
-               {{- else }} (lambda () (auth-source-pick-first-password :host "OpenRouter" :user "API Token"))
+          ;; Authentication: Use environment variable when skipping 1Password, otherwise use 1Password auth-source
+          :key {{- if .skip1Password }} "{{ env "CHEZMOI_OPENROUTER_API_KEY" }}"  ; Environment variable fallback
+               {{- else }} (lambda () (auth-source-pick-first-password :host "OpenRouter" :user "API Token"))  ; 1Password integration
                {{- end }}
           :models '(deepseek/deepseek-r1:free
                     deepseek/deepseek-r1
@@ -140,11 +134,7 @@
 
 ;; Enhanced aidermacs integration
 (use-package aidermacs :ensure t
-  :bind (("C-c g" . aidermacs-transient-menu)
-         {{- if ne .ollamaHost "" }}
-         ("C-c C-g c" . gptel-switch-to-coder)
-         ("C-c C-g a" . gptel-switch-to-agentic)
-         {{- end }})
+  ;; All bindings moved to AI keymap for better organization
   :custom
   (aidermacs-use-architect-mode t)
   {{- if ne .ollamaHost "" }}
@@ -154,6 +144,7 @@
   (aidermacs-default-model "deepseek/deepseek-chat-v3-0324:free")
   {{- end }}
   {{- if not .ollamaHost }}{{- if not .skip1Password }}
+  ;; When using cloud models without 1Password skip: dynamically get API key from 1Password
   :hook
   (aidermacs-before-run-backend . (lambda () 
     (setenv "OPENROUTER_API_KEY" 
@@ -161,8 +152,9 @@
   {{- end }}{{- end }}
   :config
   {{- if ne .ollamaHost "" }}
-  ;; Set up local Ollama endpoint for aidermacs
+  ;; Configuration for local Ollama setup
   (setenv "OLLAMA_API_BASE" "{{ .ollamaApiBase }}")
   {{- else if .skip1Password }}
+  ;; Configuration for cloud models with 1Password skip: use environment variable
   (setenv "OPENROUTER_API_KEY" "{{ env "CHEZMOI_OPENROUTER_API_KEY" }}")
   {{- end }})

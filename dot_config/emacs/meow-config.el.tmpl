@@ -3,6 +3,7 @@
 
 (use-package meow 
   :ensure (:wait t)  ; Wait for package to fully load before continuing
+  :after which-key   ; Ensure which-key is loaded first
   :demand t  ; Force immediate loading instead of lazy loading
   :init
   (defun meow-setup ()
@@ -12,9 +13,6 @@
      '("k" . meow-prev)
      '("<escape>" . ignore))
     (meow-leader-define-key
-     ;; SPC j/k will run the original command in MOTION state.
-     '("j" . "H-j")
-     '("k" . "H-k")
      ;; Use SPC (0-9) for digit arguments.
      '("1" . meow-digit-argument)
      '("2" . meow-digit-argument)
@@ -87,38 +85,54 @@
      '("X" . meow-goto-line)
      '("y" . meow-save)
      '("Y" . meow-sync-grab)
-     '("Z" . meow-pop-selection)  ; Moved to capital Z to free up z as prefix
+     '("z" . meow-pop-selection)
      '("'" . repeat)
      '("<escape>" . ignore))
     
-    ;; Custom keybindings using KEYPAD state for AI tools
-    ;; Access with SPC in NORMAL mode
+    ;; Leader key bindings - avoid keypad strings to work with which-key
     (meow-leader-define-key
-     '("l l" . gptel-menu)
-     '("l s" . gptel-send) 
-     '("l a" . gptel-add)
-     '("l f" . gptel-add-file)
-     '("l d" . gptel-multimodal-debug)
-     '("l p" . gptel-quick-preset)
-     '("l g" . aidermacs-transient-menu)
-     ;; Claude Code IDE
-     '("l c" . claude-code-ide-menu)
-     '("l C" . claude-code-ide)
-     '("l r" . claude-code-ide-resume)
-     '("l b" . claude-code-ide-switch-to-buffer)
-     '("l q" . claude-code-ide-stop)
-     '("l w" . claude-code-ide-toggle-window)
-     ;; For sending selection to Claude
-     '("l i" . claude-code-ide-insert-at-mentioned))
+     ;; Use SPC (0-9) for digit arguments
+     '("1" . meow-digit-argument)
+     '("2" . meow-digit-argument)
+     '("3" . meow-digit-argument)
+     '("4" . meow-digit-argument)
+     '("5" . meow-digit-argument)
+     '("6" . meow-digit-argument)
+     '("7" . meow-digit-argument)
+     '("8" . meow-digit-argument)
+     '("9" . meow-digit-argument)
+     '("0" . meow-digit-argument)
+     '("/" . meow-keypad-describe-key)
+     '("?" . meow-cheatsheet)
+     
+     ;; Quick actions - single key for most common operations
+     '("b" . consult-buffer)       ; buffer switch
+     '("g" . magit-status)         ; git status
+     '("x" . execute-extended-command)  ; M-x
+     '("h" . help-command))        ; Help prefix
+     ;; Prefix keymaps:
+     ;; 'f' prefix is handled by file-map bound to C-c f
+     ;; 'l' prefix is handled by ai-llm-map bound to C-c l
+     ;; 'o' prefix is handled by org-map bound to C-c o
     
-    ;; Additional useful bindings
+    ;; Additional useful bindings  
     (meow-normal-define-key
-     '("z a" . treesit-fold-toggle)  ; Folding (z is now a prefix)
-     '("M-?" . which-key-show-top-level)))
+     '("M-?" . which-key-show-top-level)
+     ;; Folding with TAB key - more standard
+     '("TAB" . treesit-fold-toggle)))
   
   :config
   ;; Call setup and enable meow after package loads
   (meow-setup)
+  
+  ;; The keymaps are now defined in keybindings.el for better organization
+  ;; We just need to create the aliases for Meow's keypad display
+  (when (boundp 'ai-llm-map)
+    (defalias 'meow-ai-llm-map ai-llm-map))
+  (when (boundp 'file-map)
+    (defalias 'meow-file-map file-map))
+  (when (boundp 'org-map)
+    (defalias 'meow-org-map org-map))
   
   ;; Ensure Meow doesn't interfere with vterm
   (add-hook 'vterm-mode-hook

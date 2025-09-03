@@ -39,89 +39,89 @@
           (sh-mode . bash-ts-mode))))
 
 (use-package ruby-ts-mode
-  :ensure nil  ; Built-in mode
+  :ensure nil
   :defer t
   :delight)
 
 (use-package emacs-lisp-mode
-  :ensure nil  ; Built-in mode
+  :ensure nil
   :delight
   :mode ("\\.el\\'" . emacs-lisp-mode))
 
 (use-package bash-ts-mode
-  :ensure nil  ; Built-in mode
+  :ensure nil
   :defer t
   :delight)
 (use-package sh-mode
-  :ensure nil  ; Built-in mode
+  :ensure nil
   :delight
   :mode ("\\.fish\\(rc\\)?\\'" . sh-mode))
 
 (use-package json-ts-mode
-  :ensure nil  ; Built-in mode
+  :ensure nil
   :defer t
   :delight)
 (use-package yaml-ts-mode
-  :ensure nil  ; Built-in mode
+  :ensure nil
   :delight
   :mode ("\\.\\(ya?ml\\)\\(?:-cpp\\)?\\'" . yaml-ts-mode))
 (use-package toml-ts-mode
-  :ensure nil  ; Built-in mode
+  :ensure nil
   :delight
   :mode ("\\.toml\\'" . toml-ts-mode))
 
 (use-package sql-ts-mode
-  :ensure nil  ; Built-in mode
+  :ensure nil
   :delight
   :mode ("\\.sql\\'" . sql-ts-mode))
 (use-package dbml-mode
-  :ensure t  ; External package
+  :ensure t
   :delight
   :mode ("\\.dbml\\'" . dbml-mode))
 
 (use-package hcl-ts-mode
-  :ensure nil  ; Built-in mode
+  :ensure nil
   :delight
   :mode ("\\.hcl[2-4]?\\'" . hcl-ts-mode))
 
 (use-package markdown-ts-mode
-  :ensure nil  ; Built-in mode
+  :ensure nil
   :delight
   :mode ("\\.md\\'" . markdown-ts-mode))
 
 (use-package html-ts-mode
-  :ensure nil  ; Built-in mode
+  :ensure nil
   :defer t
   :delight)
 (use-package css-ts-mode
-  :ensure nil  ; Built-in mode
+  :ensure nil
   :defer t
   :delight)
 (use-package javascript-ts-mode
-  :ensure nil  ; Built-in mode
+  :ensure nil
   :delight
   :mode (("\\.jsx\\'" . js-jsx-mode)))  ; jsx still needs explicit mode
 
 (use-package typescript-ts-mode
-  :ensure nil  ; Built-in mode, don't try to install
+  :ensure nil
   :delight
   :mode (("\\.ts\\'" . typescript-ts-mode)
          ("\\.tsx\\'" . tsx-ts-mode)))
 
 (use-package elixir-ts-mode
-  :ensure nil  ; Built-in mode
+  :ensure nil
   :delight
   :mode ("\\.\\(ex\\|exs\\|eex\\|leex\\|heex\\)\\'" . elixir-ts-mode))
 (use-package python-ts-mode
-  :ensure nil  ; Built-in mode
+  :ensure nil
   :defer t
   :delight)
 (use-package rust-ts-mode
-  :ensure nil  ; Built-in mode
+  :ensure nil
   :delight
   :mode ("\\.rs\\'" . rust-ts-mode))
 (use-package go-ts-mode
-  :ensure nil  ; Built-in mode
+  :ensure nil
   :delight
   :mode ("\\(\\.go\\|/go\\.mod\\|/go\\.sum\\)\\'" . go-ts-mode))
 
@@ -142,13 +142,13 @@
 
 ;; Navigate flycheck errors with consult
 (use-package consult-flycheck :ensure t
-  :after (consult flycheck)
-  :bind ("M-g f" . consult-flycheck))
+  :after (consult flycheck))
 
 ;; Automatic code formatting on save
 (use-package apheleia :ensure t
-  :delight
   :config
+  ;; Hide from modeline by setting lighter to empty
+  (setq apheleia-mode-lighter "")
   ;; Enable globally - formats on save without interrupting
   (apheleia-global-mode +1)
   ;; Ensure formatters use mise-managed tools
@@ -405,15 +405,6 @@ This is intended to be run on startup to avoid delays when opening the first Rub
   (corfu-preselect 'prompt)          ;; Preselect the prompt
   (corfu-on-exact-match nil)         ;; Don't auto-select exact matches
   (corfu-scroll-margin 5)            ;; Use scroll margin
-  :bind
-  ;; Configure Tab/S-Tab behavior
-  (:map corfu-map
-        ("TAB" . corfu-next)
-        ([tab] . corfu-next)
-        ("S-TAB" . corfu-previous)
-        ([backtab] . corfu-previous)
-        ("RET" . corfu-insert)
-        ("M-SPC" . corfu-insert-separator))
   :init
   (global-corfu-mode)
   
