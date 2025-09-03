@@ -145,6 +145,24 @@
   :after (consult flycheck)
   :bind ("M-g f" . consult-flycheck))
 
+;; Automatic code formatting on save
+(use-package apheleia :ensure t
+  :delight
+  :config
+  ;; Enable globally - formats on save without interrupting
+  (apheleia-global-mode +1)
+  ;; Ensure formatters use mise-managed tools
+  ;; Apheleia will automatically find these in PATH via mise
+  ;; No additional configuration needed for standard formatters:
+  ;; - prettier (JS/TS/HTML/CSS/JSON/YAML)
+  ;; - black/ruff (Python)
+  ;; - gofmt/goimports (Go)
+  ;; - mix format (Elixir)
+  ;; - rubocop/standardrb (Ruby)
+  ;; - rustfmt (Rust)
+  ;; - shfmt (Shell)
+  )
+
 ;; LSP support
 (use-package lsp-mode :ensure t
   :delight
