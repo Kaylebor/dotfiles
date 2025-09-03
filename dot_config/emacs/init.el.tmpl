@@ -9,6 +9,12 @@
 ;; Personal functions; some may be used in configurations
 (load-file (expand-file-name "functions.el" user-emacs-directory))
 
+{{- if eq .chezmoi.os "darwin" }}
+;; macOS Keychain auth-source configuration (must be set before packages that use auth)
+;; This enables Emacs to read credentials from macOS Keychain
+(setq auth-sources '(macos-keychain-internet macos-keychain-generic "~/.authinfo.gpg"))
+{{- end }}
+
 ;; PACKAGES
 {{- if eq .chezmoi.os "darwin" }}
 ;; Template-based PATH setup for macOS (eliminates exec-path-from-shell runtime subprocess)
@@ -269,6 +275,22 @@
   :config
   ;; which-key description for magit prefix (C-x g already bound)
   (which-key-add-key-based-replacements "C-x g" "magit"))
+
+;; Forge - Work with GitHub, GitLab, and other Git forges from Magit
+(use-package forge :ensure t
+  :after magit
+  :config
+  {{- if eq .chezmoi.os "darwin" }}
+  ;; On macOS, auth-source should already be configured to use Keychain
+  ;; Ensure cached auth info is cleared when Forge loads
+  (auth-source-forget-all-cached)
+  {{- end }}
+  ;; Add keybinding descriptions for Forge commands
+  (which-key-add-key-based-replacements "C-x g '" "forge")
+  (which-key-add-key-based-replacements "C-x g N" "forge-create")
+  ;; Optional: Configure default forge list behavior
+  (setq forge-topic-list-limit '(60 . 0))  ; Show 60 open PRs/issues, 0 closed
+  (setq forge-pull-notifications t))
 
 ;; Structural diff with difftastic
 (use-package difftastic :ensure t
