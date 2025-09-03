@@ -2,7 +2,10 @@
 ;; Meow modal editing configuration
 
 (use-package meow 
-  :ensure (:wait t)  ; Wait for package to fully load before continuing
+  :ensure (:wait t
+           :host github
+           :repo "Kaylebor/meow"
+           :branch "fix-keypad-remap-display")  ; Use our fork with the remap fix (PR #765)
   :after which-key   ; Ensure which-key is loaded first
   :demand t  ; Force immediate loading instead of lazy loading
   :init
