@@ -93,6 +93,35 @@
       (projectile-discover-projects-in-search-path)
       (message "Cleaned and refreshed project list: %d projects" (length projectile-known-projects)))))
 
+;; ANSI color support for various buffers
+(use-package ansi-color :ensure nil  ; Built-in package
+  :hook
+  ;; Compilation buffers (cargo build, make, etc.)
+  (compilation-filter . ansi-color-compilation-filter)
+  :config
+  ;; Shell and inferior modes
+  (add-hook 'shell-mode-hook
+            (lambda ()
+              (add-hook 'comint-preoutput-filter-functions
+                        'ansi-color-process-output nil t)))
+  
+  ;; Eshell
+  (add-hook 'eshell-mode-hook
+            (lambda ()
+              (add-to-list 'eshell-output-filter-functions 
+                           'ansi-color-process-output)))
+  
+  ;; Handle async shell command output
+  (advice-add 'async-shell-command :after
+              (lambda (&rest args)
+                (let ((buffer (get-buffer "*Async Shell Command*")))
+                  (when buffer
+                    (with-current-buffer buffer
+                      (add-hook 'after-change-functions 
+                                (lambda (&rest _)
+                                  (ansi-color-apply-on-region (point-min) (point-max)))
+                                nil t)))))))
+
 ;; icons - using nerd-icons for consistency
 (use-package nerd-icons :ensure t)
 
