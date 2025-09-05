@@ -458,7 +458,7 @@
 
 ;; Theme
 (use-package dracula-theme :ensure t) ;; Needed, as catppuccin-theme depends on it
-(use-package catppuccin-theme :ensure t
+(use-package catppuccin-theme :ensure (:wait t)
   :custom
   (catppuccin-flavor 'frappe)
   :init
@@ -471,7 +471,7 @@
 ;; To switch modal editing systems, comment/uncomment one of these lines and restart Emacs:
 ;; - Meow: Modern modal editing with better Emacs integration (no vterm/Magit conflicts)
 ;; - Evil: Vim emulation (powerful but can cause conflicts with some packages)
-(load-file (expand-file-name "meow-config.el" user-emacs-directory))
+;; (load-file (expand-file-name "meow-config.el" user-emacs-directory))
 ;; (load-file (expand-file-name "evil-config.el" user-emacs-directory))
 
 ;; Keybindings will be loaded after all packages are ready via elpaca-after-init-hook
