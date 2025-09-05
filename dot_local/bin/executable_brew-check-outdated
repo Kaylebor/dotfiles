@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+# Script to check for and optionally rebuild outdated source-built Homebrew packages
+# This is useful after running 'brew upgrade' to identify packages that need rebuilding
+
+set -euo pipefail
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Check if we're on macOS
+if [[ "$(uname -s)" != "Darwin" ]]; then
+    echo -e "${RED}Error: This script is only for macOS${NC}"
+    exit 1
+fi
+
+# Check if brew is installed
+if ! command -v brew &> /dev/null; then
+    echo -e "${RED}Error: Homebrew is not installed${NC}"
+    exit 1
+fi
+
+# Determine chezmoi source directory
+CHEZMOI_SOURCE_DIR="${CHEZMOI_SOURCE_DIR:-$HOME/.local/share/chezmoi}"
+HOMEBREW_MANAGER="$CHEZMOI_SOURCE_DIR/dot_local/bin/executable_chezmoi-homebrew-manager"
+
+# Check if the homebrew manager exists
+if [[ ! -f "$HOMEBREW_MANAGER" ]]; then
+    echo -e "${RED}Error: Homebrew manager not found at $HOMEBREW_MANAGER${NC}"
+    echo "Please ensure chezmoi is properly installed"
+    exit 1
+fi
+
+echo -e "${GREEN}Checking for outdated source-built packages...${NC}\n"
+
+# Check for outdated packages
+if "$HOMEBREW_MANAGER" check-outdated; then
+    # No outdated packages found (exit code 0)
+    exit 0
+else
+    # Outdated packages found (exit code 1)
+    echo -e "\n${YELLOW}These packages were built from source and have dependencies that were updated.${NC}"
+    echo -e "${YELLOW}They should be rebuilt to ensure compatibility.${NC}\n"
+    
+    # Ask if user wants to rebuild
+    read -p "Do you want to rebuild these packages now? (y/N) " -n 1 -r
+    echo
+    
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "\n${GREEN}Starting rebuild process...${NC}\n"
+        
+        # Run the rebuild command
+        if "$HOMEBREW_MANAGER" rebuild-outdated; then
+            echo -e "\n${GREEN}✅ All packages rebuilt successfully!${NC}"
+            exit 0
+        else
+            echo -e "\n${RED}❌ Some packages failed to rebuild${NC}"
+            echo "You may need to manually reinstall the failed packages"
+            exit 1
+        fi
+    else
+        echo -e "\n${YELLOW}Skipping rebuild. You can run this script again later or use:${NC}"
+        echo "  $HOMEBREW_MANAGER rebuild-outdated"
+        exit 0
+    fi
+fi

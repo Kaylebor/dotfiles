@@ -2,6 +2,11 @@
 {{/* Script to check OS and install packages based on OS */}}
 # hash: {{ include ".chezmoidata/packages.yml" | sha256sum }}
 
+{{/* Track brew formula versions to detect when packages are upgraded */}}
+{{- if eq .chezmoi.os "darwin" }}
+# brew_installed_versions: {{ output "brew" "list" "--versions" | sha256sum }}
+{{- end }}
+
 {{/* Track versions of packages that should trigger re-runs when updated (alternative Homebrew only) */}}
 {{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
 {{- range .packages.darwin.brews }}
@@ -140,7 +145,10 @@ RUNTIME_CONFIG=$(cat << 'EOF'
 EOF
 )
 
-# Call comprehensive Python Homebrew manager
+# Call comprehensive Python Homebrew manager for updates and missing packages
+# This script only runs on changes (not first run), so we handle:
+# 1. Rebuilding outdated source-built packages
+# 2. Installing newly added packages
 "{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-homebrew-manager" full-install --config "$RUNTIME_CONFIG"
 
 {{ end -}}

@@ -110,6 +110,7 @@ packages:
       - "diffutils"
       - "elixir-ls"
       - name: "emacs-plus@31"
+        force_reinstall: true  # Emacs benefits from clean reinstalls when dependencies update
         args:
           - "with-imagemagick"
           - "with-dbus"

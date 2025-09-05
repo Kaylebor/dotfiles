@@ -12,7 +12,6 @@
 # hash: {{ env "CHEZMOI_GITHUB_PAT" | sha256sum }}
 # hash: {{ .skip1Password | toString | sha256sum }}
 # hash: {{ env "CHEZMOI_SKIP_1PASSWORD" | sha256sum }}
-# Test hash: {{ now | date "2006-01-02-15-04-05" }}
 
 set -euo pipefail
 

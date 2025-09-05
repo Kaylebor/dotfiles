@@ -1,0 +1,75 @@
+#!/bin/bash
+{{/* Initial Homebrew package installation - runs only once */}}
+
+{{ if eq .chezmoi.os "darwin" -}}
+
+# Install Homebrew first if not present
+{{- if not (lookPath "brew") }}
+# Install Homebrew
+{{- if eq .homebrewInstallType "alternative" }}
+# Alternative installation to {{ $.homebrewPath }} (for MDM setups)
+echo "Installing Homebrew to {{ $.homebrewPath }} for MDM compatibility..."
+mkdir -p "$HOME/{{ $.homebrewPath }}"
+curl -L {{ .urls.homebrew.tarball }} | tar xz --strip-components 1 -C "$HOME/{{ $.homebrewPath }}"
+eval "$($HOME/{{ $.homebrewPath }}/bin/brew shellenv)"
+brew update --force --quiet
+chmod -R go-w "$(brew --prefix)/share/zsh" 2>/dev/null || true
+{{- else }}
+# Standard installation
+/bin/bash -c "$(curl -fsSL {{ .urls.homebrew.install }})"
+{{- end }}
+{{- end }}
+
+# Set up Homebrew environment
+{{- template "brew_eval" . }}
+
+# Install uv through Homebrew
+if ! command -v uv >/dev/null 2>&1; then
+  echo "Installing uv for Python scripts..."
+  brew install uv
+fi
+
+# Initialize SQLite database (idempotent)
+echo "Initializing SQLite database..."
+"{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-sqlite" init
+
+echo "Performing initial package installation..."
+
+{{/* Check for Homebrew path migrations and packages needing rebuild */}}
+{{- template "homebrew-migration-check" . }}
+
+{{/* Execute the patch script template */}}
+{{- if eq .homebrewInstallType "alternative" }}
+{{- template "patch-homebrew-formulas" . }}
+{{- end }}
+
+# Prepare runtime configuration
+RUNTIME_CONFIG=$(cat << 'EOF'
+{
+  "os": "{{ .chezmoi.os }}",
+  "homebrew_type": "{{ .homebrewInstallType }}",
+  {{- if and (hasKey . "homebrewPaths") (hasKey .homebrewPaths "applicationsPath") }}
+  "applications_path": {{ .homebrewPaths.applicationsPath | toJson }},
+  {{- end }}
+  {{- if and (hasKey . "homebrewPath") .homebrewPath }}
+  "homebrew_path": {{ .homebrewPath | toJson }},
+  {{- end }}
+  {{- if and (hasKey . "urls") (hasKey .urls "homebrew") }}
+  "homebrew_tarball_url": {{ .urls.homebrew.tarball | toJson }},
+  "homebrew_install_url": {{ .urls.homebrew.install | toJson }},
+  {{- end }}
+  {{- if and (hasKey . "brewBin") .brewBin }}
+  "brew_bin": {{ .brewBin | toJson }},
+  "has_brew": {{ stat .brewBin | toJson }},
+  {{- else }}
+  "has_brew": false,
+  {{- end }}
+  "chezmoi_source_dir": {{ .chezmoi.sourceDir | toJson }}
+}
+EOF
+)
+
+# Call Python Homebrew manager for initial installation
+"{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-homebrew-manager" full-install --first-run --config "$RUNTIME_CONFIG"
+
+{{ end -}}
