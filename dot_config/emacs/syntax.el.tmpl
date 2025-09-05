@@ -192,6 +192,18 @@
   (setq lsp-headerline-breadcrumb-enable t)
   (setq lsp-headerline-breadcrumb-icons-enable t)
   
+  ;; Configure signature help to use posframe (child frame at point)
+  (setq lsp-signature-auto-activate t)  ; Auto-activate signature help
+  (setq lsp-signature-render-documentation t)  ; Include documentation
+  
+  ;; Use posframe for signature display (floating child frame)
+  ;; This requires the posframe package which we already have
+  (setq lsp-signature-function 'lsp-signature-posframe)
+  
+  ;; Configure eldoc to show signatures in echo area instead
+  (setq lsp-eldoc-enable-hover t)              ; Enable hover info in eldoc
+  (setq lsp-eldoc-render-all nil)              ; Don't render everything, just essentials
+  
   ;; Suppress company-mode warnings since we're using corfu
   (setq lsp-warn-no-matched-clients nil)
 
@@ -375,21 +387,34 @@ This is intended to be run on startup to avoid delays when opening the first Rub
   :defer t
   :after lsp-mode
   :custom
-  ;; Configure doc to use glance style (floating at point) instead of drawer
+  ;; Configure doc to use floating popup style
   (lsp-ui-doc-enable t)                 ; Enable documentation
   (lsp-ui-doc-position 'at-point)       ; Show at point instead of top/bottom
   (lsp-ui-doc-show-with-cursor t)       ; Show on cursor hover
   (lsp-ui-doc-show-with-mouse t)        ; Show on mouse hover
-  (lsp-ui-doc-delay 0.5)                ; Small delay before showing
+  (lsp-ui-doc-delay 1.0)                ; Longer delay to be less intrusive
   
-  ;; Make the doc popup look better
+  ;; Force child frame for proper floating behavior
   (lsp-ui-doc-use-childframe t)         ; Use child frame for better positioning
+  (lsp-ui-doc-use-webkit nil)           ; Don't use webkit renderer
   (lsp-ui-doc-max-width 80)             ; Maximum width
   (lsp-ui-doc-max-height 20)            ; Maximum height
   
+  ;; Sideline (inline hints, but not intrusive)
+  (lsp-ui-sideline-enable t)            ; Enable inline hints
+  (lsp-ui-sideline-show-hover nil)      ; Don't show hover info in sideline
+  (lsp-ui-sideline-show-diagnostics t)  ; Show diagnostics
+  (lsp-ui-sideline-show-code-actions t) ; Show code actions
+  (lsp-ui-sideline-delay 1.0)           ; Delay before showing
+  
   ;; Peek configuration
   (lsp-ui-peek-enable t)                ; Enable peek feature
-  (lsp-ui-peek-show-directory t))
+  (lsp-ui-peek-show-directory t)
+  
+  :config
+  ;; Manual keybinding to show doc on demand
+  (define-key lsp-ui-mode-map (kbd "C-c h") #'lsp-ui-doc-glance)
+  (define-key lsp-ui-mode-map (kbd "C-c H") #'lsp-ui-doc-focus-frame))
 
 ;; Corfu for in-buffer completion (works great with LSP)
 (use-package corfu :ensure t
@@ -421,10 +446,17 @@ This is intended to be run on startup to avoid delays when opening the first Rub
   :after corfu
   :hook (corfu-mode . corfu-popupinfo-mode)
   :custom
-  (corfu-popupinfo-delay '(0.25 . 0.1))
-  (corfu-popupinfo-hide nil)
+  (corfu-popupinfo-delay '(0.5 . 0.1))   ; Quick popup after selection
+  (corfu-popupinfo-hide nil)             ; Don't hide automatically
+  (corfu-popupinfo-max-height 20)        ; Maximum height for docs
+  (corfu-popupinfo-max-width 80)         ; Maximum width for docs
   :config
-  (corfu-popupinfo-mode))
+  (corfu-popupinfo-mode)
+  ;; Use M-d to manually toggle documentation during completion
+  (define-key corfu-map (kbd "M-d") #'corfu-popupinfo-toggle)
+  ;; M-n/M-p to scroll the documentation
+  (define-key corfu-map (kbd "M-n") #'corfu-popupinfo-scroll-up)
+  (define-key corfu-map (kbd "M-p") #'corfu-popupinfo-scroll-down))
 
 ;; Corfu terminal support
 (use-package corfu-terminal :ensure t
