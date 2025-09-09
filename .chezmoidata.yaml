@@ -1,0 +1,6 @@
+# Default data values for chezmoi templates
+# These can be overridden in ~/.config/chezmoi/chezmoi.yaml
+
+# Control whether to set OpenAI environment variables for llama-swap
+# Set to true only when you want to use local llama-swap instead of real OpenAI API
+enableLlamaSwapEnv: false

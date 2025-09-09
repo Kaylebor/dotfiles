@@ -31,11 +31,17 @@ tv init fish > ~/.config/fish/conf.d/television.fish
 # Run the fish environment setup
 fish -c "source {{ .chezmoi.sourceDir }}/.fish_env.fish"
 
-{{- if .useLlamaSwap }}
-# Configure qwen-code for llama-swap
+{{- if and .useLlamaSwap .enableLlamaSwapEnv }}
+# Configure qwen-code for llama-swap (only when explicitly enabled)
 fish -c "set -Ux OPENAI_BASE_URL '{{ .llamaSwapApiBase }}'"
 fish -c "set -Ux OPENAI_API_KEY 'dummy'"
 fish -c "set -Ux OPENAI_MODEL 'qwen3coder-a3b-q4-16l-256k-kq8fa'"
+{{- else }}
+# Ensure OpenAI variables are unset by default
+# Use -Ue to erase universal variables if they exist
+fish -c "set -Ue OPENAI_BASE_URL 2>/dev/null; true"
+fish -c "set -Ue OPENAI_API_KEY 2>/dev/null; true"
+fish -c "set -Ue OPENAI_MODEL 2>/dev/null; true"
 {{- end }}
 
 {{- if and (hasKey . "homebrewPaths") (hasKey . "brewBin") .brewBin (stat .brewBin) }}

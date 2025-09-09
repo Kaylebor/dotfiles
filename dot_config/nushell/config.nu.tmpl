@@ -149,8 +149,8 @@ $env.CXX = "g++-15"
 $env.CARAPACE_BRIDGES = 'zsh,fish,bash'
 {{- end }}
 
-{{- if .useLlamaSwap }}
-# Configure qwen-code for llama-swap
+{{- if and .useLlamaSwap .enableLlamaSwapEnv }}
+# Configure qwen-code for llama-swap (only when explicitly enabled)
 $env.OPENAI_BASE_URL = "{{ .llamaSwapApiBase }}"
 $env.OPENAI_API_KEY = "dummy"
 $env.OPENAI_MODEL = "qwen3coder-a3b-q4-16l-256k-kq8fa"

@@ -59,8 +59,8 @@ vterm_printf() {
     fi
 }
 
-{{- if .useLlamaSwap }}
-# Configure qwen-code for llama-swap
+{{- if and .useLlamaSwap .enableLlamaSwapEnv }}
+# Configure qwen-code for llama-swap (only when explicitly enabled)
 export OPENAI_BASE_URL="{{ .llamaSwapApiBase }}"
 export OPENAI_API_KEY="dummy"
 export OPENAI_MODEL="qwen3coder-a3b-q4-16l-256k-kq8fa"
