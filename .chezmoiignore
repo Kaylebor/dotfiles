@@ -9,6 +9,9 @@ COMPANY_DOTFILES_PLAN.md
 scripts/
 docs/
 
+# Per-device configuration files (never tracked)
+.config/emacs/sql-connections.el
+
 # JSON configurations with device-specific fields (managed via merge script)
 .cursor/settings.json
 .cursor/mcp.json

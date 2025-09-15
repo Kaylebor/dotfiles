@@ -1,0 +1,169 @@
+;;; sql-connections.el.example --- Example ejc-sql connection configuration -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; This is an example configuration file for ejc-sql connections.
+;; Copy this file to ~/.config/emacs/sql-connections.el and customize it for your environment.
+;; 
+;; IMPORTANT: Never commit the actual sql-connections.el file to version control!
+;; It should remain device-specific and private.
+;;
+;; ejc-sql uses JDBC connection strings and can connect to any database with a JDBC driver.
+;; The package will automatically download required JDBC drivers via Maven.
+
+;;; Code:
+
+;; Define your ejc-sql connections here
+;; Each connection is a list with the connection name and properties
+(setq ejc-connections
+      '(;; PostgreSQL local example (peer authentication, no password)
+        ("postgres-local"
+         :subprotocol "postgresql"
+         :subname "//localhost:5432/postgres"
+         :user (user-login-name)  ; Your system username
+         :password "")  ; Empty for peer auth
+        
+        ;; PostgreSQL with password from auth-source
+        ("postgres-remote"
+         :subprotocol "postgresql"
+         :subname "//db.example.com:5432/myapp"
+         :user "dbuser"
+         :password (ejc-auth-source-get-password "db.example.com" "dbuser" 5432))
+        
+        ;; MySQL example
+        ("mysql-local"
+         :subprotocol "mysql"
+         :subname "//localhost:3306/test_db"
+         :user "root"
+         :password (ejc-auth-source-get-password "localhost" "root" 3306))
+        
+        ;; Oracle example
+        ("oracle-prod"
+         :subprotocol "oracle:thin"
+         :subname "@//oracle.example.com:1521/ORCL"
+         :user "scott"
+         :password (ejc-auth-source-get-password "oracle.example.com" "scott" 1521))
+        
+        ;; SQLite example (no auth needed)
+        ("sqlite-local"
+         :subprotocol "sqlite"
+         :subname (expand-file-name "~/data/myapp.db")
+         :user ""
+         :password "")
+        
+        ;; Microsoft SQL Server
+        ("mssql-server"
+         :subprotocol "sqlserver"
+         :subname "//mssql.example.com:1433;databaseName=AdventureWorks"
+         :user "sa"
+         :password (ejc-auth-source-get-password "mssql.example.com" "sa" 1433))
+        
+        ;; H2 Database (embedded)
+        ("h2-embedded"
+         :subprotocol "h2"
+         :subname "~/test"
+         :user "sa"
+         :password "")
+        
+        ;; MariaDB (uses MySQL driver)
+        ("mariadb-local"
+         :subprotocol "mariadb"
+         :subname "//localhost:3306/test"
+         :user "root"
+         :password (getenv "MARIADB_ROOT_PASSWORD"))))  ; From environment variable
+
+;; Optional: Custom JDBC driver artifacts
+;; If you need specific versions or non-standard drivers
+(setq ejc-jdbc-drivers
+      '((postgresql . [org.postgresql/postgresql "42.7.1"])
+        (mysql . [mysql/mysql-connector-java "8.0.33"])
+        (oracle . [com.oracle.database.jdbc/ojdbc8 "23.2.0.0"])
+        (sqlserver . [com.microsoft.sqlserver/mssql-jdbc "12.4.2.jre11"])))
+
+;; Helper functions for quick connections
+(defun ejc-connect-local ()
+  "Connect to local PostgreSQL."
+  (interactive)
+  (ejc-connect "postgres-local"))
+
+(defun ejc-connect-production ()
+  "Connect to production database with confirmation."
+  (interactive)
+  (when (yes-or-no-p "Connect to PRODUCTION database? ")
+    (ejc-connect "postgres-remote")))
+
+;; Keybindings for database connections
+(global-set-key (kbd "C-c d l") #'ejc-connect-local)
+(global-set-key (kbd "C-c d p") #'ejc-connect-production)
+(global-set-key (kbd "C-c d c") #'my/ejc-connect)  ; Choose with completion
+(global-set-key (kbd "C-c d d") #'ejc-quit-connection)  ; Disconnect
+
+;;; Authentication Setup Instructions:
+;;
+;; For macOS Keychain users:
+;; -------------------------
+;; Add credentials using the security command:
+;;
+;; # For PostgreSQL
+;; security add-internet-password \
+;;   -a "dbuser" \
+;;   -s "db.example.com" \
+;;   -P "5432" \
+;;   -r "psql" \
+;;   -l "PostgreSQL Production" \
+;;   -w 'your-password'
+;;
+;; # For MySQL
+;; security add-internet-password \
+;;   -a "root" \
+;;   -s "localhost" \
+;;   -P "3306" \
+;;   -r "mysql" \
+;;   -l "MySQL Local" \
+;;   -w 'your-password'
+;;
+;; # Test retrieval
+;; security find-internet-password -a dbuser -s db.example.com -w
+;;
+;; For 1Password users:
+;; --------------------
+;; Store database credentials in 1Password with:
+;; - Title: Database name/environment
+;; - Username: Your database user
+;; - Password: Your database password
+;; - Website/URL: The database host (becomes :host for auth-source)
+;; - Port: Database port in a custom field
+;;
+;; For ~/.authinfo.gpg users:
+;; --------------------------
+;; Add lines like:
+;; machine db.example.com login dbuser port 5432 password your-password
+;; machine localhost login root port 3306 password your-password
+
+;;; Usage:
+;;
+;; 1. Connect to a database:
+;;    M-x ejc-connect RET postgres-local RET
+;;    Or use the keybindings: C-c d l (local), C-c d p (production)
+;;
+;; 2. Execute SQL:
+;;    - C-c C-c : Execute SQL at point (auto-detects statement boundaries)
+;;    - C-c C-r : Execute selected region
+;;    - C-c C-b : Execute entire buffer
+;;    - Use / to separate SQL statements
+;;
+;; 3. Navigate results:
+;;    - In *ejc-sql-output* buffer:
+;;      - n : Next page of results
+;;      - p : Previous page
+;;      - C-M-f : Next result set
+;;      - C-M-b : Previous result set
+;;
+;; 4. Autocompletion:
+;;    - Table names, column names, and SQL keywords
+;;    - Cached after first use for performance
+;;
+;; 5. Multiple connections:
+;;    - Each buffer can have its own connection
+;;    - Switch with M-x ejc-connect
+
+;;; sql-connections.el.example ends here

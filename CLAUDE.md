@@ -2,6 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Security Guidelines
+
+- **Never display password or secret values** - When testing auth-source or password retrieval, check for existence/length only, not the actual value
+- **Avoid exposing sensitive data** - Use methods like `(if password "<password exists>" "<no password>")` instead of displaying values
+
 ## Repository Overview
 
 Chezmoi-managed dotfiles for cross-platform development (macOS/Arch Linux) using Go templating.
