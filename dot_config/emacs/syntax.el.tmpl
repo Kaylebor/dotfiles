@@ -8,6 +8,7 @@
                                          (css "https://github.com/tree-sitter/tree-sitter-css" "v0.23.2")
                                          (elixir "https://github.com/elixir-lang/tree-sitter-elixir" "v0.3.4")
                                          (elisp "https://github.com/Wilfred/tree-sitter-elisp" "main")
+                                         (lua "https://github.com/Azganoth/tree-sitter-lua" "master")
                                          (go "https://github.com/tree-sitter/tree-sitter-go" "v0.23.4")
                                          (gomod "https://github.com/camdencheek/tree-sitter-go-mod" "v1.1.0")
                                          (gosum "https://github.com/tree-sitter-grammars/tree-sitter-go-sum" "v1.0.0")
@@ -36,7 +37,8 @@
           (css-mode . css-ts-mode)
           (html-mode . html-ts-mode)
           (json-mode . json-ts-mode)
-          (sh-mode . bash-ts-mode))))
+          (sh-mode . bash-ts-mode)
+          (lua-mode . lua-ts-mode))))
 
 (use-package ruby-ts-mode
   :ensure nil
@@ -156,6 +158,12 @@
   :delight
   :mode ("\\(\\.go\\|/go\\.mod\\|/go\\.sum\\)\\'" . go-ts-mode))
 
+;; Lua
+(use-package lua-ts-mode
+  :ensure nil
+  :delight
+  :mode ("\\.lua\\'" . lua-ts-mode))
+
 (use-package gdscript-mode :ensure (:host github :repo "godotengine/emacs-gdscript-mode") :delight :mode ("\\.gd\\'" . gdscript-ts-mode))
 
 ;; Linting - only activate in programming modes
@@ -213,6 +221,7 @@
   (javascript-ts-mode . lsp)
   (js-jsx-mode . lsp)
   (go-ts-mode . lsp)
+  (lua-ts-mode . lsp)
   (elixir-ts-mode . lsp)
   (gdscript-ts-mode . lsp)
   (rust-ts-mode . lsp)
@@ -314,6 +323,14 @@
                            (ht-merge (lsp-configuration-section "json")
                                      (lsp-configuration-section "http")))
                           (lsp-notify "json/schemaAssociations" lsp-json--schema-associations))))))
+
+  ;; Lua language server via mise
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection '("mise" "exec" "--" "lua-language-server"))
+    :activation-fn (lsp-activate-on "lua")
+    :server-id 'lua-ls
+    :priority 1))
   
   ;; Disable TypeProf and default ruby-lsp to avoid conflicts
   (add-to-list 'lsp-disabled-clients 'typeprof-ls)
@@ -362,6 +379,10 @@
                 (append '("emacs-lsp-booster" "--disable-bytecode" "--") orig-result))))
         orig-result)))
   (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command))
+
+;; Use Stylua for Lua formatting if available (managed by mise)
+(with-eval-after-load 'apheleia
+  (add-to-list 'apheleia-mode-alist '(lua-ts-mode . stylua)))
 
 {{- if .prewarmRubyLSP }}
 ;; Prewarm Ruby LSP server configuration
@@ -535,4 +556,3 @@ This is intended to be run on startup to avoid delays when opening the first Rub
 
 ;; Load chezmoi template support (composite grammars for .tmpl files)
 (load-file (expand-file-name "chezmoi-templates.el" user-emacs-directory))
-
