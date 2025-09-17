@@ -1,0 +1,221 @@
+#+TITLE: Org-Babel SQL Demo
+#+PROPERTY: header-args:sql :engine postgresql :results table :exports both
+
+* Setup and Configuration
+
+This document demonstrates using Org-babel for interactive SQL development.
+
+** Connection Configuration
+
+For different databases, use header arguments:
+- =:engine postgresql= (or mysql, sqlite)  
+- =:database dbname=
+- =:dbhost hostname=
+- =:dbuser username=
+- =:dbpassword= (leave empty to use auth-source)
+
+* Basic Query Execution
+
+Press =C-c C-c= on any SQL block to execute it.
+
+#+begin_src sql :database loyal_guru
+SELECT current_database(), current_user, NOW() as current_time;
+#+end_src
+
+#+RESULTS:
+
+* Working with Tables
+
+** Simple SELECT
+
+#+begin_src sql :database loyal_guru :results table
+-- Get some sample data
+SELECT id, username, email, created_at 
+FROM users 
+ORDER BY created_at DESC
+LIMIT 5;
+#+end_src
+
+#+RESULTS:
+
+** Aggregations
+
+#+name: user-stats
+#+begin_src sql :database loyal_guru
+-- Named blocks can be referenced by other blocks
+SELECT 
+    DATE_TRUNC('month', created_at) as month,
+    COUNT(*) as new_users,
+    COUNT(DISTINCT email) as unique_emails
+FROM users
+WHERE created_at > NOW() - INTERVAL '6 months'
+GROUP BY 1
+ORDER BY 1;
+#+end_src
+
+#+RESULTS: user-stats
+
+* Post-Processing Results
+
+** Using Python to Analyze SQL Results
+
+#+begin_src python :var data=user-stats :results output
+# The SQL results are passed as a list of lists
+if data:
+    headers = data[0] if data else []
+    rows = data[1:] if len(data) > 1 else []
+    
+    print(f"Columns: {headers}")
+    print(f"Total rows: {len(rows)}")
+    
+    if rows:
+        # Calculate total new users
+        total = sum(row[1] for row in rows if row[1])
+        print(f"Total new users in period: {total}")
+#+end_src
+
+#+RESULTS:
+
+** Using Elisp to Process Results
+
+#+begin_src elisp :var data=user-stats
+;; Process SQL results in Emacs Lisp
+(when data
+  (let* ((headers (car data))
+         (rows (cdr data))
+         (total (apply '+ (mapcar (lambda (row) (or (nth 1 row) 0)) rows))))
+    (format "Found %d months of data with %d total users" 
+            (length rows) total)))
+#+end_src
+
+#+RESULTS:
+
+* JSON Operations (PostgreSQL)
+
+** Working with JSONB
+
+#+begin_src sql :database loyal_guru
+-- PostgreSQL JSON operations
+SELECT 
+    '{"name": "test", "tags": ["sql", "postgres"]}'::jsonb as data,
+    '{"name": "test"}'::jsonb @> '{"name": "test"}'::jsonb as contains,
+    '["a", "b", "c"]'::jsonb -> 1 as array_elem;
+#+end_src
+
+#+RESULTS:
+
+** Extracting JSON Fields
+
+#+begin_src sql :database loyal_guru :results table
+-- Extract nested JSON data
+WITH json_data AS (
+    SELECT '{"user": {"name": "Alice", "age": 30, "skills": ["SQL", "Python"]}}'::jsonb as data
+)
+SELECT 
+    data->'user'->>'name' as name,
+    (data->'user'->>'age')::int as age,
+    data->'user'->'skills'->>0 as first_skill
+FROM json_data;
+#+end_src
+
+#+RESULTS:
+
+* Remote Database Connections
+
+** Using Different Connections
+
+#+begin_src sql :engine postgresql :dbhost localhost :dbuser eveiga :database postgres
+-- Local PostgreSQL
+SELECT version();
+#+end_src
+
+#+RESULTS:
+
+To connect to staging (with auth-source for password):
+#+begin_src sql :engine postgresql :dbhost 34.76.183.149 :dbport 10000 :dbuser eveiga@loyal.guru :database staging
+-- This will use auth-source to get the password
+SELECT current_database(), current_user;
+#+end_src
+
+* Advanced Features
+
+** Session Support
+
+Use =:session= to maintain connection state:
+
+#+begin_src sql :database loyal_guru :session my-session
+CREATE TEMP TABLE session_data (id int, value text);
+INSERT INTO session_data VALUES (1, 'test');
+#+end_src
+
+#+RESULTS:
+
+#+begin_src sql :database loyal_guru :session my-session  
+-- Same session, temp table still exists
+SELECT * FROM session_data;
+#+end_src
+
+#+RESULTS:
+
+** Export Options
+
+*** Export to CSV
+
+#+begin_src sql :database loyal_guru :results output :exports both
+\COPY (SELECT id, username FROM users LIMIT 10) TO STDOUT WITH CSV HEADER;
+#+end_src
+
+#+RESULTS:
+
+*** Raw Output
+
+#+begin_src sql :database loyal_guru :results raw
+SELECT 'This will be inserted as raw text, not a table';
+#+end_src
+
+#+RESULTS:
+
+** Column Names Control
+
+#+begin_src sql :database loyal_guru :colnames yes
+-- Force column names to be included
+SELECT 1 as one, 2 as two;
+#+end_src
+
+#+RESULTS:
+
+#+begin_src sql :database loyal_guru :colnames no
+-- Omit column names
+SELECT 1 as one, 2 as two;
+#+end_src
+
+#+RESULTS:
+
+* Tips and Tricks
+
+** Quick Execution Keys
+
+- =C-c C-c= - Execute block at point
+- =C-c C-v b= - Execute all blocks in buffer  
+- =C-c C-v C-b= - Execute blocks up to point
+- =C-c '= - Edit block in SQL mode buffer (with syntax highlighting)
+
+** Performance Tips
+
+1. Use =LIMIT= for exploratory queries
+2. Add =:cache yes= to cache results of expensive queries
+3. Use =:eval no-export= to skip execution during export
+
+** Troubleshooting
+
+If connection fails:
+1. Check =*Messages*= buffer for errors
+2. Verify connection with =psql= directly
+3. Ensure auth-source has credentials (for remote connections)
+
+Example test:
+#+begin_src sh
+psql -h localhost -U eveiga -d loyal_guru -c "SELECT 1"
+#+end_src
+
+#+RESULTS:

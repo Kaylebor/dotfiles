@@ -44,7 +44,7 @@
 (global-set-key (kbd "C-x t") 'treemacs)
 
 ;; Terminal
-(global-set-key (kbd "C-c t") 'vterm)
+(global-set-key (kbd "C-c t") 'eat)
 
 ;; Ripgrep search
 (global-set-key (kbd "C-c s") 'rg-menu)
@@ -77,9 +77,9 @@
   (define-key treesit-fold-mode-map (kbd "C-c C-u") 'treesit-fold-unfold-all)
   (define-key treesit-fold-mode-map (kbd "C-c C-r") 'treesit-fold-rebuild))
 
-;; Claude Code IDE vterm integration
-(with-eval-after-load 'vterm
-  (define-key vterm-mode-map (kbd "C-c C-c") #'claude-code-ide-send-escape))
+;; Claude Code IDE vterm integration - DISABLED (using eat now)
+;; (with-eval-after-load 'vterm
+;;   (define-key vterm-mode-map (kbd "C-c C-c") #'claude-code-ide-send-escape))
 
 ;;; Prefix Keymaps for Organization
 

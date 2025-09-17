@@ -204,8 +204,8 @@
 
 ;; Force Emacs to use a POSIX shell
 (setopt shell-file-name (executable-find "bash"))
-;; Switch vterm to preferred shell
-(setopt vterm-shell {{ .preferredShell | quote }})
+;; Switch vterm to preferred shell - DISABLED (using eat now)
+;; (setopt vterm-shell {{ .preferredShell | quote }})
 (setopt explicit-shell-file-name {{ .preferredShell | quote }})
 
 ;; Magit config

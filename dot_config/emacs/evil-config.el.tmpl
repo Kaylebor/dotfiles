@@ -3,18 +3,15 @@
 
 (setopt evil-want-keybinding nil)
 
-(use-package hydra :ensure t)
+;; (use-package hydra :ensure t)  ; Disabled - not used anywhere, potential cause of freeze
 
-(use-package undo-tree :ensure t
-  :delight
-  :init
-  (global-undo-tree-mode))
+(use-package undo-fu :ensure t)
 
 (use-package evil :ensure t
   :delight
   :custom
   (evil-want-integration t)
-  (evil-undo-system 'undo-tree)
+  (evil-undo-system 'undo-fu)
   :init
   (evil-mode 1))
 
@@ -40,11 +37,11 @@
   (keymap-set evil-normal-state-map "g l d" #'gptel-multimodal-debug)
   (keymap-set evil-normal-state-map "g l p" #'gptel-quick-preset)
   (keymap-set evil-normal-state-map "M-?" #'which-key-show-top-level)
-  
+
   ;; Avy navigation
   (keymap-set evil-normal-state-map "g s" #'avy-goto-char-timer)
   (keymap-set evil-visual-state-map "g s" #'avy-goto-char-timer)
-  
+
   ;; Claude Code IDE bindings
   (keymap-set evil-normal-state-map "g l c" #'claude-code-ide-menu)
   (keymap-set evil-normal-state-map "g l C" #'claude-code-ide)
@@ -52,14 +49,14 @@
   (keymap-set evil-normal-state-map "g l b" #'claude-code-ide-switch-to-buffer)
   (keymap-set evil-normal-state-map "g l q" #'claude-code-ide-stop)
   (keymap-set evil-normal-state-map "g l w" #'claude-code-ide-toggle-window)
-  
+
   ;; Visual mode binding for sending selection to Claude
   (keymap-set evil-visual-state-map "g l i" #'claude-code-ide-insert-at-mentioned))
 
-;; Claude Code IDE evil-mode vterm integration
+;; Claude Code IDE evil-mode vterm integration - DISABLED FOR DEBUGGING
 ;; Make C-c C-c send escape to Claude (for canceling operations)
 ;; This overrides the default vterm C-c C-c (which sends C-c)
-(with-eval-after-load 'vterm
-  (define-key vterm-mode-map (kbd "C-c C-c") #'claude-code-ide-send-escape))
+;; (with-eval-after-load 'vterm
+;;   (define-key vterm-mode-map (kbd "C-c C-c") #'claude-code-ide-send-escape))
 
 (provide 'evil-config)

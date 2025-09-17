@@ -214,16 +214,20 @@
   (minibuffer-prompt-properties '(read-only t cursor-intangible t face minibuffer-prompt)))
 
 ;; Terminal emulators
-(use-package vterm :ensure t
-  :config
-  ;; Prevent Emacs-in-Emacs deadlock when git tries to open an editor
-  (add-hook 'vterm-mode-hook
-            (lambda ()
-              (setq-local vterm-environment
-                          (append '("EDITOR=nvim"  ; Use nvim as fallback editor in vterm
-                                    "GIT_EDITOR=nvim"
-                                    "VISUAL=nvim")
-                                  vterm-environment)))))
+;; eat - Pure elisp terminal emulator (no compilation needed)
+(use-package eat :ensure t)
+
+;; vterm - DISABLED to avoid compilation issues on macOS
+;; (use-package vterm :ensure t
+;;   :config
+;;   ;; Prevent Emacs-in-Emacs deadlock when git tries to open an editor
+;;   (add-hook 'vterm-mode-hook
+;;             (lambda ()
+;;               (setq-local vterm-environment
+;;                           (append '("EDITOR=nvim"  ; Use nvim as fallback editor in vterm
+;;                                     "GIT_EDITOR=nvim"
+;;                                     "VISUAL=nvim")
+;;                                   vterm-environment)))))
 
 
 ;; Claude Code IDE integration
@@ -232,10 +236,8 @@
          :repo "manzaltu/claude-code-ide.el")
   (use-package claude-code-ide
     :custom
-    ;; Use vterm as terminal backend with anti-flicker optimization for resize stability
-    (claude-code-ide-terminal-backend 'vterm)
-    (claude-code-ide-vterm-anti-flicker t)
-    (claude-code-ide-vterm-render-delay 0.005)
+    ;; Use eat as terminal backend (pure elisp, no compilation needed)
+    (claude-code-ide-terminal-backend 'eat)
     ;; Claude CLI is available via mise - use executable-find to locate it
     (claude-code-ide-cli-executable (executable-find "claude"))
     ;; Optional: Enable debug mode initially to verify setup
@@ -471,8 +473,9 @@
 ;; To switch modal editing systems, comment/uncomment one of these lines and restart Emacs:
 ;; - Meow: Modern modal editing with better Emacs integration (no vterm/Magit conflicts)
 ;; - Evil: Vim emulation (powerful but can cause conflicts with some packages)
+;; Note: On macOS with Xcode license issues, set DISABLE_NATIVE_COMP=1 when running chezmoi apply
 ;; (load-file (expand-file-name "meow-config.el" user-emacs-directory))
-;; (load-file (expand-file-name "evil-config.el" user-emacs-directory))
+(load-file (expand-file-name "evil-config.el" user-emacs-directory))
 
 ;; Keybindings will be loaded after all packages are ready via elpaca-after-init-hook
 
