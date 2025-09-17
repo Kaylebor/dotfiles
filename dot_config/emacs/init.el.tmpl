@@ -81,17 +81,17 @@
   (add-hook 'kill-emacs-hook #'projectile-save-known-projects)
   ;; Add manual refresh command (without cleanup)
   (define-key projectile-command-map "r" 
-    (lambda ()
-      (interactive)
-      (projectile-discover-projects-in-search-path)
-      (message "Discovered projects. Total: %d projects" (length projectile-known-projects))))
+              (lambda ()
+                (interactive)
+                (projectile-discover-projects-in-search-path)
+                (message "Discovered projects. Total: %d projects" (length projectile-known-projects))))
   ;; Add manual cleanup + refresh command  
   (define-key projectile-command-map "R" 
-    (lambda ()
-      (interactive)
-      (projectile-cleanup-known-projects)
-      (projectile-discover-projects-in-search-path)
-      (message "Cleaned and refreshed project list: %d projects" (length projectile-known-projects)))))
+              (lambda ()
+                (interactive)
+                (projectile-cleanup-known-projects)
+                (projectile-discover-projects-in-search-path)
+                (message "Cleaned and refreshed project list: %d projects" (length projectile-known-projects)))))
 
 ;; ANSI color support for various buffers
 (use-package ansi-color :ensure nil  ; Built-in package
@@ -156,9 +156,9 @@
   ;; Configure project buffer support - consult-buffer will automatically include project buffers
   ;; Add project buffer switching with C-x p b
   (define-key global-map (kbd "C-x p b") 
-    (lambda () (interactive) 
-      (let ((consult-buffer-sources '(consult--source-project-buffer)))
-        (consult-buffer)))))
+              (lambda () (interactive) 
+                (let ((consult-buffer-sources '(consult--source-project-buffer)))
+                  (consult-buffer)))))
 
 (use-package marginalia :ensure t
   :init
@@ -177,7 +177,7 @@
   :init
   ;; Optionally replace the key help with a completing-read interface
   (setq prefix-help-command #'embark-prefix-help-command)
-)
+  )
 
 (use-package embark-consult :ensure t
   :after (embark consult)
@@ -384,159 +384,158 @@
   (which-key-add-key-based-replacements "g l" "AI-tools")
   ;; Which-key descriptions for Meow are now handled in keybindings.el
 
-;; Code folding based on newer treesit.el
-(use-package treesit-fold :ensure t
-  :delight
-  :custom
-  (treesit-fold-line-count-show t)
-  :init
-  (global-treesit-fold-mode)
-  (global-treesit-fold-indicators-mode)
-)
+  ;; Code folding based on newer treesit.el
+  (use-package treesit-fold :ensure t
+    :delight
+    :custom
+    (treesit-fold-line-count-show t)
+    :init
+    (global-treesit-fold-mode)
+    (global-treesit-fold-indicators-mode)
+    )
 
-(use-package grip-mode :ensure t
-  :custom
-  (grip-command 'go-grip) ;; auto, grip, go-grip or mdopen
-  :hook (markdown-ts-mode . grip-mode))
+  (use-package grip-mode :ensure t
+    :custom
+    (grip-command 'go-grip) ;; auto, grip, go-grip or mdopen
+    :hook (markdown-ts-mode . grip-mode))
 
-;; Quick navigation with Avy
-(use-package avy :ensure t
-  :custom
-  (avy-timeout-seconds 0.5)
-)
+  ;; Quick navigation with Avy
+  (use-package avy :ensure t
+    :custom
+    (avy-timeout-seconds 0.5)
+    )
 
-;; Incremental text selection
-(use-package expand-region :ensure t)
+  ;; Incremental text selection
+  (use-package expand-region :ensure t)
 
-;; Spelling
-(use-package jinx :ensure t)
+  ;; Spelling
+  (use-package jinx :ensure t)
 
-{{- if eq .chezmoi.os "linux" }}
-;; dock.el - Desktop environment dock integration for Unity-compatible desktops
-(when (member (getenv "XDG_CURRENT_DESKTOP") '("KDE" "GNOME" "Unity" "ubuntu:GNOME"))
-  (use-package dock :ensure t))
-{{- end }}
+  {{- if eq .chezmoi.os "linux" }}
+  ;; dock.el - Desktop environment dock integration for Unity-compatible desktops
+  (when (member (getenv "XDG_CURRENT_DESKTOP") '("KDE" "GNOME" "Unity" "ubuntu:GNOME"))
+    (use-package dock :ensure t))
+  {{- end }}
 
-;; Better mise integration with Emacs
-(use-package mise :ensure t
-  :delight
-  :init
-  (global-mise-mode))
+  ;; Better mise integration with Emacs
+  (use-package mise :ensure t
+    :delight
+    :init
+    (global-mise-mode))
 
-{{- if not .skip1Password }}
-;; 1Password integration
-(elpaca (auth-source-1password :host github :repo "dlobraico/auth-source-1password" :build t)
-  (auth-source-1password-enable))
-{{- end }}
+  {{- if not .skip1Password }}
+  ;; 1Password integration
+  (elpaca (auth-source-1password :host github :repo "dlobraico/auth-source-1password" :build t)
+    (auth-source-1password-enable))
+  {{- end }}
 
-;; Org Babel: Mermaid support (diagram rendering via mmdc)
-(use-package ob-mermaid
-  :ensure (:host github :repo "arnm/ob-mermaid")
-  :after org
-  :init
-  ;; Ensure mermaid is included in org-babel languages without clobbering others
-  (with-eval-after-load 'org
-    (add-to-list 'org-babel-load-languages '(mermaid . t)))
-  :config
-  ;; Load languages now (merges with existing list)
-  (when (fboundp 'org-babel-do-load-languages)
-    (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages))
-  ;; Prefer mise-managed mmdc if available
-  (when (boundp 'ob-mermaid-cli-path)
-    (setq ob-mermaid-cli-path
-          (or (and (fboundp 'my-mise-which) (my-mise-which "mmdc"))
-              (executable-find "mmdc")))))
+  ;; Org Babel: Mermaid support (diagram rendering via mmdc)
+  (use-package ob-mermaid
+    :ensure (:host github :repo "arnm/ob-mermaid")
+    :after org
+    :init
+    ;; Ensure mermaid is included in org-babel languages without clobbering others
+    (with-eval-after-load 'org
+      (add-to-list 'org-babel-load-languages '(mermaid . t)))
+    :config
+    ;; Load languages now (merges with existing list)
+    (when (fboundp 'org-babel-do-load-languages)
+      (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages))
+    ;; Prefer mise-managed mmdc if available
+    (when (boundp 'ob-mermaid-cli-path)
+      (setq ob-mermaid-cli-path
+            (or (and (fboundp 'my-mise-which) (my-mise-which "mmdc"))
+                (executable-find "mmdc")))))
 
-;; GPT and family
-(load-file (expand-file-name "gptel-init.el" user-emacs-directory))
+  ;; GPT and family
+  (load-file (expand-file-name "gptel-init.el" user-emacs-directory))
 
-;; Emojis
-(use-package emojify :ensure t
-  :custom
-  (emojify-emoji-styles '(unicode github))
-  (emojify-display-style 'unicode)
-  :init
-  (global-emojify-mode))
+  ;; Emojis
+  (use-package emojify :ensure t
+    :custom
+    (emojify-emoji-styles '(unicode github))
+    (emojify-display-style 'unicode)
+    :init
+    (global-emojify-mode))
 
-;; Theme
-(use-package dracula-theme :ensure t) ;; Needed, as catppuccin-theme depends on it
-(use-package catppuccin-theme :ensure (:wait t)
-  :custom
-  (catppuccin-flavor 'frappe)
-  :init
-  (load-theme 'catppuccin :no-confirm))
+  ;; Theme
+  (use-package dracula-theme :ensure t) ;; Needed, as catppuccin-theme depends on it
+  (use-package catppuccin-theme :ensure (:wait t)
+    :custom
+    (catppuccin-flavor 'frappe)
+    :init
+    (load-theme 'catppuccin :no-confirm))
 
-;; Window management configuration
-(load-file (expand-file-name "window-management.el" user-emacs-directory))
+  ;; Window management configuration
+  (load-file (expand-file-name "window-management.el" user-emacs-directory))
 
-;; Modal editing configuration
-;; To switch modal editing systems, comment/uncomment one of these lines and restart Emacs:
-;; - Meow: Modern modal editing with better Emacs integration (no vterm/Magit conflicts)
-;; - Evil: Vim emulation (powerful but can cause conflicts with some packages)
-;; Note: On macOS with Xcode license issues, set DISABLE_NATIVE_COMP=1 when running chezmoi apply
-;; (load-file (expand-file-name "meow-config.el" user-emacs-directory))
-(load-file (expand-file-name "evil-config.el" user-emacs-directory))
+  ;; Modal editing configuration
+  ;; To switch modal editing systems, comment/uncomment one of these lines and restart Emacs:
+  ;; - Meow: Modern modal editing with better Emacs integration (no vterm/Magit conflicts)
+  ;; - Evil: Vim emulation (powerful but can cause conflicts with some packages)
+  ;; (load-file (expand-file-name "meow-config.el" user-emacs-directory))
+  (load-file (expand-file-name "evil-config.el" user-emacs-directory))
 
-;; Keybindings will be loaded after all packages are ready via elpaca-after-init-hook
+  ;; Keybindings will be loaded after all packages are ready via elpaca-after-init-hook
 
-;; Elpaca queues are processed via after-init-hook in elpaca-init.el
+  ;; Elpaca queues are processed via after-init-hook in elpaca-init.el
 
-;; Performance optimizations
+  ;; Performance optimizations
 
-;; Reset GC threshold after startup for better runtime performance
-(add-hook 'emacs-startup-hook
-          (lambda ()
-            (setq gc-cons-threshold (* 20 1024 1024)  ; 20MB
-                  gc-cons-percentage 0.1)
-            (message "GC threshold reset to %s" gc-cons-threshold)))
-
-;; Pixel-precision scrolling configured in custom.el
-
-;; Disable vc-mode entirely since we use Magit exclusively
-(setq vc-handled-backends nil)
-
-{{- if eq .chezmoi.os "darwin" }}
-;; macOS-specific optimizations
-;; Smoother scrolling on macOS (Mac Port specific)
-(setq mac-mouse-wheel-smooth-scroll t)
-
-;; Optimize for macOS window management
-(setq ns-use-native-fullscreen t)
-(setq ns-pop-up-frames nil)
-
-;; Faster frame switching
-(setq frame-title-format nil)
-{{- end }}
-
-;; Hide some Emacs-native modes from modeline
-(with-eval-after-load 'delight
-  (delight '((eldoc-mode nil "eldoc"))))
-
-;; Disable menu bar
-(menu-bar-mode -1)
-
-;; Auto-install icon fonts after Elpaca finishes (if needed)
-(with-eval-after-load 'elpaca
-  (add-hook 'elpaca-after-init-hook
+  ;; Reset GC threshold after startup for better runtime performance
+  (add-hook 'emacs-startup-hook
             (lambda ()
-              ;; Check and install nerd-icons fonts if package is available
-              (when (and (require 'nerd-icons nil t)
-                         (fboundp 'nerd-icons-install-fonts))
-                ;; Check if any Nerd Font is installed by looking for common patterns
-                (unless (seq-find (lambda (font) 
-                                    (string-match-p "\\(Nerd Font\\|NFM\\|NF\\)" font))
-                                  (font-family-list))
-                  (message "Installing nerd-icons fonts...")
-                  (nerd-icons-install-fonts t))))
-            ;; Run after other init hooks with lower priority
-            90)
-  
-  ;; Load all keybindings after packages are ready
-  (add-hook 'elpaca-after-init-hook
-            (lambda ()
-              (message "Loading keybindings configuration...")
-              (load-file (expand-file-name "keybindings.el" user-emacs-directory)))
-            95))) ; Priority 95 to run after font installation - close with-eval-after-load
+              (setq gc-cons-threshold (* 20 1024 1024)  ; 20MB
+                    gc-cons-percentage 0.1)
+              (message "GC threshold reset to %s" gc-cons-threshold)))
+
+  ;; Pixel-precision scrolling configured in custom.el
+
+  ;; Disable vc-mode entirely since we use Magit exclusively
+  (setq vc-handled-backends nil)
+
+  {{- if eq .chezmoi.os "darwin" }}
+  ;; macOS-specific optimizations
+  ;; Smoother scrolling on macOS (Mac Port specific)
+  (setq mac-mouse-wheel-smooth-scroll t)
+
+  ;; Optimize for macOS window management
+  (setq ns-use-native-fullscreen t)
+  (setq ns-pop-up-frames nil)
+
+  ;; Faster frame switching
+  (setq frame-title-format nil)
+  {{- end }}
+
+  ;; Hide some Emacs-native modes from modeline
+  (with-eval-after-load 'delight
+    (delight '((eldoc-mode nil "eldoc"))))
+
+  ;; Disable menu bar
+  (menu-bar-mode -1)
+
+  ;; Auto-install icon fonts after Elpaca finishes (if needed)
+  (with-eval-after-load 'elpaca
+    (add-hook 'elpaca-after-init-hook
+              (lambda ()
+                ;; Check and install nerd-icons fonts if package is available
+                (when (and (require 'nerd-icons nil t)
+                           (fboundp 'nerd-icons-install-fonts))
+                  ;; Check if any Nerd Font is installed by looking for common patterns
+                  (unless (seq-find (lambda (font) 
+                                      (string-match-p "\\(Nerd Font\\|NFM\\|NF\\)" font))
+                                    (font-family-list))
+                    (message "Installing nerd-icons fonts...")
+                    (nerd-icons-install-fonts t))))
+              ;; Run after other init hooks with lower priority
+              90)
+    
+    ;; Load all keybindings after packages are ready
+    (add-hook 'elpaca-after-init-hook
+              (lambda ()
+                (message "Loading keybindings configuration...")
+                (load-file (expand-file-name "keybindings.el" user-emacs-directory)))
+              95))) ; Priority 95 to run after font installation - close with-eval-after-load
 
 ;; Customization
 (setopt custom-file (expand-file-name "custom.el" user-emacs-directory))
