@@ -5,7 +5,12 @@
 
 ;; (use-package hydra :ensure t)  ; Disabled - not used anywhere, potential cause of freeze
 
-(use-package undo-fu :ensure t)
+(use-package undo-fu :ensure t
+  :config
+  ;; Increase undo limits for modern systems (default is ~160KB/240KB/1.5MB)
+  (setq undo-limit 67108864)        ; 64mb
+  (setq undo-strong-limit 100663296) ; 96mb
+  (setq undo-outer-limit 1006632960)) ; 960mb
 
 (use-package evil :ensure t
   :delight
@@ -51,7 +56,13 @@
   (keymap-set evil-normal-state-map "g l w" #'claude-code-ide-toggle-window)
 
   ;; Visual mode binding for sending selection to Claude
-  (keymap-set evil-visual-state-map "g l i" #'claude-code-ide-insert-at-mentioned))
+  (keymap-set evil-visual-state-map "g l i" #'claude-code-ide-insert-at-mentioned)
+
+  ;; Enhanced undo-fu keybindings
+  (keymap-set evil-normal-state-map "U" #'undo-fu-only-redo-all)
+  (keymap-set evil-visual-state-map "U" #'undo-fu-only-redo-all)
+  (keymap-set evil-normal-state-map "g u" #'undo-fu-disable-checkpoint)
+  (keymap-set evil-visual-state-map "g u" #'undo-fu-disable-checkpoint))
 
 ;; Claude Code IDE evil-mode vterm integration - DISABLED FOR DEBUGGING
 ;; Make C-c C-c send escape to Claude (for canceling operations)
