@@ -10,13 +10,105 @@ PATCHES_DIR="{{ .chezmoi.sourceDir }}/scripts/patches"
 
 echo "Applying Homebrew formula patches for alternative installation..."
 
+# Basic colors (fallback to ANSI if tput not available)
+BOLD="$(tput bold 2>/dev/null || printf '\033[1m')"
+YELLOW="$(tput setaf 3 2>/dev/null || printf '\033[33m')"
+RED="$(tput setaf 1 2>/dev/null || printf '\033[31m')"
+RESET="$(tput sgr0 2>/dev/null || printf '\033[0m')"
+
+
+
 # Ensure all taps are clean before patching
 echo "Ensuring clean homebrew taps..."
 # Reset homebrew-core
 if [[ -d "$(brew --repository homebrew/core)" ]]; then
     git -C "$(brew --repository homebrew/core)" checkout HEAD -- . 2>/dev/null || true
     git -C "$(brew --repository homebrew/core)" clean -fd 2>/dev/null || true
+else
+    # Ensure homebrew/core tap exists before any patching/cleaning
+    echo "Ensuring homebrew/core tap exists..."
+    brew tap homebrew/core --force
 fi
+
+# Helper: determine if a formula should be considered already patched based on data-driven patterns
+is_formula_already_patched() {
+    local formula_name="$1"
+    local formula_path="$2"
+    MATCHED_PATTERN=""
+    case "$formula_name" in
+{{- $fps := .formula_patches }}
+{{- if $fps }}
+{{- range $fname, $cfg := $fps }}
+        {{ $fname }})
+{{- with (index $cfg "skip_if_formula_contains") }}
+{{- range $idx, $pat := . }}
+            if grep -qE {{ printf "%q" $pat }} "$formula_path"; then MATCHED_PATTERN={{ printf "%q" $pat }}; return 0; fi
+{{- end }}
+{{- end }}
+            return 1 ;;
+{{- end }}
+{{- end }}
+        *) return 1 ;;
+    esac
+}
+
+# Helper: apply data-driven replacements to a formula file
+apply_formula_replacements() {
+    local formula_name="$1"
+    local formula_path="$2"
+    local changed=0
+    local total_patterns=0
+    local matched_patterns=0
+    local missing_patterns=""
+    case "$formula_name" in
+{{- $fps := .formula_patches }}
+{{- if $fps }}
+{{- range $fname, $cfg := $fps }}
+        {{ $fname }})
+{{- with (index $cfg "replace_in_formula") }}
+{{- range $idx, $rep := . }}
+            total_patterns=$((total_patterns+1))
+            if grep -qE {{ printf "%q" $rep.search }} "$formula_path"; then
+                cp "$formula_path" "$formula_path.bak"
+                perl -0777 -pe 's/{{ $rep.search }}/{{ $rep.replace }}/g' "$formula_path" > "$formula_path.tmp" && mv "$formula_path.tmp" "$formula_path"
+                changed=1
+                matched_patterns=$((matched_patterns+1))
+                echo "${YELLOW}⚠️  Applied replacement for $formula_name: /{{ $rep.search }}/ → {{ $rep.replace }}${RESET}"
+            fi
+            if ! grep -qE {{ printf "%q" $rep.search }} "$formula_path"; then
+                if [[ -z "$missing_patterns" ]]; then
+                    missing_patterns="{{ $rep.search }}"
+                else
+                    missing_patterns="$missing_patterns, {{ $rep.search }}"
+                fi
+            fi
+{{- end }}
+{{- end }}
+            ;;
+{{- end }}
+{{- end }}
+        *) ;;
+    esac
+    if [[ $total_patterns -gt 0 && $matched_patterns -lt $total_patterns ]]; then
+        echo "${RED}❌ Replacement failed for $formula_name: missing pattern(s): $missing_patterns${RESET}"
+        return 2
+    fi
+    return $changed
+}
+
+# Helper: check if a formula has an enabled patch configuration in data
+is_patch_enabled() {
+    local formula_name="$1"
+    case "$formula_name" in
+{{- $fps := .formula_patches }}
+{{- if $fps }}
+{{- range $fname, $cfg := $fps }}
+        {{ $fname }}) return 0 ;;
+{{- end }}
+{{- end }}
+        *) return 1 ;;
+    esac
+}
 
 # Reset any additional taps
 {{- if .packages.darwin.taps }}
@@ -41,6 +133,13 @@ patch_formula() {
     local patch_file="$2"
     
     echo "Patching formula: $formula_name"
+    
+    # Skip if this formula is not configured in data
+    if ! is_patch_enabled "$formula_name"; then
+        patch_basename="$(basename "$patch_file")"
+        echo "${YELLOW}⚠️  Skipping patch for $formula_name: no configuration found in packages.yml. Remove scripts/patches/${patch_basename} or add formula_patches.${formula_name}.${RESET}"
+        return 0
+    fi
     
     # Skip if package is already installed
     if brew list "$formula_name" &>/dev/null; then
@@ -67,9 +166,10 @@ patch_formula() {
     
     echo "Found formula at: $formula_path"
     
-    # Check if already patched by looking for our specific patch content
-    if grep -q "this->end()" "$formula_path"; then
-        echo "✅ $formula_name already patched"
+    # Data-driven skip: if configured patterns indicate the formula already contains equivalent fix
+    if is_formula_already_patched "$formula_name" "$formula_path"; then
+        patch_basename="$(basename "$patch_file")"
+        echo "${YELLOW}⚠️  Skipping patch for $formula_name: detected equivalent fix (pattern: ${MATCHED_PATTERN}). Consider removing scripts/patches/${patch_basename}.${RESET}"
         return 0
     fi
     
@@ -79,38 +179,47 @@ patch_formula() {
     
     echo "Backing up original formula..."
     cp "$formula_path" "$formula_path.original"
+
+    # Apply any configured text replacements prior to patching
+    if ! apply_formula_replacements "$formula_name" "$formula_path"; then
+        echo "${RED}Error applying configured replacements for $formula_name. Aborting.${RESET}"
+        exit 1
+    fi
     
-    echo "Applying patch from $patch_file..."
-    
-    # Apply the patch by modifying the formula structure
-    # Check if formula already uses patch :DATA (aspell case)
-    if grep -q "patch :DATA" "$formula_path"; then
-        echo "Formula already uses patch :DATA, appending our patch..."
-        # Simply append our patch data after __END__
-        cat "$patch_file" >> "$formula_path"
-    else
-        # Formula doesn't have patches, add patches method before install
-        awk -v patch_file="$patch_file" '
-        /^  def install/ && !patches_added {
-            print "  # PATCHED BY CHEZMOI - C++ compatibility fixes"
-            print "  def patches"
-            print "    DATA"
-            print "  end"
-            print ""
-            patches_added = 1
-        }
-        { print }
-        END {
-            if (patches_added) {
+    if [[ -n "$patch_file" ]]; then
+        echo "Applying patch from $patch_file..."
+        # Apply the patch by modifying the formula structure
+        # Check if formula already uses patch :DATA (aspell case)
+        if grep -q "patch :DATA" "$formula_path"; then
+            echo "Formula already uses patch :DATA, appending our patch..."
+            # Simply append our patch data after __END__
+            cat "$patch_file" >> "$formula_path"
+        else
+            # Formula doesn't have patches, add patches method before install
+            awk -v patch_file="$patch_file" '
+            /^  def install/ && !patches_added {
+                print "  # PATCHED BY CHEZMOI - C++ compatibility fixes"
+                print "  def patches"
+                print "    DATA"
+                print "  end"
                 print ""
-                print "__END__"
-                while ((getline line < patch_file) > 0) {
-                    print line
-                }
-                close(patch_file)
+                patches_added = 1
             }
-        }
-        ' "$formula_path" > "$formula_path.tmp" && mv "$formula_path.tmp" "$formula_path"
+            { print }
+            END {
+                if (patches_added) {
+                    print ""
+                    print "__END__"
+                    while ((getline line < patch_file) > 0) {
+                        print line
+                    }
+                    close(patch_file)
+                }
+            }
+            ' "$formula_path" > "$formula_path.tmp" && mv "$formula_path.tmp" "$formula_path"
+        fi
+    else
+        echo "No patch file provided; applied replacements only."
     fi
     
     echo "✅ Successfully patched $formula_name"
@@ -125,6 +234,17 @@ for patch_file in "$PATCHES_DIR"/*.patch; do
         patch_formula "$formula_name" "$patch_file"
     fi
 done
+
+# Also process replacement-only entries configured in formula_patches (no .patch file present)
+{{- $fps2 := .formula_patches }}
+{{- if $fps2 }}
+{{- range $fname, $cfg := $fps2 }}
+if [[ ! -f "$PATCHES_DIR/{{ $fname }}.patch" ]]; then
+    echo "Found replacement-only config for: {{ $fname }}"
+    patch_formula "{{ $fname }}" ""
+fi
+{{- end }}
+{{- end }}
 
 echo "✅ Formula patching complete"
 

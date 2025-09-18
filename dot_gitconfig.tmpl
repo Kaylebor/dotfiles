@@ -12,19 +12,19 @@
 [init]
   defaultBranch = main
 [commit]
-  {{- if not .skip1Password }}
   gpgSign = true
-  {{- else }}
-  gpgSign = false
-  {{- end }}
   template = ~/.gitmessage
 [user]
   name = "Ender Veiga Bueno"
   email = "letstalk@ender.codes"
-  {{- if not .skip1Password }}
-  signingkey = {{ template "onepassword_safe" dict "opPath" "op://Private/Personal Key/public key" "envVar" "CHEZMOI_GIT_SIGNING_KEY" "context" . }}
-  {{- else if env "CHEZMOI_GIT_SIGNING_KEY" }}
+  {{- if .skip1Password }}
+  {{- if env "CHEZMOI_GIT_SIGNING_KEY" }}
   signingkey = {{ env "CHEZMOI_GIT_SIGNING_KEY" }}
+  {{- else }}
+  signingkey = {{ .signingKey }}
+  {{- end }}
+  {{- else }}
+  signingkey = {{ template "onepassword_safe" dict "opPath" "op://Private/Personal Key/public key" "envVar" "CHEZMOI_GIT_SIGNING_KEY" "context" . }}
   {{- end }}
 [github]
   user = "Kaylebor"

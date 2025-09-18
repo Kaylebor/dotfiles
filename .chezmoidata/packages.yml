@@ -1,8 +1,5 @@
 # Formula patches configuration for alternative Homebrew installations
 formula_patches:
-  aspell:
-    expected_hash: "746699427e648a7851e06ea193e0ba1575ff4487d1d76e59ea7c56a9648cf179"
-    description: "Fix VectorHashTable template compilation errors with modern Clang (members 'e' and '_size' not found in vector_hash-t.hpp)"
 
 packages:
   arch:
@@ -84,15 +81,13 @@ packages:
       - "zsh-antidote"
   darwin:
     taps:
-      - "d12frosted/emacs-plus"
+      # - "d12frosted/emacs-plus"
+      # - "railwaycat/emacsmacport"
     brews:
       - "age"
       - "antidote"
       - name: "aspell"
         watch_versions: true
-        alternative_only:
-          env:
-            HOMEBREW_MAKE_JOBS: "1"
       - "autoconf"
       - "bat"
       - "binutils"
@@ -106,14 +101,22 @@ packages:
       - "difftastic"
       - "diffutils"
       - "elixir-ls"
-      - name: "emacs-plus@31"
-        force_reinstall: true  # Emacs benefits from clean reinstalls when dependencies update
-        args:
-          - "with-imagemagick"
-          - "with-dbus"
-          - "with-mailutils"
-          - "with-memeplex-slim-icon"
-          - "with-xwidgets"
+      # - name: "emacs-plus@31"
+      #   force_reinstall: true  # Emacs benefits from clean reinstalls when dependencies update
+      #   args:
+      #     - "with-imagemagick"
+      #     - "with-dbus"
+      #     - "with-mailutils"
+      #     - "with-memeplex-slim-icon"
+      #     - "with-xwidgets"
+      # - name: "emacs-mac"
+      #   args:
+      #     - "with-mac-metal"
+      #     - "with-natural-title-bar"
+      #     - "with-starter"
+      #     - "with-xwidgets"
+      #     - "with-unlimited-select"
+      #     - "with-emacs-big-sur-icon"
       - "enchant"
       - "eza"
       - "fd"
@@ -124,17 +127,18 @@ packages:
       - "fop"
       - "fzf"
       - "gawk"
-      - name: "gcc"
-        install_order: 10
-        alternative_only:
-          args:
-            - "build-from-source"
-          env:
-            LDFLAGS: "-Wl,-headerpad_max_install_names"
-            BOOT_LDFLAGS: "-Wl,-headerpad_max_install_names"
-            CFLAGS_FOR_TARGET: "-Wl,-headerpad_max_install_names"
-            CXXFLAGS_FOR_TARGET: "-Wl,-headerpad_max_install_names"
-            HOMEBREW_NO_INSTALL_CLEANUP: "1"
+      # - name: "gcc"
+      #   watch_versions: true
+      #   install_order: 10
+      #   alternative_only:
+      #     args:
+      #       - "build-from-source"
+          # env:
+          #   LDFLAGS: "-Wl,-headerpad_max_install_names"
+          #   BOOT_LDFLAGS: "-Wl,-headerpad_max_install_names"
+          #   CFLAGS_FOR_TARGET: "-Wl,-headerpad_max_install_names"
+          #   CXXFLAGS_FOR_TARGET: "-Wl,-headerpad_max_install_names"
+          #   HOMEBREW_NO_INSTALL_CLEANUP: "1"
       - "gh"
       - "git"
       - "git-flow"
@@ -161,7 +165,6 @@ packages:
         watch_versions: true
       - "jc"
       - "jd"
-      - "lapack"
       - "less"
       - "libpq"
       - "libxslt"
@@ -178,7 +181,6 @@ packages:
       - "neovim"
       - "nmap"
       - "nushell"
-      - "openblas"
       - "pgcli"
       - "pgformatter"
       - name: "pkgconfig"
@@ -189,12 +191,16 @@ packages:
       - "ripgrep"
       - "rsync"
       - "rust"
+      - "scons"
       - "screen"
       - "shared-mime-info"
       - "shellcheck"
       - "shfmt"
       - "sql-formatter"
       - "starship"
+      - "swig"
+      - name: "svn"
+        install_order: 50
       - "television"
       - "tmux"
       - "unixodbc"

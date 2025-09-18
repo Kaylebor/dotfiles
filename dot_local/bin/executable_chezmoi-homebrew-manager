@@ -136,6 +136,31 @@ class HomebrewManager:
                 self._formulae_cache = {}
                 
         return self._formulae_cache
+
+    def _get_install_order(self, package_name: str) -> float:
+        """Return install_order for a package, or +inf if not specified.
+
+        Honors alternative_only.install_order when running in alternative Homebrew mode.
+        """
+        packages_config = self._load_packages_config()
+        brews = packages_config.get("packages", {}).get("darwin", {}).get("brews", [])
+        for pkg in brews:
+            if isinstance(pkg, dict) and pkg.get("name") == package_name:
+                if "install_order" in pkg:
+                    try:
+                        return float(pkg["install_order"])
+                    except Exception:
+                        return float("inf")
+                if (self._is_alternative_homebrew() and
+                    "alternative_only" in pkg and
+                    isinstance(pkg["alternative_only"], dict) and
+                    "install_order" in pkg["alternative_only"]):
+                    try:
+                        return float(pkg["alternative_only"]["install_order"])
+                    except Exception:
+                        return float("inf")
+                return float("inf")
+        return float("inf")
     
     def _load_packages_config(self) -> Dict[str, Any]:
         """Load packages configuration from packages.yml."""
@@ -236,6 +261,13 @@ class HomebrewManager:
             if result.returncode == 0:
                 continue
             
+            # If no expected_hash is set and there is no corresponding patch file, skip hash verification
+            expected_hash = (patch_config or {}).get("expected_hash")
+            patch_file_path = self.chezmoi_source_dir / "scripts" / "patches" / f"{formula}.patch"
+            if not expected_hash and not patch_file_path.exists():
+                print(f"Skipping hash check for {formula} (no expected_hash and no patch file)")
+                continue
+
             print(f"Verifying {formula} formula hash...")
             
             # Get formula path
@@ -254,7 +286,6 @@ class HomebrewManager:
                                       capture_output=True, text=True, check=True)
                 actual_hash = result.stdout.split()[0]
                 
-                expected_hash = patch_config.get("expected_hash")
                 if actual_hash != expected_hash:
                     print(f"❌ Hash mismatch for {formula}!")
                     print(f"   Expected: {expected_hash}")
@@ -1059,6 +1090,21 @@ class HomebrewManager:
             
             # Classify and install packages
             individual_brews, bundle_brews, casks = self.classify_packages()
+
+            # Sort by install_order (then by original position for stability)
+            def _pkg_name(p):
+                return p.get("name") if isinstance(p, dict) else p
+            individual_brews = sorted(
+                list(enumerate(individual_brews)),
+                key=lambda t: (self._get_install_order(_pkg_name(t[1])), t[0])
+            )
+            individual_brews = [p for _, p in individual_brews]
+
+            bundle_brews = sorted(
+                list(enumerate(bundle_brews)),
+                key=lambda t: (self._get_install_order(_pkg_name(t[1])), t[0])
+            )
+            bundle_brews = [p for _, p in bundle_brews]
             
             # Install packages with environment variables first
             if not self.install_individual_packages(individual_brews):

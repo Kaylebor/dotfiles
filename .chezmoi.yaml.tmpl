@@ -24,6 +24,11 @@
 {{-   $skip1Password = false }}
 {{- end }}
 
+{{- $signingKey := "" }}
+{{- if $skip1Password }}
+{{- $signingKey = promptString "Enter the signing key path" (print .chezmoi.homeDir "/.ssh/id_ed25519") }}
+{{- end }}
+
 {{- $prewarmRubyLSP := false }}
 {{- if hasKey . "prewarmRubyLSP" }}
 {{-   $prewarmRubyLSP = .prewarmRubyLSP }}
@@ -96,6 +101,7 @@ data:
   brewBin: {{ $brewBin | quote }}
 {{- end }}
   skip1Password: {{ $skip1Password }}
+  signingKey: {{ $signingKey }}
   prewarmRubyLSP: {{ $prewarmRubyLSP }}
   ollamaHost: {{ $ollamaHost | quote }}
   ollamaApiBase: {{ printf "http://%s" $ollamaHost | quote }}

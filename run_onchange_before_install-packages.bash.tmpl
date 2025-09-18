@@ -1,17 +1,18 @@
 #!/bin/bash
 {{/* Script to check OS and install packages based on OS */}}
+{{ $brewBin := .brewBin }}
 # hash: {{ include ".chezmoidata/packages.yml" | sha256sum }}
 
 {{/* Track brew formula versions to detect when packages are upgraded */}}
 {{- if eq .chezmoi.os "darwin" }}
-# brew_installed_versions: {{ output "brew" "list" "--versions" | sha256sum }}
+# brew_installed_versions: {{ output $brewBin "list" "--versions" | sha256sum }}
 {{- end }}
 
 {{/* Track versions of packages that should trigger re-runs when updated (alternative Homebrew only) */}}
 {{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
 {{- range .packages.darwin.brews }}
 {{- if and (kindIs "map" .) (hasKey . "watch_versions") (eq .watch_versions true) }}
-# {{ .name }}_version: $(brew list --versions {{ .name }} 2>/dev/null || echo "not_installed")
+# {{ .name }}_version: $({{ $brewBin }} list --versions {{ .name }} 2>/dev/null || echo "not_installed")
 {{- end }}
 {{- end }}
 {{- end }}
@@ -32,8 +33,8 @@
 # Install uv on macOS
 if ! command -v uv >/dev/null 2>&1; then
   echo "Installing uv for Python scripts..."
-  if command -v brew >/dev/null 2>&1; then
-    brew install uv
+  if command -v {{ $brewBin }} >/dev/null 2>&1; then
+    {{ $brewBin }} install uv
   else
     echo "Error: Homebrew not available, cannot install uv"
     exit 1
