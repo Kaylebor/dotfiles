@@ -8,7 +8,7 @@ Modern alternatives to traditional Unix tools. When searching, processing files,
 
 ### Core Tools
 - **Search**: `fd` (find), `rg` (grep), `fzf` (fuzzy finder)
-- **View/Edit**: `bat` (cat), `delta` (diff), `nvim`/`helix`/`emacs`
+- **View/Edit**: `bat` (cat), `difftastic` (diff), `nvim`/`emacs`
 - **File ops**: `eza` (ls), `tree`, `jq`/`yq` (JSON/YAML), `jc` (cmd→JSON)
 - **System**: `btop` (htop), `dysk` (disk usage), `curlie` (curl)
 - **Dev**: `mise` (runtime manager), `gh` (GitHub CLI), `shellcheck`, `shfmt`
@@ -18,7 +18,7 @@ Modern alternatives to traditional Unix tools. When searching, processing files,
 {{- if eq .chezmoi.os "linux" }}
 - **Network**: `nmap`
 {{- end }}
-- **VCS**: `delta`, `difft`, `gitu`
+- **VCS**: `difftastic`, `gitu`
 
 ### Shell Environment
 - **Shell**: Fish (primary) + Starship prompt
@@ -27,7 +27,7 @@ Modern alternatives to traditional Unix tools. When searching, processing files,
 
 ## Configuration
 - **Dotfiles**: Managed via chezmoi
-- **Aliases**: `cat`→`bat`, `diff`→`delta`, git shortcuts
+- **Aliases**: `cat`→`bat`, `diff`→`difftastic`, git shortcuts
 - **Search integration**: FZF+fd, previews with bat/tree/jq/yq
 
 ## Key Features

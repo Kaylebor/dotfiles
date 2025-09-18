@@ -18,7 +18,7 @@ $env.PATH = ($env.PATH | split row (char esep) | prepend ["/usr/local/sbin", "/u
 # Set EDITOR with emacsclient preference and fallback
 {{- if lookPath "emacsclient" }}
 {{- $fallbackEditor := "" }}
-{{- $tuiEditors := list "helix" "hx" "nvim" "vim" "vi" }}
+{{- $tuiEditors := list "hx" "nvim" "vim" "vi" }}
 {{- range $editor := $tuiEditors }}
 {{- if and (not $fallbackEditor) (lookPath $editor) }}
 {{- $fallbackEditor = $editor }}
@@ -26,7 +26,7 @@ $env.PATH = ($env.PATH | split row (char esep) | prepend ["/usr/local/sbin", "/u
 {{- end }}
 $env.EDITOR = "emacsclient -t{{ if $fallbackEditor }} --alternate-editor='{{ $fallbackEditor }}'{{ end }}"
 {{- else }}
-{{- $tuiEditors := list "helix" "hx" "nvim" "vim" "vi" }}
+{{- $tuiEditors := list "hx" "nvim" "vim" "vi" }}
 {{- range $editor := $tuiEditors }}
 {{- if lookPath $editor }}
 $env.EDITOR = "{{ $editor }}"
@@ -41,7 +41,7 @@ $env.EDITOR = "{{ $editor }}"
 {{- if lookPath "zed" }}
 {{- $fallbackEditor = "zed -w" }}
 {{- else }}
-{{- $visualEditors := list "helix" "hx" "nvim" "vim" "vi" }}
+{{- $visualEditors := list "hx" "nvim" "vim" "vi" }}
 {{- range $editor := $visualEditors }}
 {{- if and (not $fallbackEditor) (lookPath $editor) }}
 {{- $fallbackEditor = $editor }}
@@ -274,8 +274,8 @@ alias tree = eza --tree --icons=auto
 alias cat = bat
 {{- end }}
 
-{{- if lookPath "delta" }}
-alias diff = delta
+{{- if lookPath "difft" }}
+alias diff = difft
 {{- end }}
 
 # Utility aliases

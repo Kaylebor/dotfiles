@@ -14,7 +14,7 @@ Direct communication with tool's built-in completion system:
 - `chezmoi`, `golangci-lint`, `kind`
 
 #### Clap (Rust)
-- `fd`, `rg`, `bat`, `eza`, `delta`
+- `fd`, `rg`, `bat`, `eza`, `difftastic`
 - `mise`, `just`, `starship`
 
 #### Click (Python)

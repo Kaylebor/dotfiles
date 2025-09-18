@@ -88,7 +88,7 @@ This repository uses [carapace](https://carapace-sh.github.io/carapace-bin/) for
 Many modern CLI tools include completion frameworks that provide rich, context-aware completions:
 
 - **Cobra** (Go): Used by `gh`, `kubectl`, `docker`, `helm`, `hugo`
-- **Clap** (Rust): Used by `fd`, `rg`, `bat`, `eza`, `delta`, `mise`
+- **Clap** (Rust): Used by `fd`, `rg`, `bat`, `eza`, `difftastic`, `mise`
 - **Click** (Python): Used by `pgcli`
 - **Argcomplete** (Python): Enhancement for Python's argparse
 - **Yargs** (Node.js): Used by many JavaScript CLIs

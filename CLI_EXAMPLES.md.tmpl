@@ -35,7 +35,7 @@ bat README.md
 bat -n script.py
 
 # Compare files with syntax highlighting
-delta file1.txt file2.txt
+difft file1.txt file2.txt
 ```
 
 ## Directory Navigation
@@ -89,10 +89,10 @@ ps aux | jc --ps | jq '.[] | select(.cpu > 50)'
 ### Enhanced Diffs
 ```bash
 # Side-by-side diff
-delta --side-by-side
+difft --side-by-side
 
 # Navigate large diffs
-delta --navigate
+difft --navigate
 ```
 
 ### Interactive Git UI

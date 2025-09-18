@@ -13,7 +13,7 @@ fd: clap           # Fast find
 rg: clap           # Ripgrep
 bat: clap          # Better cat
 eza: clap          # Modern ls
-delta: clap        # Git diff
+difft: clap        # Git diff
 mise: clap         # Runtime manager
 
 # Node.js + Yargs

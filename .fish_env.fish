@@ -63,7 +63,7 @@ if test (uname) = Darwin; and command -q brew
 end
 
 # Set EDITOR and VISUAL; EDITOR will have only TUI editors, while VISUAL prefers GUI editors and falls back to TUI editors
-set -l tui_editors helix hx nvim vim vi
+set -l tui_editors hx nvim vim vi
 if not set -q EDITOR
     if type -q emacsclient
         set -Ux EDITOR 'emacsclient -t'

@@ -39,9 +39,9 @@ See @PACKAGE_MANAGEMENT.md for advanced configuration and Homebrew path migratio
 
 ### Stack
 **Languages**: Ruby, Node, Go, Python, Java (GraalVM), Elixir, Erlang, Rust, Deno, Bun  
-**Editors**: Emacs (primary), Neovim, Helix, Zed  
+**Editors**: Emacs (primary), Neovim, Zed  
 **Shells**: Fish (primary), Zsh  
-**Tools**: Git+delta, ripgrep, fd, bat, eza, starship, tmux, miller, 1Password SSH
+**Tools**: Git+difftastic, ripgrep, fd, bat, eza, starship, tmux, miller, 1Password SSH
 
 ### 1Password Integration
 - SSH signing for git

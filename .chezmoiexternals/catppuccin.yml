@@ -18,10 +18,6 @@
   url: "https://github.com/catppuccin/mpv/archive/refs/heads/main.tar.gz"
   path: "mpv-main/themes/frappe/sapphire.conf"
 
-".local/share/delta/catppuccin.gitconfig":
-  type: "archive-file"
-  url: "https://github.com/catppuccin/delta/archive/refs/heads/main.tar.gz"
-  path: "delta-main/catppuccin.gitconfig"
 
 ".var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/themes/":
   type: "archive"
