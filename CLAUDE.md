@@ -73,3 +73,12 @@ See @ONEPASSWORD_SETUP.md for detailed setup and troubleshooting
 **Carapace**: Universal completion engine supporting Fish, Zsh, Bash, and more.
 
 See @SHELL_COMPLETIONS.md for framework bridges, configuration, and usage details
+
+## Chezmoi Documentation
+Context7 Library ID: /twpayne/chezmoi
+
+### Adding Configurable Options
+1. Add prompt in `.chezmoi.yaml.tmpl` with `promptChoice`/`promptString`/`promptBool`
+2. Store in `data:` section as quoted variable
+3. Use in templates as `.variableName` (no `.data` prefix)
+4. Pattern: check `hasKey`, prompt if missing, store result

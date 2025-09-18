@@ -63,6 +63,13 @@
 {{-   end }}
 {{- end }}
 
+{{- $modalEditingMode := "evil" }}
+{{- if hasKey . "modalEditingMode" }}
+{{-   $modalEditingMode = .modalEditingMode }}
+{{- else }}
+{{-   $modalEditingMode = promptChoice "Which modal editing system for Emacs?" (list "evil" "meow" "none") }}
+{{- end }}
+
 {{- $preferredShell := "/bin/sh" }}
 {{- if lookPath "fish" }}
 {{-   $preferredShell = lookPath "fish" }}
@@ -95,6 +102,7 @@ data:
   pullOllamaModels: {{ $pullOllamaModels }}
   useLlamaSwap: {{ $useLlamaSwap }}
   llamaSwapApiBase: {{ $llamaSwapApiBase | quote }}
+  modalEditingMode: {{ $modalEditingMode | quote }}
   preferredShell: {{ $preferredShell | quote }}
   # Precalculated common paths
   paths:

@@ -470,11 +470,15 @@
   (load-file (expand-file-name "window-management.el" user-emacs-directory))
 
   ;; Modal editing configuration
-  ;; To switch modal editing systems, comment/uncomment one of these lines and restart Emacs:
-  ;; - Meow: Modern modal editing with better Emacs integration (no vterm/Magit conflicts)
-  ;; - Evil: Vim emulation (powerful but can cause conflicts with some packages)
-  ;; (load-file (expand-file-name "meow-config.el" user-emacs-directory))
+{{- if eq .modalEditingMode "meow" }}
+  ;; Meow: Modern modal editing with better Emacs integration (no vterm/Magit conflicts)
+  (load-file (expand-file-name "meow-config.el" user-emacs-directory))
+{{- else if eq .modalEditingMode "evil" }}
+  ;; Evil: Vim emulation (powerful but can cause conflicts with some packages)
   (load-file (expand-file-name "evil-config.el" user-emacs-directory))
+{{- else }}
+  ;; No modal editing configured
+{{- end }}
 
   ;; Keybindings will be loaded after all packages are ready via elpaca-after-init-hook
 
