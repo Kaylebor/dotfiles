@@ -168,7 +168,6 @@ packages:
           - '~/Applications/1Password.app'
           - '~/Applications/1Password 7 - Password Manager.app'
       - '1password-cli'
-      - 'cursor-cli'
       - 'font-maple-mono'
       - 'font-maple-mono-nf'
       - 'kitty'
