@@ -52,6 +52,33 @@ When Claude Code is opened from within Emacs (vs a normal terminal), additional 
 
 These tools provide deep code analysis and navigation when available. Use them for understanding large codebases and finding symbol relationships.
 
+## CLAUDE.md Documentation Patterns
+
+### File Reference Pattern (@)
+- **Format**: `@relative/path/to/file.ts` - Must be relative from the CLAUDE.md file's location
+- **Example**: In `multiselect/CLAUDE.md`, reference services as `@../../services/resources.service.ts`
+- **Key Points**:
+  - Paths are relative to the directory containing the CLAUDE.md file
+  - Can traverse upwards with `../` notation
+  - Files: Sources the file content into context
+  - Folders: Lists files in the folder (doesn't source all contents)
+  - Historical note: Previously had 3-levels deep constraint, appears relaxed now
+- **Alternative**: Use regular Markdown links `[Description](path)` for documentation purposes without sourcing
+- **Benefit**: Claude automatically pulls referenced files into context
+
+### Hierarchical Context Loading
+Claude automatically loads CLAUDE.md files hierarchically:
+1. Component-specific: `src/app/component/CLAUDE.md` - loaded when files in that directory are opened
+2. Project-specific: `project/CLAUDE.md` - loaded for the project
+3. User-specific: `~/CLAUDE.local.md` - loaded globally (this file after chezmoi apply)
+
+### Component-Specific Documentation
+- Place CLAUDE.md files alongside components for automatic context loading
+- Example: `src/app/resources/analytics/reports/CLAUDE.md`
+- These files are automatically read when Claude opens files in the same directory
+- Use for component-specific patterns, gotchas, or implementation notes
+- No need to reference these in the main CLAUDE.md - they load contextually
+
 ## AI Agents (Subagents)
 
 Claude Code automatically delegates to specialized agents based on task context:
@@ -76,3 +103,9 @@ Claude Code automatically delegates to specialized agents based on task context:
 
 Explicit invocation: "Use the [agent-name] agent to..."
 View available agents: Run `/agents` command
+
+### Parallel Agent Execution
+Launch multiple agents simultaneously for efficiency by calling them in a single message:
+- Send all Task tool calls in one message to run agents in parallel
+- Example: Creating documentation for multiple components at once
+- Useful for independent tasks that don't depend on each other
