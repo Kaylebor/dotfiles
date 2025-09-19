@@ -413,19 +413,19 @@ class HomebrewManager:
             
             # Build command
             cmd = ["brew", "install", pkg_name]
-            
+
             # Add arguments
             if "args" in pkg:
                 for arg in pkg["args"]:
                     cmd.append(f"--{arg}")
-            
+
             # Add alternative-only arguments
-            if (self._is_alternative_homebrew() and 
-                "alternative_only" in pkg and 
+            if (self._is_alternative_homebrew() and
+                "alternative_only" in pkg and
                 "args" in pkg["alternative_only"]):
                 for arg in pkg["alternative_only"]["args"]:
                     cmd.append(f"--{arg}")
-            
+
             try:
                 subprocess.run(cmd, env=env, check=True)
                 print(f"✅ Successfully installed {pkg_name}")
@@ -812,20 +812,20 @@ class HomebrewManager:
         
         # Build command
         cmd = ["brew", "reinstall" if reinstall else "install", pkg_name]
-        
+
         if isinstance(pkg_config, dict):
             # Add arguments
             if "args" in pkg_config:
                 for arg in pkg_config["args"]:
                     cmd.append(f"--{arg}")
-            
+
             # Add alternative-only arguments
-            if (self._is_alternative_homebrew() and 
-                "alternative_only" in pkg_config and 
+            if (self._is_alternative_homebrew() and
+                "alternative_only" in pkg_config and
                 "args" in pkg_config["alternative_only"]):
                 for arg in pkg_config["alternative_only"]["args"]:
                     cmd.append(f"--{arg}")
-        
+
         try:
             subprocess.run(cmd, env=env, check=True)
             return True

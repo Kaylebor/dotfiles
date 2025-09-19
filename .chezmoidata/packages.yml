@@ -4,227 +4,213 @@ formula_patches:
 packages:
   arch:
     aur:
-      - "1password"
-      - "1password-cli"
-      - "age"
-      - "autoconf"
-      - "bat"
-      - "biome"
-      - "binutils"
-      - "btop"
-      - "carapace"
-      - "cmake"
-      - "coreutils"
-      - "curl"
-      - "curlie"
-      - "difftastic"
-      - "dysk"
-      - "erlang"
-      - "elixir-ls"
-      - "emacs"
-      - "enchant"
-      - "eza"
-      - "fd"
-      - "firefox-developer-edition"
-      - "fish"
-      - "flex"
-      - "fop"
-      - "fzf"
-      - "github-cli"
-      - "gitu"
-      - "golangci-lint"
-      - "graphviz"
-      - "gron"
-      - "grpc"
-      - "gzip"
-      - "hunspell"
-      - "ijq"
-      - "imagemagick"
-      - "jc"
-      - "jd-tool"
-      - "jdk17-openjdk"
-      - "less"
-      - "libpqxx"
-      - "libxslt"
-      - "libyaml"
-      - "make"
-      - "miller"
-      - "mise"
-      - "neovim"
-      - "nmap"
-      - "nushell"
-      - "otf-font-awesome"
-      - "pgcli"
-      - "pgformatter"
-      - "pkgconf"
-      - "postgresql"
-      - "procps-ng"
-      - "qt6ct"
-      - "ripgrep"
-      - "rsync"
-      - "screen"
-      - "shared-mime-info"
-      - "shellcheck"
-      - "sql-formatter"
-      - "starship"
-      - "television"
-      - "tmux"
-      - "ttf-jetbrains-mono-nerd"
-      - "maplemono-nf"
-      - "unixodbc"
-      - "usage"
-      - "valkey"
-      - "wdiff"
-      - "xdg-ninja"
-      - "yq"
-      - "zsh"
-      - "zsh-antidote"
+      - '1password'
+      - '1password-cli'
+      - 'age'
+      - 'autoconf'
+      - 'bat'
+      - 'biome'
+      - 'binutils'
+      - 'btop'
+      - 'carapace'
+      - 'cmake'
+      - 'coreutils'
+      - 'curl'
+      - 'curlie'
+      - 'difftastic'
+      - 'dysk'
+      - 'erlang'
+      - 'elixir-ls'
+      - 'emacs'
+      - 'enchant'
+      - 'eza'
+      - 'fd'
+      - 'firefox-developer-edition'
+      - 'fish'
+      - 'flex'
+      - 'fop'
+      - 'fzf'
+      - 'github-cli'
+      - 'gitu'
+      - 'golangci-lint'
+      - 'graphviz'
+      - 'gron'
+      - 'grpc'
+      - 'gzip'
+      - 'hunspell'
+      - 'ijq'
+      - 'imagemagick'
+      - 'jansson'
+      - 'jc'
+      - 'jd-tool'
+      - 'jdk17-openjdk'
+      - 'less'
+      - 'libgccjit'
+      - 'libpqxx'
+      - 'libxslt'
+      - 'libyaml'
+      - 'mailutils'
+      - 'make'
+      - 'miller'
+      - 'mise'
+      - 'neovim'
+      - 'nmap'
+      - 'nushell'
+      - 'otf-font-awesome'
+      - 'pgcli'
+      - 'pgformatter'
+      - 'pkgconf'
+      - 'postgresql'
+      - 'procps-ng'
+      - 'qt6ct'
+      - 'ripgrep'
+      - 'rsync'
+      - 'screen'
+      - 'shared-mime-info'
+      - 'shellcheck'
+      - 'sql-formatter'
+      - 'television'
+      - 'tmux'
+      - 'ttf-jetbrains-mono-nerd'
+      - 'maplemono-nf'
+      - 'unixodbc'
+      - 'usage'
+      - 'valkey'
+      - 'wdiff'
+      - 'xdg-ninja'
+      - 'yq'
+      - 'zsh'
+      - 'zsh-antidote'
   darwin:
     taps:
-      # - "d12frosted/emacs-plus"
-      # - "railwaycat/emacsmacport"
+      - 'railwaycat/emacsmacport'
     brews:
-      - "age"
-      - "antidote"
-      - name: "aspell"
+      - 'age'
+      - 'antidote'
+      - name: 'aspell'
         watch_versions: true
-      - "autoconf"
-      - "bat"
-      - "binutils"
-      - "biome"
-      - "btop"
-      - "carapace"
-      - "cmake"
-      - "coreutils"
-      - "curl"
-      - "curlie"
-      - "difftastic"
-      - "diffutils"
-      - "elixir-ls"
-      # - name: "emacs-plus@31"
-      #   force_reinstall: true  # Emacs benefits from clean reinstalls when dependencies update
-      #   args:
-      #     - "with-imagemagick"
-      #     - "with-dbus"
-      #     - "with-mailutils"
-      #     - "with-memeplex-slim-icon"
-      #     - "with-xwidgets"
-      # - name: "emacs-mac"
-      #   args:
-      #     - "with-mac-metal"
-      #     - "with-natural-title-bar"
-      #     - "with-starter"
-      #     - "with-xwidgets"
-      #     - "with-unlimited-select"
-      #     - "with-emacs-big-sur-icon"
-      - "enchant"
-      - "eza"
-      - "fd"
-      - "ffmpegthumbnailer"
-      - "findutils"
-      - "fish"
-      - "flex"
-      - "fop"
-      - "fzf"
-      - "gawk"
-      # - name: "gcc"
-      #   watch_versions: true
-      #   install_order: 10
-      #   alternative_only:
-      #     args:
-      #       - "build-from-source"
-          # env:
-          #   LDFLAGS: "-Wl,-headerpad_max_install_names"
-          #   BOOT_LDFLAGS: "-Wl,-headerpad_max_install_names"
-          #   CFLAGS_FOR_TARGET: "-Wl,-headerpad_max_install_names"
-          #   CXXFLAGS_FOR_TARGET: "-Wl,-headerpad_max_install_names"
-          #   HOMEBREW_NO_INSTALL_CLEANUP: "1"
-      - "gh"
-      - "git"
-      - "git-flow"
-      - "gitu"
-      - "gnu-getopt"
-      - "gnu-indent"
-      - "gnu-sed"
-      - "gnu-tar"
-      - "gnu-which"
-      - "gnutls"
-      - "golangci-lint"
-      - "gpatch"
-      - "graphviz"
-      - "grep"
-      - "gron"
-      - "grip"
-      - "grpc"
-      - "gzip"
-      - "hunspell"
-      - "ijq"
-      - name: "imagemagick@6"
+      - 'autoconf'
+      - 'automake'
+      - 'bat'
+      - 'binutils'
+      - 'biome'
+      - 'btop'
+      - 'carapace'
+      - 'cmake'
+      - 'coreutils'
+      - 'curl'
+      - 'curlie'
+      - 'difftastic'
+      - 'diffutils'
+      - 'elixir-ls'
+      - name: 'emacs-mac'
+        args:
+          - 'with-mac-metal'
+          - 'with-natural-title-bar'
+          - 'with-starter'
+          - 'with-xwidgets'
+          - 'with-unlimited-select'
+          - 'with-emacs-big-sur-icon'
+      - 'enchant'
+      - 'eza'
+      - 'fd'
+      - 'ffmpegthumbnailer'
+      - 'findutils'
+      - 'fish'
+      - 'flex'
+      - 'fop'
+      - 'fzf'
+      - 'gawk'
+      - 'gcc'
+      - 'gh'
+      - 'git'
+      - 'git-flow'
+      - 'gitu'
+      - 'gnu-getopt'
+      - 'gnu-indent'
+      - 'gnu-sed'
+      - 'gnu-tar'
+      - 'gnu-which'
+      - 'gnutls'
+      - 'golangci-lint'
+      - 'gpatch'
+      - 'graphviz'
+      - 'grep'
+      - 'gron'
+      - 'grip'
+      - 'grpc'
+      - 'gzip'
+      - 'hunspell'
+      - 'ijq'
+      - name: 'imagemagick@6'
         watch_versions: true
-      - name: "imagemagick"
+      - name: 'imagemagick'
         watch_versions: true
-      - "jc"
-      - "jd"
-      - "less"
-      - "libpq"
-      - "libxslt"
-      - "libyaml"
-      - "libvterm"
-      - "lima"
-      - "little-cms2"
-      - name: "llvm"
-        install_order: 20
-      - "make"
-      - "mediainfo"
-      - "miller"
-      - "mise"
-      - "neovim"
-      - "nmap"
-      - "nushell"
-      - "pgcli"
-      - "pgformatter"
-      - name: "pkgconfig"
+      - 'jansson'
+      - 'jc'
+      - 'jd'
+      - 'less'
+      - 'libpq'
+      - 'libgccjit'
+      - 'libxslt'
+      - 'libyaml'
+      - 'libvterm'
+      - 'lima'
+      - 'little-cms2'
+      - name: 'llvm'
+        install_order: 30
+      - 'mailutils'
+      - 'make'
+      - 'mediainfo'
+      - 'miller'
+      - 'mise'
+      - 'neovim'
+      - 'nmap'
+      - 'nushell'
+      - 'pgcli'
+      - 'pgformatter'
+      - name: 'pkgconfig'
         install_order: 40
-      - "poppler"
-      - "postgresql@17"
-      - "prettier"
-      - "ripgrep"
-      - "rsync"
-      - "rust"
-      - "scons"
-      - "screen"
-      - "shared-mime-info"
-      - "shellcheck"
-      - "shfmt"
-      - "sql-formatter"
-      - "starship"
-      - "swig"
-      - name: "svn"
+      - 'poppler'
+      - 'postgresql@17'
+      - 'prettier'
+      - 'ripgrep'
+      - 'rsync'
+      - 'rust'
+      - 'scons'
+      - 'screen'
+      - 'shared-mime-info'
+      - 'shellcheck'
+      - 'shfmt'
+      - 'sql-formatter'
+      - 'swig'
+      - name: 'svn'
         install_order: 50
-      - "television"
-      - "tmux"
-      - "unixodbc"
-      - "unzip"
-      - "valkey"
-      - "watch"
-      - "watchman"
-      - "wdiff"
-      - "wget"
-      - "wordnet"
-      - "wxwidgets"
-      - "xdg-ninja"
-      - "yq"
-      - "zip"
-      - "zsh"
+      - 'television'
+      - 'tree'
+      - 'tmux'
+      - 'unixodbc'
+      - 'unzip'
+      - 'valkey'
+      - 'watch'
+      - 'watchman'
+      - 'wdiff'
+      - 'wget'
+      - 'wordnet'
+      - 'wxwidgets'
+      - 'xdg-ninja'
+      - 'yq'
+      - 'zip'
+      - 'zsh'
     casks:
-      - name: "1password"
+      - name: '1password'
         skip_if_installed:
-          - "/Applications/1Password.app"
-          - "/Applications/1Password 7 - Password Manager.app"
-          - "~/Applications/1Password.app"
-          - "~/Applications/1Password 7 - Password Manager.app"
-      - "1password-cli"
-      - "cursor-cli"
-      - "font-maple-mono"
-      - "font-maple-mono-nf"
-      - "kitty"
+          - '/Applications/1Password.app'
+          - '/Applications/1Password 7 - Password Manager.app'
+          - '~/Applications/1Password.app'
+          - '~/Applications/1Password 7 - Password Manager.app'
+      - '1password-cli'
+      - 'cursor-cli'
+      - 'font-maple-mono'
+      - 'font-maple-mono-nf'
+      - 'kitty'
