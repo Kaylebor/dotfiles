@@ -29,6 +29,15 @@ uv = "latest"
 "aqua:golangci/golangci-lint" = "latest"
 "aqua:carapace-sh/carapace-bin" = "latest"
 "aqua:alexpasmantier/television" = "latest"
+
+# Additional CLI Tools (avoiding asdf backends)
+"npm:@biomejs/biome" = "latest"        # biome - JS/TS formatter/linter
+"npm:prettier" = "latest"              # prettier - code formatter
+"aqua:Wilfred/difftastic" = "latest"   # difft - structural diff
+"aqua:tomnomnom/gron" = "latest"       # gron - JSON grep
+"aqua:aristocratos/btop" = "latest"    # btop - process viewer
+"aqua:rs/curlie" = "latest"            # curlie - better curl
+"aqua:FiloSottile/age" = "latest"      # age - encryption tool
 {{- if (eq .chezmoi.os "linux") }}
 protonge = "GE-Proton10-4"
 {{- end }}
