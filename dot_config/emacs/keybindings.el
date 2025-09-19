@@ -136,60 +136,7 @@
                           (find-file "~/org/index.org")))
 (global-set-key (kbd "C-c o") org-map)
 
-;;; Which-key descriptions
-
-(when (fboundp 'which-key-add-key-based-replacements)
-  ;; Main prefixes
-  (which-key-add-key-based-replacements "C-c" "user")
-  (which-key-add-key-based-replacements "C-c f" "files")
-  (which-key-add-key-based-replacements "C-c l" "AI/LLM")
-  (which-key-add-key-based-replacements "C-c o" "org")
-  (which-key-add-key-based-replacements "C-c s" "search")
-  (which-key-add-key-based-replacements "C-c t" "terminal")
-  (which-key-add-key-based-replacements "C-x p" "project")
-  (which-key-add-key-based-replacements "C-x t" "treemacs")
-  (which-key-add-key-based-replacements "M-s" "search")
-  (which-key-add-key-based-replacements "M-g" "goto")
-  
-  ;; Nested descriptions for file operations
-  (which-key-add-key-based-replacements "C-c f f" "find-file")
-  (which-key-add-key-based-replacements "C-c f s" "save-buffer")
-  (which-key-add-key-based-replacements "C-c f S" "save-some")
-  (which-key-add-key-based-replacements "C-c f r" "recent")
-  (which-key-add-key-based-replacements "C-c f d" "dired")
-  (which-key-add-key-based-replacements "C-c f D" "dired-other")
-  (which-key-add-key-based-replacements "C-c f R" "rename")
-  (which-key-add-key-based-replacements "C-c f c" "copy")
-  (which-key-add-key-based-replacements "C-c f w" "write-as")
-  
-  ;; Nested descriptions for AI/LLM
-  (which-key-add-key-based-replacements "C-c l l" "gptel-menu")
-  (which-key-add-key-based-replacements "C-c l s" "send")
-  (which-key-add-key-based-replacements "C-c l a" "add")
-  (which-key-add-key-based-replacements "C-c l f" "add-file")
-  (which-key-add-key-based-replacements "C-c l d" "debug")
-  (which-key-add-key-based-replacements "C-c l p" "preset")
-  (which-key-add-key-based-replacements "C-c l g" "aider")
-  (which-key-add-key-based-replacements "C-c l c" "claude-menu")
-  (which-key-add-key-based-replacements "C-c l C" "claude-start")
-  (which-key-add-key-based-replacements "C-c l r" "claude-resume")
-  (which-key-add-key-based-replacements "C-c l b" "claude-buffer")
-  (which-key-add-key-based-replacements "C-c l q" "claude-stop")
-  (which-key-add-key-based-replacements "C-c l w" "claude-toggle")
-  (which-key-add-key-based-replacements "C-c l i" "claude-insert")
-  (which-key-add-key-based-replacements "C-c l 1" "switch-coder")
-  (which-key-add-key-based-replacements "C-c l 2" "switch-agentic")
-  
-  ;; Nested descriptions for Org
-  (which-key-add-key-based-replacements "C-c o f" "find-org")
-  (which-key-add-key-based-replacements "C-c o a" "agenda")
-  (which-key-add-key-based-replacements "C-c o c" "capture")
-  (which-key-add-key-based-replacements "C-c o l" "store-link")
-  (which-key-add-key-based-replacements "C-c o L" "insert-link")
-  (which-key-add-key-based-replacements "C-c o t" "todo")
-  (which-key-add-key-based-replacements "C-c o s" "schedule")
-  (which-key-add-key-based-replacements "C-c o d" "deadline")
-  (which-key-add-key-based-replacements "C-c o o" "open-index"))
+;;; Which-key descriptions are now in which-key-replacements.el
 
 ;; Create aliases for Meow's keypad display (only if Meow is loaded)
 ;; These must be defined after the keymaps are created

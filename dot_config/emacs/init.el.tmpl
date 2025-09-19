@@ -70,8 +70,6 @@
   (with-eval-after-load 'projectile
     (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map))
   :config
-  ;; which-key description for projectile prefix
-  (which-key-add-key-based-replacements "C-x p" "project")
   ;; Discover projects after initialization
   (add-hook 'elpaca-after-init-hook
             (lambda ()
@@ -196,10 +194,7 @@
 (use-package bookmark
   :custom
   (bookmark-default-file (expand-file-name "bookmarks" user-emacs-directory))
-  (bookmark-save-flag 1) ; Auto-save after each bookmark
-  :config
-  ;; which-key description for register/bookmark prefix
-  (which-key-add-key-based-replacements "C-x r" "register/bookmark"))
+  (bookmark-save-flag 1)) ; Auto-save after each bookmark
 
 ;; Emacs minibuffer configurations.
 (use-package emacs
@@ -284,10 +279,7 @@
   ;; Show word-level differences within changed lines
   (magit-diff-refine-hunk t)
   ;; Reuse current window except for diffs
-  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
-  :config
-  ;; which-key description for magit prefix (C-x g already bound)
-  (which-key-add-key-based-replacements "C-x g" "magit"))
+  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
 ;; Forge - Work with GitHub, GitLab, and other Git forges from Magit
 (use-package forge :ensure t
@@ -298,9 +290,6 @@
   ;; Ensure cached auth info is cleared when Forge loads
   (auth-source-forget-all-cached)
   {{- end }}
-  ;; Add keybinding descriptions for Forge commands
-  (which-key-add-key-based-replacements "C-x g '" "forge")
-  (which-key-add-key-based-replacements "C-x g N" "forge-create")
   ;; Optional: Configure default forge list behavior
   (setq forge-topic-list-limit '(60 . 0))  ; Show 60 open PRs/issues, 0 closed
   (setq forge-pull-notifications t))
@@ -330,59 +319,7 @@
    '((("\\`\\+\\(.+\\)\\'" nil nil) . (nil nil "\\1"))
      (("\\`ctl-x-\\(.+\\)\\'" nil nil) . (nil nil "\\1"))))
   :init
-  (which-key-mode)
-  :config
-  ;; Built-in prefix descriptions (not tied to specific packages)
-  (which-key-add-key-based-replacements "C-h" "help")
-  (which-key-add-key-based-replacements "M-g" "goto")
-  (which-key-add-key-based-replacements "C-c o" "org")
-  ;; Additional built-in Emacs prefixes
-  (which-key-add-key-based-replacements "C-x 4" "other-window")
-  (which-key-add-key-based-replacements "C-x 5" "other-frame")
-  (which-key-add-key-based-replacements "C-x 6" "two-column")
-  (which-key-add-key-based-replacements "C-x 8" "unicode/emoji")
-  (which-key-add-key-based-replacements "C-x v" "version-control")
-  (which-key-add-key-based-replacements "C-x n" "narrow/widen")
-  (which-key-add-key-based-replacements "C-x a" "abbreviations")
-  (which-key-add-key-based-replacements "C-x w" "window-layout")
-  (which-key-add-key-based-replacements "C-x x" "buffer-tools")
-  (which-key-add-key-based-replacements "C-x C-a" "debugger")
-  (which-key-add-key-based-replacements "C-x RET" "coding-system")
-  (which-key-add-key-based-replacements "C-x C-k" "keyboard-macros")
-  (which-key-add-key-based-replacements "C-x ESC" "repeat-command")
-  (which-key-add-key-based-replacements "ESC ESC" "escape-commands")
-  ;; Nested emoji prefix
-  (which-key-add-key-based-replacements "C-x 8 e" "emoji")
-  ;; Nested projectile prefixes
-  (which-key-add-key-based-replacements "C-x p 4" "project-other-window")
-  (which-key-add-key-based-replacements "C-x p 5" "project-other-frame") 
-  (which-key-add-key-based-replacements "C-x p c" "project-compile")
-  (which-key-add-key-based-replacements "C-x p s" "project-search")
-  (which-key-add-key-based-replacements "C-x p x" "project-shell")
-  (which-key-add-key-based-replacements "C-x p C-x" "project-save")
-  (which-key-add-key-based-replacements "C-x p x 4" "project-shell-other-window")
-  ;; Nested version control prefixes  
-  (which-key-add-key-based-replacements "C-x v M" "vc-merge")
-  (which-key-add-key-based-replacements "C-x v b" "vc-branch")
-  (which-key-add-key-based-replacements "C-x v w" "vc-worktree")
-  ;; Nested window layout prefixes
-  (which-key-add-key-based-replacements "C-x w ^" "window-detach")
-  (which-key-add-key-based-replacements "C-x w f" "window-flip")
-  (which-key-add-key-based-replacements "C-x w o" "window-rotate")
-  (which-key-add-key-based-replacements "C-x w r" "window-rotate-clockwise")
-  ;; Nested keyboard macro prefixes
-  (which-key-add-key-based-replacements "C-x C-k C-q" "kmacro-quit-counter")
-  (which-key-add-key-based-replacements "C-x C-k C-r" "kmacro-register-counter")
-  (which-key-add-key-based-replacements "C-x C-k C-r a" "kmacro-register-add")
-  ;; C-c prefixes (mode-specific)
-  (which-key-add-key-based-replacements "C-c !" "flycheck")
-  (which-key-add-key-based-replacements "C-c &" "yasnippet")
-  (which-key-add-key-based-replacements "C-c ^" "mode-specific")
-  (which-key-add-key-based-replacements "C-c C-g" "gptel-switch")
-  (which-key-add-key-based-replacements "C-c C-l" "gptel")
-  ;; Evil mode prefixes
-  (which-key-add-key-based-replacements "g l" "AI-tools")
-  ;; Which-key descriptions for Meow are now handled in keybindings.el
+  (which-key-mode))
 
   ;; Code folding based on newer treesit.el
   (use-package treesit-fold :ensure t
@@ -539,7 +476,15 @@
               (lambda ()
                 (message "Loading keybindings configuration...")
                 (load-file (expand-file-name "keybindings.el" user-emacs-directory)))
-              95))) ; Priority 95 to run after font installation - close with-eval-after-load
+              95) ; Priority 95 to run after font installation
+
+    ;; Load which-key replacements after all keybindings are set
+    (add-hook 'elpaca-after-init-hook
+              (lambda ()
+                (when (featurep 'which-key)
+                  (message "Loading which-key replacements...")
+                  (load-file (expand-file-name "which-key-replacements.el" user-emacs-directory))))
+              99)) ; Priority 99 to run after keybindings - close with-eval-after-load
 
 ;; Customization
 (setopt custom-file (expand-file-name "custom.el" user-emacs-directory))
