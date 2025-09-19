@@ -1,15 +1,14 @@
 #!/bin/bash
 {{/* Script to check OS and install packages based on OS */}}
-{{ $brewBin := .brewBin }}
 # hash: {{ include ".chezmoidata/packages.yml" | sha256sum }}
 
 {{/* Track brew formula versions to detect when packages are upgraded */}}
 {{- if eq .chezmoi.os "darwin" }}
+{{ $brewBin := .brewBin }}
 # brew_installed_versions: {{ output $brewBin "list" "--versions" | sha256sum }}
-{{- end }}
 
 {{/* Track versions of packages that should trigger re-runs when updated (alternative Homebrew only) */}}
-{{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
+{{- if eq .homebrewInstallType "alternative" }}
 {{- range .packages.darwin.brews }}
 {{- if and (kindIs "map" .) (hasKey . "watch_versions") (eq .watch_versions true) }}
 # {{ .name }}_version: $({{ $brewBin }} list --versions {{ .name }} 2>/dev/null || echo "not_installed")
@@ -153,6 +152,8 @@ EOF
 "{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-homebrew-manager" full-install --config "$RUNTIME_CONFIG"
 
 {{ end -}}
+
+{{- end }}
 
 {{/* Linux setup commands */}}
 {{- if eq .chezmoi.os "linux" }}
