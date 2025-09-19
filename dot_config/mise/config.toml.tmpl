@@ -14,6 +14,21 @@ deno = "latest"
 bun = "latest"
 pipx = "latest"
 uv = "latest"
+
+# CLI Tools (migrated from package managers)
+"cargo:bat" = "latest"
+"cargo:fd-find" = "latest"
+"cargo:ripgrep" = "latest"
+"cargo:eza" = "latest"
+"cargo:gitu" = "latest"
+"cargo:usage-cli" = "latest"
+"go:github.com/mikefarah/yq/v4" = "latest"
+"pipx:jc" = "latest"
+"aqua:cli/cli" = "latest"          # gh/github-cli
+"aqua:koalaman/shellcheck" = "latest"
+"aqua:golangci/golangci-lint" = "latest"
+"aqua:carapace-sh/carapace-bin" = "latest"
+"aqua:alexpasmantier/television" = "latest"
 {{- if (eq .chezmoi.os "linux") }}
 protonge = "GE-Proton10-4"
 {{- end }}

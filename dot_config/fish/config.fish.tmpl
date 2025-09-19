@@ -1,14 +1,12 @@
-{{- if eq .chezmoi.os "linux" }}
-{{- if eq .chezmoi.osRelease.id "cachyos" }}
+{{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "cachyos") (stat "/usr/share/cachyos-fish-config/cachyos-config.fish") }}
 source /usr/share/cachyos-fish-config/cachyos-config.fish
-{{- end }}
-{{- end }}
 
+{{ end -}}
 {{- if eq .chezmoi.os "darwin" }}
 # Increase file descriptor limit for development work (macOS)
 ulimit -n 65536 2>/dev/null || true
-{{- end }}
 
+{{ end -}}
 
 {{/* Prompt */}}
 {{- if lookPath "starship" }}
