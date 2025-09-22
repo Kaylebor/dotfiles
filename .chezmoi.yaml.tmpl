@@ -84,6 +84,9 @@
 {{-   $preferredShell = lookPath "bash" }}
 {{- end }}
 
+cd:
+  command: {{ $preferredShell | quote }}
+
 data:
 {{- if eq .chezmoi.os "darwin" }}
   homebrewInstallType: {{ $homebrewInstallType | quote }}
