@@ -17,12 +17,15 @@
 
 ;; PACKAGES
 {{- if eq .chezmoi.os "darwin" }}
-;; Template-based PATH setup for macOS (eliminates exec-path-from-shell runtime subprocess)
-(setq exec-path '({{- range (env "PATH" | splitList ":") -}}"{{ . }}" {{ end }}))
-(setenv "PATH" "{{ env "PATH" }}")
+;; macOS: PATH is set by LaunchAgent (daemon) or Emacs.sh wrapper (GUI)
+;; No need for exec-path-from-shell or hardcoded paths
+(when (getenv "PATH")
+  (setq exec-path (append (parse-colon-path (getenv "PATH"))
+                          (list exec-directory))))
 {{- else }}
-;; Only load exec-path-from-shell in daemon mode on non-macOS
-(when (daemonp) (elpaca exec-path-from-shell (exec-path-from-shell-initialize)))
+;; Linux/other: Use exec-path-from-shell in daemon mode
+(when (daemonp)
+  (elpaca exec-path-from-shell (exec-path-from-shell-initialize)))
 {{- end }}
 
 ;; delight to hide or replace modeline information per-package
