@@ -9,6 +9,10 @@ COMPANY_DOTFILES_PLAN.md
 scripts/
 docs/
 
+# Editor temporary files
+flycheck_*.el
+flycheck_*.tmpl
+
 # Per-device configuration files (never tracked)
 .config/emacs/sql-connections.el
 

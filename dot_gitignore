@@ -38,6 +38,7 @@ dist/
 
 # Flycheck
 flycheck_*.el
+flycheck_*.tmpl
 
 # server auth directory
 /server/

@@ -63,6 +63,8 @@ See @ONEPASSWORD_SETUP.md for detailed setup and troubleshooting
 3. Deploy: `chezmoi apply`
 4. Add packages to `.chezmoidata/packages.yml`
 
+**Important**: Always edit chezmoi source files (e.g., `dot_gitignore`), not the generated target files (e.g., `~/.gitignore`). Use `chezmoi apply` to deploy changes.
+
 ## Fuzzy Finders
 
 **Television** (primary): Modern channel-based finder with `tv init`/`tv update-channels`  
