@@ -109,3 +109,32 @@ Launch multiple agents simultaneously for efficiency by calling them in a single
 - Send all Task tool calls in one message to run agents in parallel
 - Example: Creating documentation for multiple components at once
 - Useful for independent tasks that don't depend on each other
+
+## MCP Tools
+
+### Semantic Code Tools (Serena MCP)
+When available, prioritize semantic tools over text-based alternatives:
+- `get_symbols_overview` - File structure without reading full content
+- `find_symbol` - Locate classes/methods by name path (`Class/method`)
+- Use project memories first: `list_memories` → `read_memory`
+- Start with overview tools before reading files
+
+### Library Documentation (Context7 MCP)
+- **First time**: Use `resolve-library-id` to find Context7 ID
+- **Save resolved IDs** in project CLAUDE.md to avoid re-resolving
+- **Direct access**: Use saved IDs with `get-library-docs`
+- **When in doubt**: Query Context7 for up-to-date docs vs web search
+
+### Fallback to Standard Tools
+- Non-code files (configs, docs, data)
+- Simple text/file operations
+- When MCP tools unavailable
+
+## Dotfile Management
+
+This file is managed via **chezmoi** and generated from a template:
+- **Source**: `~/.local/share/chezmoi/CLAUDE.local.md.tmpl`
+- **Generated to**: `~/CLAUDE.local.md`
+- **Edit the source template**, then run `chezmoi apply` to update
+- **Template features**: OS/hardware-specific conditionals using `{{ .chezmoi.os }}`
+- **Chezmoi repo**: `~/.local/share/chezmoi/` (git-managed dotfiles)
