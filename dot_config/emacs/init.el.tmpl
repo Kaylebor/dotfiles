@@ -124,7 +124,11 @@
                                 nil t)))))))
 
 ;; icons - using nerd-icons for consistency
-(use-package nerd-icons :ensure t)
+(use-package nerd-icons :ensure t
+  :config
+  (let ((bridge-file (expand-file-name "lsp-nerd-icons-bridge.el" user-emacs-directory)))
+    (when (file-readable-p bridge-file)
+      (load bridge-file nil 'nomessage))))
 
 ;; Alternative modeline; may change or build my own later
 (use-package simple-modeline :ensure t
@@ -138,6 +142,9 @@
 (use-package treemacs-nerd-icons :ensure t
   :config
   (treemacs-load-theme "nerd-icons")
+  (let ((bridge-file (expand-file-name "treemacs-nerd-icons-bridge.el" user-emacs-directory)))
+    (when (file-readable-p bridge-file)
+      (load bridge-file nil 'nomessage)))
   ;; Enable automatic project following when switching buffers
   (treemacs-project-follow-mode 1))
 
