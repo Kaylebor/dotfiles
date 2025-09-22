@@ -20,10 +20,10 @@ mkdir -p "$APPS_DIR"
 # Find the actual Emacs.app location
 EMACS_APP_PATH=""
 {{- if and (hasKey . "brewBin") .brewBin }}
-if [ -d "$({{ .brewBin }} --prefix emacs-plus@31)/Emacs.app" ]; then
-    EMACS_APP_PATH="$({{ .brewBin }} --prefix emacs-plus@31)/Emacs.app"
-elif [ -d "$({{ .brewBin }} --cellar emacs-plus@31)/$({{ .brewBin }} list --versions emacs-plus@31 | awk '{print $2}')/Emacs.app" ]; then
-    EMACS_APP_PATH="$({{ .brewBin }} --cellar emacs-plus@31)/$({{ .brewBin }} list --versions emacs-plus@31 | awk '{print $2}')/Emacs.app"
+if [ -d "$({{ .brewBin }} --prefix emacs-mac)/Emacs.app" ]; then
+    EMACS_APP_PATH="$({{ .brewBin }} --prefix emacs-mac)/Emacs.app"
+elif [ -d "$({{ .brewBin }} --cellar emacs-mac)/$({{ .brewBin }} list --versions emacs-mac | awk '{print $2}')/Emacs.app" ]; then
+    EMACS_APP_PATH="$({{ .brewBin }} --cellar emacs-mac)/$({{ .brewBin }} list --versions emacs-mac | awk '{print $2}')/Emacs.app"
 fi
 {{- end }}
 
