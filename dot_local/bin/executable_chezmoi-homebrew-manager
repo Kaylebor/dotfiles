@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from homebrew_manager import PackagesHelper, RebuildService
+from homebrew_manager.install import InstallService
 
 
 class HomebrewManager:
@@ -29,6 +30,7 @@ class HomebrewManager:
         self._formulae_cache: Optional[Dict[str, Any]] = None
         self._packages_helper: Optional[PackagesHelper] = None
         self._rebuild_service: Optional[RebuildService] = None
+        self._install_service: Optional[InstallService] = None
         self.dry_run = dry_run
     
     def _setup_environment(self) -> None:
@@ -44,6 +46,7 @@ class HomebrewManager:
         # Reset helpers that depend on configuration
         self._packages_helper = None
         self._rebuild_service = None
+        self._install_service = None
     
     def load_runtime_config(self, config_json: str) -> None:
         """Load runtime configuration from JSON string."""
@@ -165,264 +168,30 @@ class HomebrewManager:
             )
         return self._rebuild_service
 
+    def _get_install_service(self) -> InstallService:
+        if self._install_service is None:
+            self._install_service = InstallService(self)
+        return self._install_service
+
     def install_homebrew(self) -> bool:
         """Install Homebrew if not present."""
-        if self.config.get("has_brew"):
-            return True
-        
-        print("Installing Homebrew...")
-        
-        if self._is_alternative_homebrew():
-            # Alternative installation
-            homebrew_path = self.config.get("homebrew_path", "homebrew")
-            tarball_url = self.config.get("homebrew_tarball_url")
-            
-            if not tarball_url:
-                print("Error: Missing homebrew_tarball_url in config")
-                return False
-            
-            print(f"Installing Homebrew to {homebrew_path} for MDM compatibility...")
-            
-            home_dir = Path.home()
-            homebrew_dir = home_dir / homebrew_path
-            
-            try:
-                homebrew_dir.mkdir(parents=True, exist_ok=True)
-                
-                # Download and extract
-                cmd = f'curl -L {tarball_url} | tar xz --strip-components 1 -C "{homebrew_dir}"'
-                subprocess.run(cmd, shell=True, check=True)
-                
-                # Set up environment
-                brew_env_cmd = f"{homebrew_dir}/bin/brew shellenv"
-                result = subprocess.run(brew_env_cmd, shell=True, capture_output=True, text=True, check=True)
-                
-                # Apply environment to current process
-                for line in result.stdout.strip().split('\n'):
-                    if line.startswith('export '):
-                        key_value = line[7:]  # Remove 'export '
-                        if '=' in key_value:
-                            key, value = key_value.split('=', 1)
-                            value = value.strip('"\'')
-                            os.environ[key] = value
-                
-                # Update and fix permissions
-                subprocess.run(["brew", "update", "--force", "--quiet"], check=True)
-                
-                brew_bin = self.config.get("brew_bin")
-                if brew_bin:
-                    zsh_dir = Path(subprocess.run([brew_bin, "--prefix"], capture_output=True, text=True, check=True).stdout.strip()) / "share" / "zsh"
-                    if zsh_dir.exists():
-                        subprocess.run(["chmod", "-R", "go-w", str(zsh_dir)], check=False)
-                
-                return True
-                
-            except subprocess.CalledProcessError as e:
-                print(f"Error installing alternative Homebrew: {e}")
-                return False
-        else:
-            # Standard installation
-            install_url = self.config.get("homebrew_install_url", "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh")
-            
-            try:
-                cmd = f'/bin/bash -c "$(curl -fsSL {install_url})"'
-                subprocess.run(cmd, shell=True, check=True)
-                return True
-            except subprocess.CalledProcessError as e:
-                print(f"Error installing standard Homebrew: {e}")
-                return False
+        return self._get_install_service().install_homebrew()
     
     def verify_formula_patches(self) -> bool:
         """Verify formula patches before applying."""
-        if not self._is_alternative_homebrew():
-            return True
-        
-        formula_patches = self._get_packages_helper().formula_patches
-        
-        if not formula_patches:
-            return True
-        
-        print("Verifying formula patches for alternative Homebrew...")
-        
-        for formula, patch_config in formula_patches.items():
-            # Skip if package is already installed
-            result = subprocess.run(["brew", "list", formula], capture_output=True)
-            if result.returncode == 0:
-                continue
-            
-            # If no expected_hash is set and there is no corresponding patch file, skip hash verification
-            expected_hash = (patch_config or {}).get("expected_hash")
-            patch_file_path = self.chezmoi_source_dir / "scripts" / "patches" / f"{formula}.patch"
-            if not expected_hash and not patch_file_path.exists():
-                print(f"Skipping hash check for {formula} (no expected_hash and no patch file)")
-                continue
-
-            print(f"Verifying {formula} formula hash...")
-            
-            # Get formula path
-            try:
-                repo_result = subprocess.run(["brew", "--repository", "homebrew/core"], 
-                                           capture_output=True, text=True, check=True)
-                repo_path = Path(repo_result.stdout.strip())
-                formula_path = repo_path / "Formula" / formula[0] / f"{formula}.rb"
-                
-                if not formula_path.exists():
-                    print(f"⚠️  Formula not found: {formula_path}")
-                    continue
-                
-                # Calculate actual hash
-                result = subprocess.run(["shasum", "-a", "256", str(formula_path)], 
-                                      capture_output=True, text=True, check=True)
-                actual_hash = result.stdout.split()[0]
-                
-                if actual_hash != expected_hash:
-                    print(f"❌ Hash mismatch for {formula}!")
-                    print(f"   Expected: {expected_hash}")
-                    print(f"   Actual:   {actual_hash}")
-                    print(f"   Description: {patch_config.get('description', 'No description')}")
-                    
-                    issue_url = patch_config.get("issue_url")
-                    if issue_url:
-                        print(f"   Related issue: {issue_url}")
-                    
-                    print("   The formula may have been updated upstream.")
-                    print("   Please update the patch and expected hash.")
-                    return False
-                else:
-                    print(f"✅ {formula} formula hash verified")
-                    print(f"   Patch: {patch_config.get('description', 'No description')}")
-                    
-            except subprocess.CalledProcessError as e:
-                print(f"Error verifying formula {formula}: {e}")
-                return False
-        
-        return True
+        return self._get_install_service().verify_formula_patches()
     
     def install_taps(self) -> bool:
         """Install Homebrew taps."""
-        taps = self._get_packages_helper().taps
-        
-        if not taps:
-            return True
-        
-        print("Installing Homebrew taps...")
-        for tap in taps:
-            try:
-                print(f"Tapping {tap}...")
-                subprocess.run(["brew", "tap", tap], check=True)
-            except subprocess.CalledProcessError as e:
-                print(f"Error tapping {tap}: {e}")
-                return False
-        
-        return True
-    
+        return self._get_install_service().install_taps()
+
     def classify_packages(self) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], List[str]]:
         """Classify packages for installation strategy."""
-        helper = self._get_packages_helper()
-        brews = helper.brews
-        casks = helper.casks
-        
-        # Classify brews
-        individual_brews = []  # Packages needing individual installation (with env vars)
-        bundle_brews = []      # Packages for brew bundle
-        
-        for pkg in brews:
-            if isinstance(pkg, str):
-                bundle_brews.append({"name": pkg, "type": "string"})
-            elif isinstance(pkg, dict):
-                # Check if package needs individual installation
-                has_env = "env" in pkg
-                has_alt_env = (self._is_alternative_homebrew() and 
-                              "alternative_only" in pkg and 
-                              "env" in pkg["alternative_only"])
-                
-                if has_env or has_alt_env:
-                    individual_brews.append(pkg)
-                else:
-                    bundle_brews.append(pkg)
-        
-        # Process casks with skip conditions
-        processed_casks = []
-        for cask in casks:
-            if isinstance(cask, str):
-                processed_casks.append(cask)
-            elif isinstance(cask, dict):
-                # Handle skip_if_installed logic
-                skip_paths = cask.get("skip_if_installed", [])
-                if skip_paths:
-                    should_skip = False
-                    
-                    if isinstance(skip_paths, list):
-                        for path in skip_paths:
-                            expanded_path = Path(path).expanduser()
-                            if expanded_path.exists():
-                                should_skip = True
-                                break
-                    else:
-                        expanded_path = Path(skip_paths).expanduser()
-                        if expanded_path.exists():
-                            should_skip = True
-                    
-                    if not should_skip:
-                        processed_casks.append(cask["name"])
-                else:
-                    processed_casks.append(cask["name"])
-        
-        return individual_brews, bundle_brews, processed_casks
-    
+        return self._get_install_service().classify_packages()
+
     def install_individual_packages(self, packages: List[Dict[str, Any]]) -> bool:
-        """Install packages that need individual handling (environment variables)."""
-        if not packages:
-            return True
-        
-        print("Installing packages with isolated environments...")
-        
-        for pkg in packages:
-            pkg_name = pkg.get("name")
-            if not pkg_name:
-                continue
-            
-            print(f"Installing {pkg_name} with isolated environment...")
-            
-            # Build environment
-            env = os.environ.copy()
-            
-            # Apply base environment variables
-            if "env" in pkg:
-                env.update(pkg["env"])
-                print(f"Applied environment variables: {pkg['env']}")
-            
-            # Apply alternative-only environment variables
-            if (self._is_alternative_homebrew() and 
-                "alternative_only" in pkg and 
-                "env" in pkg["alternative_only"]):
-                env.update(pkg["alternative_only"]["env"])
-                print(f"Applied alternative environment variables: {pkg['alternative_only']['env']}")
-            
-            # Build command
-            cmd = ["brew", "install", pkg_name]
-
-            # Add arguments
-            if "args" in pkg:
-                for arg in pkg["args"]:
-                    cmd.append(f"--{arg}")
-
-            # Add alternative-only arguments
-            if (self._is_alternative_homebrew() and
-                "alternative_only" in pkg and
-                "args" in pkg["alternative_only"]):
-                for arg in pkg["alternative_only"]["args"]:
-                    cmd.append(f"--{arg}")
-
-            try:
-                subprocess.run(cmd, env=env, check=True)
-                print(f"✅ Successfully installed {pkg_name}")
-            except subprocess.CalledProcessError as e:
-                print(f"❌ Error installing {pkg_name}: {e}")
-                return False
-        
-        return True
-    
+        """Install packages that need individual handling."""
+        return self._get_install_service().install_individual_packages(packages)
     def force_reinstall_packages(self, packages: List[str]) -> bool:
         """Force reinstall packages with proper configuration from packages.yml."""
         if self.dry_run:
@@ -527,52 +296,8 @@ class HomebrewManager:
     
     def install_individual_package(self, pkg_config: Dict[str, Any], reinstall: bool = False) -> bool:
         """Install a single package with its configuration."""
-        pkg_name = pkg_config.get("name") if isinstance(pkg_config, dict) else pkg_config
-        if not pkg_name:
-            return False
-        
-        action = "Reinstalling" if reinstall else "Installing"
-        print(f"  {action} {pkg_name}...")
-        
-        # Build environment
-        env = os.environ.copy()
-        
-        if isinstance(pkg_config, dict):
-            # Apply base environment variables
-            if "env" in pkg_config:
-                env.update(pkg_config["env"])
-                print(f"    With env: {pkg_config['env']}")
-            
-            # Apply alternative-only environment variables
-            if (self._is_alternative_homebrew() and 
-                "alternative_only" in pkg_config and 
-                "env" in pkg_config["alternative_only"]):
-                env.update(pkg_config["alternative_only"]["env"])
-                print(f"    With alt env: {pkg_config['alternative_only']['env']}")
-        
-        # Build command
-        cmd = ["brew", "reinstall" if reinstall else "install", pkg_name]
+        return self._get_install_service().install_individual_package(pkg_config, reinstall=reinstall)
 
-        if isinstance(pkg_config, dict):
-            # Add arguments
-            if "args" in pkg_config:
-                for arg in pkg_config["args"]:
-                    cmd.append(f"--{arg}")
-
-            # Add alternative-only arguments
-            if (self._is_alternative_homebrew() and
-                "alternative_only" in pkg_config and
-                "args" in pkg_config["alternative_only"]):
-                for arg in pkg_config["alternative_only"]["args"]:
-                    cmd.append(f"--{arg}")
-
-        try:
-            subprocess.run(cmd, env=env, check=True)
-            return True
-        except subprocess.CalledProcessError as e:
-            print(f"    Error: {e}")
-            return False
-    
     def simple_reinstall_packages(self, packages: List[str]) -> bool:
         """Simple reinstall using brew reinstall (legacy CHEZMOI_REINSTALL_PACKAGES behavior)."""
         if self.dry_run:
@@ -606,199 +331,23 @@ class HomebrewManager:
 
     def generate_brew_bundle(self, brews: List[Dict[str, Any]], casks: List[str]) -> str:
         """Generate brew bundle content."""
-        bundle_lines = []
-        
-        # Add brews
-        for brew in brews:
-            if brew.get("type") == "string":
-                bundle_lines.append(f'brew "{brew["name"]}"')
-            else:
-                # Map brew package
-                line_parts = [f'brew "{brew["name"]}"']
-                
-                # Add arguments
-                if "args" in brew:
-                    args_list = [f'"{arg}"' for arg in brew["args"]]
-                    line_parts.append(f'args: [{", ".join(args_list)}]')
-                
-                # Add alternative-only arguments
-                if (self._is_alternative_homebrew() and 
-                    "alternative_only" in brew and 
-                    "args" in brew["alternative_only"]):
-                    alt_args = [f'"{arg}"' for arg in brew["alternative_only"]["args"]]
-                    line_parts.append(f'args: [{", ".join(alt_args)}]')
-                
-                bundle_lines.append(", ".join(line_parts))
-        
-        # Add casks
-        for cask in casks:
-            bundle_lines.append(f'cask "{cask}"')
-        
-        return "\n".join(bundle_lines)
-    
+        return self._get_install_service().generate_brew_bundle(brews, casks)
+
     def install_with_bundle(self, bundle_content: str) -> bool:
         """Install packages using brew bundle."""
-        if not bundle_content.strip():
-            return True
-        
-        print("Installing remaining packages with brew bundle...")
-        
-        try:
-            # Use brew bundle with stdin - show output in real time
-            process = subprocess.Popen(
-                ["brew", "bundle", "--file=-"],
-                stdin=subprocess.PIPE,
-                text=True
-            )
-            
-            # Send bundle content and close stdin
-            process.communicate(input=bundle_content)
-            
-            if process.returncode == 0:
-                print("✅ Brew bundle installation completed successfully")
-                return True
-            else:
-                print("❌ Brew bundle installation failed")
-                return False
-                
-        except Exception as e:
-            print(f"❌ Error running brew bundle: {e}")
-            return False
-    
+        return self._get_install_service().install_with_bundle(bundle_content)
+
     def setup_terminfo(self) -> bool:
         """Set up kitty TERMINFO for Emacs compatibility."""
-        # Check if kitty is installed via Homebrew
-        try:
-            result = subprocess.run(["brew", "list", "--cask"], capture_output=True, text=True, check=True)
-            if "kitty" not in result.stdout.splitlines():
-                print("Skipping kitty TERMINFO setup (kitty not installed via Homebrew)")
-                return True
-        except subprocess.CalledProcessError:
-            return True
-        
-        applications_path = self.config.get("applications_path", "/Applications")
-        kitty_terminfo_path = Path(applications_path) / "kitty.app" / "Contents" / "Resources" / "kitty" / "terminfo"
-        
-        if not kitty_terminfo_path.exists():
-            print(f"⚠️  Warning: kitty terminfo directory not found: {kitty_terminfo_path}")
-            return True
-        
-        print("Setting up kitty TERMINFO database for Emacs compatibility...")
-        
-        home_dir = Path.home()
-        terminfo_dirs = [home_dir / ".terminfo" / "x", home_dir / ".terminfo" / "78"]
-        
-        # Create terminfo directories (idempotent)
-        for dir_path in terminfo_dirs:
-            dir_path.mkdir(parents=True, exist_ok=True)
-        
-        # Copy kitty terminfo from bundle (always copy to get updates)
-        source_file = kitty_terminfo_path / "78" / "xterm-kitty"
-        if source_file.exists():
-            dest_file = home_dir / ".terminfo" / "x" / "xterm-kitty"
-            
-            try:
-                import shutil
-                shutil.copy2(source_file, dest_file)
-                print("Updated kitty terminfo at ~/.terminfo/x/xterm-kitty")
-                
-                # Create/update symlink for hex-based lookup
-                symlink_path = home_dir / ".terminfo" / "78" / "xterm-kitty"
-                if symlink_path.exists() or symlink_path.is_symlink():
-                    symlink_path.unlink()
-                
-                symlink_path.symlink_to("../x/xterm-kitty")
-                print("Updated symlink ~/.terminfo/78/xterm-kitty -> ~/.terminfo/x/xterm-kitty")
-                
-                print("✅ Kitty TERMINFO setup complete - Emacs should work properly in terminal mode")
-                return True
-                
-            except Exception as e:
-                print(f"❌ Error setting up kitty TERMINFO: {e}")
-                return False
-        else:
-            print(f"⚠️  Warning: kitty terminfo file not found at expected location: {source_file}")
-            return True
-    
+        return self._get_install_service().setup_terminfo()
+
     def update_spotlight_index(self) -> bool:
-        """Index ~/Applications for Spotlight."""
-        if not self._is_alternative_homebrew():
-            return True
-        
-        applications_dir = Path.home() / "Applications"
-        if applications_dir.exists():
-            print("Indexing ~/Applications for Spotlight...")
-            try:
-                subprocess.run(["mdimport", str(applications_dir)], check=False)
-                return True
-            except Exception as e:
-                print(f"Warning: Failed to index Applications directory: {e}")
-                return True
-        
-        return True
-    
+        """Index ~/Applications for Spotlight (alternative Homebrew)."""
+        return self._get_install_service().update_spotlight_index()
+
     def install_missing_packages_only(self) -> bool:
         """Install only missing packages (no upgrades)."""
-        print("Checking for missing packages...")
-        
-        # Get currently installed packages
-        try:
-            result = subprocess.run(["brew", "list", "--formula"], 
-                                  capture_output=True, text=True, check=True)
-            installed_formulae = set(result.stdout.strip().split('\n'))
-            
-            result = subprocess.run(["brew", "list", "--cask"], 
-                                  capture_output=True, text=True, check=True)
-            installed_casks = set(result.stdout.strip().split('\n'))
-        except subprocess.CalledProcessError as e:
-            print(f"Error getting installed packages: {e}")
-            return False
-        
-        # Classify packages
-        individual_brews, bundle_brews, casks = self.classify_packages()
-        
-        # Filter to only missing packages
-        missing_individual = []
-        for pkg in individual_brews:
-            pkg_name = pkg.get('name') if isinstance(pkg, dict) else pkg
-            if pkg_name and pkg_name not in installed_formulae:
-                missing_individual.append(pkg)
-                print(f"  Missing formula: {pkg_name}")
-        
-        missing_bundle = []
-        for pkg in bundle_brews:
-            pkg_name = pkg.get('name') if isinstance(pkg, dict) else pkg
-            if pkg_name and pkg_name not in installed_formulae:
-                missing_bundle.append(pkg)
-                print(f"  Missing formula: {pkg_name}")
-        
-        missing_casks = []
-        for cask in casks:
-            cask_name = cask if isinstance(cask, str) else cask.get('name')
-            if cask_name and cask_name not in installed_casks:
-                missing_casks.append(cask)
-                print(f"  Missing cask: {cask_name}")
-        
-        if not missing_individual and not missing_bundle and not missing_casks:
-            print("✅ No missing packages to install")
-            return True
-        
-        # Install missing packages
-        print(f"\nInstalling {len(missing_individual) + len(missing_bundle)} missing formulae and {len(missing_casks)} missing casks...")
-        
-        # Install packages with environment variables first
-        if missing_individual and not self.install_individual_packages(missing_individual):
-            return False
-        
-        # Install remaining packages with brew bundle
-        if missing_bundle or missing_casks:
-            bundle_content = self.generate_brew_bundle(missing_bundle, missing_casks)
-            if bundle_content.strip() and not self.install_with_bundle(bundle_content):
-                return False
-        
-        print("✅ Missing packages installed successfully")
-        return True
-    
+        return self._get_install_service().install_missing_packages_only()
     def full_installation(self, first_run: bool = False) -> bool:
         """Perform full Homebrew installation process."""
         if self.dry_run:
