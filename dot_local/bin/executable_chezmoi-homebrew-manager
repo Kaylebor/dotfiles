@@ -362,7 +362,9 @@ class HomebrewManager:
         # Install taps
         if not self.install_taps():
             return False
-        
+
+        install_service = self._get_install_service()
+
         if first_run:
             # First run: Install all packages
             print("\nPerforming initial package installation...")
@@ -412,9 +414,9 @@ class HomebrewManager:
                 print("  Run 'brew-check-outdated' manually to check")
             
             # Now install any missing packages
-            if not self.install_missing_packages_only():
+            if not install_service.install_missing_packages_only():
                 return False
-        
+
         # Set up kitty TERMINFO
         if not self.setup_terminfo():
             return False
@@ -431,19 +433,19 @@ class HomebrewManager:
             except Exception as e:
                 print(f"Warning: Failed to update homebrew state: {e}")
         
-        # Check for and rebuild outdated source-built packages
-        # This is non-critical - don't fail the entire installation if rebuilds fail
-        print("\nChecking for outdated source-built packages...")
-        try:
-            outdated = self.detect_outdated_source_builds()
-            if outdated:
-                print(f"Found {len(outdated)} packages that need rebuilding due to dependency updates")
-                if not self.rebuild_outdated_packages():
-                    print("⚠️  Some packages failed to rebuild, but installation continues")
-                    print("  Run 'brew-check-outdated' manually to retry")
-        except Exception as e:
-            print(f"⚠️  Warning: Could not check for outdated packages: {e}")
-            print("  Run 'brew-check-outdated' manually to check")
+        # If new packages were installed, re-run detection to catch dependency updates
+        if not first_run and install_service.installed_any():
+            print("\nChecking for outdated source-built packages after installing new packages...")
+            try:
+                outdated = self.detect_outdated_source_builds()
+                if outdated:
+                    print(f"Found {len(outdated)} packages that need rebuilding due to dependency updates")
+                    if not self.rebuild_outdated_packages():
+                        print("⚠️  Some packages failed to rebuild, but installation continues")
+                        print("  Run 'brew-check-outdated' manually to retry")
+            except Exception as e:
+                print(f"⚠️  Warning: Could not check for outdated packages: {e}")
+                print("  Run 'brew-check-outdated' manually to check")
         
         print("✅ Full Homebrew installation completed successfully!")
         return True

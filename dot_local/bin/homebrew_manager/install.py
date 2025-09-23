@@ -20,6 +20,7 @@ class InstallService:
 
     def __init__(self, manager: "HomebrewManager") -> None:
         self.manager = manager
+        self._installed_any = False
 
     # ------------------------------------------------------------------
     # Helpers
@@ -179,62 +180,62 @@ class InstallService:
 
     def classify_packages(self) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], List[str]]:
         helper = self._packages()
-        brews = helper.brews
-        casks = helper.casks
-
+        brews = list(helper.iter_entries())
         individual: List[Dict[str, Any]] = []
         bundle: List[Dict[str, Any]] = []
 
-        for pkg in brews:
-            if isinstance(pkg, str):
-                bundle.append({"name": pkg, "type": "string"})
-            elif isinstance(pkg, dict):
-                has_env = "env" in pkg
-                has_alt_env = self._is_alternative() and isinstance(pkg.get("alternative_only"), dict) and "env" in pkg["alternative_only"]
-                if has_env or has_alt_env:
-                    individual.append(pkg)
-                else:
-                    bundle.append(pkg)
+        for entry in brews:
+            if entry.get("type") == "string":
+                bundle.append(entry)
+            elif helper.requires_individual(entry):
+                individual.append(entry)
+            else:
+                bundle.append(entry)
 
         processed_casks: List[str] = []
-        for cask in casks:
+        for cask in helper.casks:
             if isinstance(cask, str):
                 processed_casks.append(cask)
             elif isinstance(cask, dict):
                 skip_paths = cask.get("skip_if_installed", [])
-                should_skip = False
                 paths = skip_paths if isinstance(skip_paths, list) else [skip_paths]
-                for path in paths:
-                    if Path(path).expanduser().exists():
-                        should_skip = True
-                        break
-                if not should_skip and "name" in cask:
-                    processed_casks.append(cask["name"])
+                if not any(Path(path).expanduser().exists() for path in paths if isinstance(path, str)):
+                    name = cask.get("name")
+                    if isinstance(name, str):
+                        processed_casks.append(name)
         return individual, bundle, processed_casks
 
     def install_individual_packages(self, packages: Iterable[Dict[str, Any]]) -> bool:
         packages = list(packages)
         if not packages:
+            self._installed_any = False
             return True
         print("Installing packages with isolated environments...")
+        self._installed_any = True
+        helper = self._packages()
         for pkg in packages:
-            pkg_name = pkg.get("name")
+            pkg_name = pkg.get("name") if isinstance(pkg, dict) else pkg
             if not pkg_name:
                 continue
             print(f"Installing {pkg_name} with isolated environment...")
             env = os.environ.copy()
-            if "env" in pkg:
-                env.update(pkg["env"])
-                print(f"Applied environment variables: {pkg['env']}")
-            if self._is_alternative() and isinstance(pkg.get("alternative_only"), dict) and "env" in pkg["alternative_only"]:
-                env.update(pkg["alternative_only"]["env"])
-                print(f"Applied alternative environment variables: {pkg['alternative_only']['env']}")
+            base_env, alt_env = helper.entry_envs(pkg)
+            if base_env:
+                env.update(base_env)
+                print(f"Applied environment variables: {base_env}")
+            if self._is_alternative() and alt_env:
+                env.update(alt_env)
+                print(f"Applied alternative environment variables: {alt_env}")
 
             cmd = ["brew", "install", pkg_name]
-            if "args" in pkg:
-                cmd.extend(f"--{arg}" for arg in pkg["args"])
-            if self._is_alternative() and isinstance(pkg.get("alternative_only"), dict) and "args" in pkg["alternative_only"]:
-                cmd.extend(f"--{arg}" for arg in pkg["alternative_only"]["args"])
+            base_args = helper.entry_args(pkg)
+            if base_args:
+                cmd.extend(f"--{arg}" for arg in base_args)
+            if self._is_alternative():
+                alt_args = helper.entry_args(pkg, include_alternative=True)
+                # Include only alt-specific args beyond base
+                alt_specific = [arg for arg in alt_args if arg not in base_args]
+                cmd.extend(f"--{arg}" for arg in alt_specific)
             try:
                 subprocess.run(cmd, env=env, check=True)
                 print(f"✅ Successfully installed {pkg_name}")
@@ -251,25 +252,24 @@ class InstallService:
         action = "Reinstalling" if reinstall else "Installing"
         print(f"  {action} {pkg_name}...")
         env = os.environ.copy()
+        helper = self._packages()
         if isinstance(pkg_config, dict):
-            base_env = pkg_config.get("env")
-            if isinstance(base_env, dict):
+            base_env, alt_env = helper.entry_envs(pkg_config)
+            if base_env:
                 env.update(base_env)
                 print(f"    With env: {base_env}")
-            if self._is_alternative():
-                alt_env = pkg_config.get("alternative_only", {}).get("env") if isinstance(pkg_config.get("alternative_only"), dict) else None
-                if isinstance(alt_env, dict):
-                    env.update(alt_env)
-                    print(f"    With alt env: {alt_env}")
+            if self._is_alternative() and alt_env:
+                env.update(alt_env)
+                print(f"    With alt env: {alt_env}")
         cmd = ["brew", "reinstall" if reinstall else "install", pkg_name]
         if isinstance(pkg_config, dict):
-            base_args = pkg_config.get("args")
-            if isinstance(base_args, list):
+            base_args = helper.entry_args(pkg_config)
+            if base_args:
                 cmd.extend(f"--{arg}" for arg in base_args)
             if self._is_alternative():
-                alt_args = pkg_config.get("alternative_only", {}).get("args") if isinstance(pkg_config.get("alternative_only"), dict) else None
-                if isinstance(alt_args, list):
-                    cmd.extend(f"--{arg}" for arg in alt_args)
+                alt_args = helper.entry_args(pkg_config, include_alternative=True)
+                alt_specific = [arg for arg in alt_args if arg not in base_args]
+                cmd.extend(f"--{arg}" for arg in alt_specific)
         try:
             subprocess.run(cmd, env=env, check=True)
             return True
@@ -285,12 +285,16 @@ class InstallService:
             print(f"Installing {package_name} (not in config)")
             try:
                 subprocess.run(["brew", "install", package_name], check=True)
+                self._installed_any = True
                 return True
             except subprocess.CalledProcessError as exc:
                 print(f"Error installing {package_name}: {exc}")
                 return False
 
-        return self.install_individual_package(pkg_config, reinstall=False)
+        success = self.install_individual_package(pkg_config, reinstall=False)
+        if success:
+            self._installed_any = True
+        return success
 
     def generate_brew_bundle(self, brews: List[Dict[str, Any]], casks: List[str]) -> str:
         lines: List[str] = []
@@ -345,6 +349,8 @@ class InstallService:
         missing_bundle = [pkg for pkg in bundle if pkg.get("name") not in installed_formulae]
         missing_casks = [cask for cask in casks if cask not in installed_casks]
 
+        self._installed_any = bool(missing_individual or missing_bundle or missing_casks)
+
         for pkg in missing_individual + missing_bundle:
             print(f"  Missing formula: {pkg.get('name')}")
         for cask in missing_casks:
@@ -354,6 +360,9 @@ class InstallService:
             return False
         bundle_content = self.generate_brew_bundle(missing_bundle, missing_casks)
         return self.install_with_bundle(bundle_content)
+
+    def installed_any(self) -> bool:
+        return self._installed_any
 
     # ------------------------------------------------------------------
     # Post install tasks

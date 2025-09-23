@@ -100,6 +100,42 @@ class PackagesHelper:
                 flag = bool(alt.get("force_reinstall", flag))
         return flag
 
+    # ------ entry helpers -------------------------------------------------
+
+    @staticmethod
+    def entry_envs(entry: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+        base = entry.get("env") if isinstance(entry, dict) else {}
+        alt = {}
+        alt_section = entry.get("alternative_only") if isinstance(entry, dict) else None
+        if isinstance(base, dict):
+            base_env = dict(base)
+        else:
+            base_env = {}
+        if isinstance(alt_section, dict):
+            maybe_alt = alt_section.get("env")
+            alt = dict(maybe_alt) if isinstance(maybe_alt, dict) else {}
+        return base_env, alt
+
+    @staticmethod
+    def entry_args(entry: Dict[str, Any], *, include_alternative: bool = False) -> List[str]:
+        args: List[str] = []
+        base_args = entry.get("args") if isinstance(entry, dict) else None
+        if isinstance(base_args, list):
+            args.extend(str(arg) for arg in base_args)
+        if include_alternative and isinstance(entry.get("alternative_only"), dict):
+            alt_args = entry["alternative_only"].get("args")
+            if isinstance(alt_args, list):
+                args.extend(str(arg) for arg in alt_args)
+        return args
+
+    def requires_individual(self, entry: Dict[str, Any]) -> bool:
+        base_env, alt_env = self.entry_envs(entry)
+        if base_env:
+            return True
+        if self.is_alternative and alt_env:
+            return True
+        return False
+
     # ------ internal utilities -----------------------------------------
 
     @staticmethod
@@ -109,4 +145,3 @@ class PackagesHelper:
         if isinstance(entry, str):
             return {"name": entry, "type": "string"}
         return None
-
