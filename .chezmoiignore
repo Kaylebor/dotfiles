@@ -9,6 +9,12 @@ COMPANY_DOTFILES_PLAN.md
 scripts/
 docs/
 
+# Repo-local helper scripts (invoked via sourceDir, not copied to $HOME)
+.local/bin/executable_chezmoi-homebrew-manager
+.local/bin/executable_brew-check-outdated
+.local/bin/executable_chezmoi-sqlite
+.local/bin/homebrew_manager/**
+
 # Editor temporary files
 flycheck_*.el
 flycheck_*.tmpl
@@ -24,10 +30,6 @@ flycheck_*.tmpl
 
 # macOS-specific files to ignore on non-macOS systems
 {{ if ne .chezmoi.os "darwin" -}}
-# Homebrew management scripts (macOS-only)
-.local/bin/executable_chezmoi-homebrew-manager
-.local/bin/executable_brew-check-outdated
-
 # Alternative Homebrew installation files (only ignore if not alternative install)
 {{- if and (hasKey . "homebrewInstallType") (ne .homebrewInstallType "alternative") }}
 .local/share/chezmoi-homebrew-state.db

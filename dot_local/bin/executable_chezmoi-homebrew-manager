@@ -15,19 +15,21 @@ import json
 import os
 import subprocess
 import sys
-import yaml
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple, Set
-from math import inf
-import networkx as nx
+from typing import Any, Dict, List, Optional, Tuple
+
+from homebrew_manager import PackagesHelper, RebuildService
 
 
 class HomebrewManager:
-    def __init__(self, packages_file: Optional[Path] = None):
+    def __init__(self, packages_file: Optional[Path] = None, *, dry_run: bool = False):
         self.chezmoi_source_dir = Path(os.environ.get("CHEZMOI_SOURCE_DIR", os.getcwd()))
         self.packages_file = packages_file or (self.chezmoi_source_dir / ".chezmoidata" / "packages.yml")
         self.config: Dict[str, Any] = {}
         self._formulae_cache: Optional[Dict[str, Any]] = None
+        self._packages_helper: Optional[PackagesHelper] = None
+        self._rebuild_service: Optional[RebuildService] = None
+        self.dry_run = dry_run
     
     def _setup_environment(self) -> None:
         """Set up Homebrew environment based on configuration."""
@@ -39,6 +41,9 @@ class HomebrewManager:
             self.chezmoi_source_dir = Path(self.config["chezmoi_source_dir"])
             if not self.packages_file.parent.name == ".chezmoidata":
                 self.packages_file = self.chezmoi_source_dir / ".chezmoidata" / "packages.yml"
+        # Reset helpers that depend on configuration
+        self._packages_helper = None
+        self._rebuild_service = None
     
     def load_runtime_config(self, config_json: str) -> None:
         """Load runtime configuration from JSON string."""
@@ -137,44 +142,29 @@ class HomebrewManager:
                 
         return self._formulae_cache
 
-    def _get_install_order(self, package_name: str) -> float:
-        """Return install_order for a package, or +inf if not specified.
+    def _get_packages_helper(self) -> PackagesHelper:
+        if self._packages_helper is None:
+            self._packages_helper = PackagesHelper.load(
+                self.packages_file,
+                is_alternative=self._is_alternative_homebrew(),
+            )
+        return self._packages_helper
 
-        Honors alternative_only.install_order when running in alternative Homebrew mode.
-        """
-        packages_config = self._load_packages_config()
-        brews = packages_config.get("packages", {}).get("darwin", {}).get("brews", [])
-        for pkg in brews:
-            if isinstance(pkg, dict) and pkg.get("name") == package_name:
-                if "install_order" in pkg:
-                    try:
-                        return float(pkg["install_order"])
-                    except Exception:
-                        return float("inf")
-                if (self._is_alternative_homebrew() and
-                    "alternative_only" in pkg and
-                    isinstance(pkg["alternative_only"], dict) and
-                    "install_order" in pkg["alternative_only"]):
-                    try:
-                        return float(pkg["alternative_only"]["install_order"])
-                    except Exception:
-                        return float("inf")
-                return float("inf")
-        return float("inf")
-    
-    def _load_packages_config(self) -> Dict[str, Any]:
-        """Load packages configuration from packages.yml."""
-        if not self.packages_file.exists():
-            print(f"Warning: Packages file not found: {self.packages_file}")
-            return {}
-        
-        try:
-            with open(self.packages_file, 'r') as f:
-                return yaml.safe_load(f) or {}
-        except Exception as e:
-            print(f"Error loading packages config: {e}")
-            return {}
-    
+    def _get_rebuild_service(self) -> RebuildService:
+        if self._rebuild_service is None:
+            self._rebuild_service = RebuildService(
+                get_formulae_info=self._get_all_formulae_info,
+                packages_helper=self._get_packages_helper(),
+                stop_service=self._stop_service,
+                start_service=self._start_service,
+                install_package=lambda pkg_config, reinstall=True: self.install_individual_package(
+                    pkg_config, reinstall=reinstall
+                ),
+                dry_run=self.dry_run,
+                is_alternative=self._is_alternative_homebrew,
+            )
+        return self._rebuild_service
+
     def install_homebrew(self) -> bool:
         """Install Homebrew if not present."""
         if self.config.get("has_brew"):
@@ -247,8 +237,7 @@ class HomebrewManager:
         if not self._is_alternative_homebrew():
             return True
         
-        packages_config = self._load_packages_config()
-        formula_patches = packages_config.get("formula_patches", {})
+        formula_patches = self._get_packages_helper().formula_patches
         
         if not formula_patches:
             return True
@@ -311,8 +300,7 @@ class HomebrewManager:
     
     def install_taps(self) -> bool:
         """Install Homebrew taps."""
-        packages_config = self._load_packages_config()
-        taps = packages_config.get("packages", {}).get("darwin", {}).get("taps", [])
+        taps = self._get_packages_helper().taps
         
         if not taps:
             return True
@@ -330,9 +318,9 @@ class HomebrewManager:
     
     def classify_packages(self) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], List[str]]:
         """Classify packages for installation strategy."""
-        packages_config = self._load_packages_config()
-        brews = packages_config.get("packages", {}).get("darwin", {}).get("brews", [])
-        casks = packages_config.get("packages", {}).get("darwin", {}).get("casks", [])
+        helper = self._get_packages_helper()
+        brews = helper.brews
+        casks = helper.casks
         
         # Classify brews
         individual_brews = []  # Packages needing individual installation (with env vars)
@@ -437,6 +425,8 @@ class HomebrewManager:
     
     def force_reinstall_packages(self, packages: List[str]) -> bool:
         """Force reinstall packages with proper configuration from packages.yml."""
+        if self.dry_run:
+            print(f"[dry-run] Would force reinstall packages: {', '.join(packages)}")
         if not packages:
             print("No packages to reinstall")
             return False
@@ -458,26 +448,13 @@ class HomebrewManager:
         
         print(f"Force reinstalling packages: {', '.join(valid_packages)}")
         
-        # Get package configurations for sorting
-        packages_config = self._load_packages_config()
-        brews = packages_config.get("packages", {}).get("darwin", {}).get("brews", [])
-        
-        def get_install_order(package_name: str) -> float:
-            """Get install order for package, returns inf if not specified."""
-            for pkg in brews:
-                if isinstance(pkg, dict) and pkg.get('name') == package_name:
-                    # Check top-level install_order first
-                    if 'install_order' in pkg:
-                        return float(pkg['install_order'])
-                    # Check alternative_only install_order
-                    if (self._is_alternative_homebrew() and 
-                        'alternative_only' in pkg and 
-                        'install_order' in pkg['alternative_only']):
-                        return float(pkg['alternative_only']['install_order'])
-            return float('inf')
+        helper = self._get_packages_helper()
         
         # Sort packages by install order
-        sorted_packages = sorted(valid_packages, key=lambda p: (get_install_order(p), valid_packages.index(p)))
+        sorted_packages = sorted(
+            valid_packages,
+            key=lambda p: (helper.install_order(p), valid_packages.index(p)),
+        )
         
         # Uninstall packages first
         print("Uninstalling packages for clean reinstall...")
@@ -502,19 +479,9 @@ class HomebrewManager:
     
     def _install_single_package(self, package_name: str) -> bool:
         """Install a single package with its configuration from packages.yml."""
-        packages_config = self._load_packages_config()
-        brews = packages_config.get("packages", {}).get("darwin", {}).get("brews", [])
-        
-        # Find package configuration
-        pkg_config = None
-        for pkg in brews:
-            if isinstance(pkg, dict) and pkg.get('name') == package_name:
-                pkg_config = pkg
-                break
-            elif isinstance(pkg, str) and pkg == package_name:
-                pkg_config = {'name': pkg}
-                break
-        
+        helper = self._get_packages_helper()
+        pkg_config = helper.get_entry(package_name)
+
         if not pkg_config:
             # Package not in config, install with defaults
             print(f"Installing {package_name} (not in config)")
@@ -524,266 +491,39 @@ class HomebrewManager:
             except subprocess.CalledProcessError as e:
                 print(f"Error installing {package_name}: {e}")
                 return False
-        
+
         # Install with configuration
         return self.install_individual_package(pkg_config)
 
     def detect_outdated_source_builds(self) -> List[Dict[str, Any]]:
-        """Detect source-built packages with newer dependencies using cached data."""
-        formulae = self._get_all_formulae_info()
-        
-        if not formulae:
-            return []
-        
-        # Create a map of all package install times
-        install_times = {}
-        for name, formula in formulae.items():
-            if 'installed' in formula and formula['installed']:
-                install_times[name] = formula['installed'][0].get('time')
-        
-        # Find source-built packages with outdated dependencies
-        outdated_packages = []
-        seen = set()  # Track packages we've already processed
-        
-        for name, formula in formulae.items():
-            # Skip if we've already seen this package (avoid duplicates from full_name)
-            if formula['name'] in seen:
-                continue
-            seen.add(formula['name'])
-            
-            if 'installed' in formula and formula['installed'] and not formula['installed'][0]['built_as_bottle']:
-                pkg_name = formula['name']
-                pkg_time = formula['installed'][0].get('time')
-                
-                if not pkg_time:
-                    continue
-                
-                # Check dependencies
-                deps = formula['installed'][0].get('runtime_dependencies', [])
-                newer_deps = []
-                
-                for dep in deps:
-                    dep_name = dep['full_name']
-                    dep_time = install_times.get(dep_name)
-                    
-                    if dep_time and dep_time > pkg_time:
-                        newer_deps.append(dep_name)
-                
-                if newer_deps:
-                    outdated_packages.append({
-                        'name': pkg_name,
-                        'pkg_time': pkg_time,
-                        'newer_deps': newer_deps,
-                        'newer_deps_count': len(newer_deps),
-                        'total_deps': len(deps)
-                    })
-        
-        # Sort by number of newer dependencies
-        outdated_packages.sort(key=lambda x: x['newer_deps_count'], reverse=True)
-        
-        return outdated_packages
-    
-    def _get_rebuild_order(self, packages_to_rebuild: Set[str]) -> List[str]:
-        """Get the order to rebuild packages using topological sort to handle dependencies."""
-        formulae = self._get_all_formulae_info()
-        
-        # Build a dependency graph for source-built packages
-        G = nx.DiGraph()
-        
-        # Add all source-built packages as nodes
-        source_built_packages = set()
-        for name, formula in formulae.items():
-            if 'installed' in formula and formula['installed'] and not formula['installed'][0]['built_as_bottle']:
-                pkg_name = formula['name']
-                source_built_packages.add(pkg_name)
-                G.add_node(pkg_name)
-        
-        # Add edges (package -> dependency means package depends on dependency)
-        for name, formula in formulae.items():
-            if 'installed' not in formula or not formula['installed']:
-                continue
-            if formula['installed'][0]['built_as_bottle']:
-                continue
-                
-            pkg_name = formula['name']
-            if pkg_name not in source_built_packages:
-                continue
-                
-            deps = formula['installed'][0].get('runtime_dependencies', [])
-            for dep in deps:
-                dep_name = dep.get('full_name', '')
-                # Check if the dependency is also a source-built package
-                if dep_name in formulae and dep_name in source_built_packages:
-                    # Add edge: pkg_name depends on dep_name
-                    G.add_edge(pkg_name, dep_name)
-        
-        # Check for circular dependencies
-        try:
-            cycles = list(nx.simple_cycles(G))
-            if cycles:
-                print(f"⚠️  Warning: Circular dependencies detected:")
-                for cycle in cycles[:3]:  # Show first 3 cycles
-                    print(f"    {' -> '.join(cycle + [cycle[0]])}")
-                if len(cycles) > 3:
-                    print(f"    ... and {len(cycles) - 3} more cycles")
-                print("  Breaking cycles by ignoring back-edges...")
-                
-                # Remove cycles by converting to DAG
-                # This is a simple approach - just break cycles by removing back edges
-                G = nx.DiGraph(nx.dag.transitive_reduction(G))
-        except nx.NetworkXError:
-            pass  # Graph might already be acyclic
-        
-        # Get packages that need rebuilding and all their dependents
-        packages_affected = set(packages_to_rebuild)
-        
-        # Find all packages that depend on the packages we're rebuilding
-        for pkg in packages_to_rebuild:
-            if pkg in G:
-                # Get all nodes that have a path to this package (ancestors in dependency tree)
-                ancestors = nx.ancestors(G, pkg)
-                packages_affected.update(ancestors)
-        
-        # Create subgraph with only affected packages
-        subgraph = G.subgraph(packages_affected)
-        
-        # Topological sort to get rebuild order (reverse because we want dependencies first)
-        try:
-            rebuild_order = list(nx.topological_sort(subgraph))
-            rebuild_order.reverse()  # Build dependencies before dependents
-        except nx.NetworkXUnfeasible:
-            # This shouldn't happen after we removed cycles, but just in case
-            print("⚠️  Warning: Could not determine dependency order, using original order")
-            rebuild_order = list(packages_affected)
-        
-        return rebuild_order
-    
+        """Wrapper around the rebuild service detection."""
+        return self._get_rebuild_service().detect_outdated()
+
     def rebuild_outdated_packages(self) -> bool:
-        """Detect and rebuild outdated source-built packages with proper dependency ordering."""
-        outdated = self.detect_outdated_source_builds()
-        
+        """Delegate rebuild execution to the rebuild service."""
+        service = self._get_rebuild_service()
+        outdated = service.detect_outdated()
+
         if not outdated:
             print("✅ No source-built packages need rebuilding")
             return True
-        
+
         print(f"\n⚠️  Found {len(outdated)} source-built packages with outdated dependencies:")
-        for pkg in outdated[:10]:  # Show first 10
+        for pkg in outdated[:10]:
             print(f"  • {pkg['name']} ({pkg['newer_deps_count']}/{pkg['total_deps']} dependencies newer)")
         if len(outdated) > 10:
             print(f"  ... and {len(outdated) - 10} more")
-        
-        # Get the packages that need rebuilding
-        packages_to_rebuild = {pkg['name'] for pkg in outdated}
-        
-        # Get proper rebuild order considering dependencies
-        print("\nAnalyzing dependency graph...")
-        rebuild_order = self._get_rebuild_order(packages_to_rebuild)
-        
-        if len(rebuild_order) > len(packages_to_rebuild):
-            additional = len(rebuild_order) - len(packages_to_rebuild)
-            print(f"  Including {additional} additional packages that depend on outdated packages")
-        
-        # Get currently running services that we'll need to manage
-        print("\nChecking for running services...")
-        running_services = self._get_running_services()
-        services_to_restart = {}
-        
-        for pkg_name in rebuild_order:
-            if pkg_name in running_services and running_services[pkg_name] in ['started', 'running']:
-                services_to_restart[pkg_name] = running_services[pkg_name]
-                print(f"  Found running service: {pkg_name}")
-        
-        if services_to_restart:
-            print(f"\nWill manage {len(services_to_restart)} service(s) during rebuild")
-        
-        print(f"\nRebuilding {len(rebuild_order)} packages in dependency order...")
-        
-        # Get package configurations
-        packages_config = self._load_packages_config()
-        brews = packages_config.get("packages", {}).get("darwin", {}).get("brews", [])
-        
-        # Create a map for quick lookup
-        pkg_configs = {}
-        for pkg in brews:
-            if isinstance(pkg, dict):
-                pkg_configs[pkg.get('name')] = pkg
-            elif isinstance(pkg, str):
-                pkg_configs[pkg] = {'name': pkg}
-        
-        # Rebuild packages in order
-        failed_packages = []
-        rebuilt_count = 0
-        
-        for pkg_name in rebuild_order:
-            print(f"\n[{rebuilt_count + 1}/{len(rebuild_order)}] Rebuilding {pkg_name}...")
-            
-            # Stop service if it's running
-            if pkg_name in services_to_restart:
-                self._stop_service(pkg_name)
-            
-            # Get package configuration to check for special flags
-            pkg_config = pkg_configs.get(pkg_name, {'name': pkg_name})
-            
-            # Check if this package requires force reinstall (uninstall first)
-            # This can be set in packages.yml with force_reinstall: true
-            force_reinstall = False
-            if isinstance(pkg_config, dict):
-                force_reinstall = pkg_config.get('force_reinstall', False)
-                # Also check alternative_only section
-                if self._is_alternative_homebrew() and 'alternative_only' in pkg_config:
-                    force_reinstall = pkg_config['alternative_only'].get('force_reinstall', force_reinstall)
-            
-            # Some packages always need force reinstall
-            if pkg_name in ['emacs-plus@31', 'emacs-plus@30', 'emacs-plus@29']:
-                force_reinstall = True
-                print(f"  Note: {pkg_name} always uses force reinstall")
-            
-            if force_reinstall:
-                # Uninstall first for clean reinstall
-                try:
-                    subprocess.run(["brew", "uninstall", "--ignore-dependencies", pkg_name], 
-                                 check=True, capture_output=True)
-                    print(f"  Uninstalled {pkg_name} for clean reinstall")
-                except subprocess.CalledProcessError:
-                    print(f"  Warning: Failed to uninstall {pkg_name}, continuing anyway...")
-            
-            # Reinstall with configuration
-            # Use reinstall=True unless we did a force reinstall (uninstall first)
-            if self.install_individual_package(pkg_config, reinstall=(not force_reinstall)):
-                rebuilt_count += 1
-                
-                # Restart service if it was running
-                if pkg_name in services_to_restart:
-                    self._start_service(pkg_name)
-            else:
-                failed_packages.append(pkg_name)
-                print(f"  ❌ Failed to rebuild {pkg_name}")
-                # Continue trying other packages
-        
-        # Clear the cache since we've modified installed packages
-        self._formulae_cache = None
-        
-        # Check final service status
-        if services_to_restart:
-            print("\nChecking service status after rebuild:")
-            final_services = self._get_running_services()
-            for pkg_name in services_to_restart:
-                if pkg_name in final_services:
-                    status = final_services[pkg_name]
-                    if status in ['started', 'running']:
-                        print(f"  ✅ {pkg_name} service is running")
-                    else:
-                        print(f"  ⚠️  {pkg_name} service status: {status}")
-                else:
-                    print(f"  ❌ {pkg_name} service not found")
-        
-        if failed_packages:
-            print(f"\n❌ Failed to rebuild {len(failed_packages)} packages: {', '.join(failed_packages)}")
-            print(f"✅ Successfully rebuilt {rebuilt_count} packages")
+
+        result = service.rebuild(outdated)
+
+        if result.failed:
+            print(f"\n❌ Failed to rebuild {len(result.failed)} packages: {', '.join(result.failed)}")
+            print(f"✅ Successfully rebuilt {result.rebuilt} packages")
             return False
-        else:
-            print(f"\n✅ Successfully rebuilt all {rebuilt_count} packages")
-            return True
+
+        print(f"\n✅ Successfully rebuilt all {result.rebuilt} packages")
+        self._formulae_cache = None
+        return True
     
     def install_individual_package(self, pkg_config: Dict[str, Any], reinstall: bool = False) -> bool:
         """Install a single package with its configuration."""
@@ -835,6 +575,8 @@ class HomebrewManager:
     
     def simple_reinstall_packages(self, packages: List[str]) -> bool:
         """Simple reinstall using brew reinstall (legacy CHEZMOI_REINSTALL_PACKAGES behavior)."""
+        if self.dry_run:
+            print(f"[dry-run] Would simple reinstall packages: {', '.join(packages)}")
         if not packages:
             print("No packages to reinstall")
             return False
@@ -1059,6 +801,8 @@ class HomebrewManager:
     
     def full_installation(self, first_run: bool = False) -> bool:
         """Perform full Homebrew installation process."""
+        if self.dry_run:
+            print("[dry-run] Starting full installation workflow")
         if first_run:
             print("Starting initial Homebrew setup...")
         else:
@@ -1170,78 +914,134 @@ class HomebrewManager:
         return True
 
 
-def main():
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Comprehensive Homebrew manager for Chezmoi"
     )
     parser.add_argument(
         "command",
-        choices=["full-install", "force-reinstall", "simple-reinstall", "check-outdated", "rebuild-outdated"],
-        help="Command to execute"
+        choices=[
+            "full-install",
+            "force-reinstall",
+            "simple-reinstall",
+            "check-outdated",
+            "rebuild-outdated",
+        ],
+        help="Command to execute",
     )
     parser.add_argument(
         "--config",
-        help="Runtime configuration as JSON string"
+        help="Runtime configuration as JSON string",
     )
     parser.add_argument(
         "--packages-file",
         type=Path,
-        help="Override path to packages.yml file"
+        help="Override path to packages.yml file",
     )
     parser.add_argument(
         "--first-run",
         action="store_true",
-        help="Indicate this is the first run (install all packages)"
+        help="Indicate this is the first run (install all packages)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show planned actions without executing them",
     )
     parser.add_argument(
         "packages",
         nargs="*",
-        help="Packages for force-reinstall or simple-reinstall commands"
+        help="Packages for force-reinstall or simple-reinstall commands",
     )
-    
+    return parser
+
+
+def run_full_install(manager: HomebrewManager, args: argparse.Namespace) -> int:
+    if args.dry_run:
+        print("[dry-run] full-install would run (first-run=%s)" % args.first_run)
+        return 0
+    success = manager.full_installation(first_run=args.first_run)
+    return 0 if success else 1
+
+
+def run_force_reinstall(manager: HomebrewManager, args: argparse.Namespace) -> int:
+    if not args.packages:
+        print("Error: force-reinstall requires package names")
+        return 1
+    if args.dry_run:
+        print(f"[dry-run] force-reinstall would process: {', '.join(args.packages)}")
+        return 0
+    success = manager.force_reinstall_packages(args.packages)
+    return 0 if success else 1
+
+
+def run_simple_reinstall(manager: HomebrewManager, args: argparse.Namespace) -> int:
+    if not args.packages:
+        print("Error: simple-reinstall requires package names")
+        return 1
+    if args.dry_run:
+        print(f"[dry-run] simple-reinstall would process: {', '.join(args.packages)}")
+        return 0
+    success = manager.simple_reinstall_packages(args.packages)
+    return 0 if success else 1
+
+
+def run_check_outdated(manager: HomebrewManager, args: argparse.Namespace) -> int:
+    if args.dry_run:
+        print("[dry-run] check-outdated would evaluate installed packages")
+        return 0
+    outdated = manager.detect_outdated_source_builds()
+    if not outdated:
+        print("✅ No source-built packages have outdated dependencies")
+        return 0
+
+    print(f"⚠️  Found {len(outdated)} source-built packages with outdated dependencies:\n")
+    for pkg in outdated:
+        print(f"• {pkg['name']}")
+        print(f"  {pkg['newer_deps_count']}/{pkg['total_deps']} dependencies are newer")
+        if pkg['newer_deps'][:3]:
+            print(f"  Examples: {', '.join(pkg['newer_deps'][:3])}")
+        print()
+    print("Run 'chezmoi-homebrew-manager rebuild-outdated' to rebuild them")
+    return 1
+
+
+def run_rebuild_outdated(manager: HomebrewManager, args: argparse.Namespace) -> int:
+    if args.dry_run:
+        print("[dry-run] rebuild-outdated would rebuild detected packages")
+        return 0
+    success = manager.rebuild_outdated_packages()
+    return 0 if success else 1
+
+
+COMMAND_HANDLERS = {
+    "full-install": run_full_install,
+    "force-reinstall": run_force_reinstall,
+    "simple-reinstall": run_simple_reinstall,
+    "check-outdated": run_check_outdated,
+    "rebuild-outdated": run_rebuild_outdated,
+}
+
+
+def main() -> None:
+    parser = build_parser()
     args = parser.parse_args()
-    
-    manager = HomebrewManager(args.packages_file)
-    
+
+    manager = HomebrewManager(args.packages_file, dry_run=args.dry_run)
+
     if args.config:
         manager.load_runtime_config(args.config)
-    
-    if args.command == "full-install":
-        success = manager.full_installation(first_run=args.first_run)
-        sys.exit(0 if success else 1)
-    elif args.command == "force-reinstall":
-        if not args.packages:
-            print("Error: force-reinstall requires package names")
-            sys.exit(1)
-        success = manager.force_reinstall_packages(args.packages)
-        sys.exit(0 if success else 1)
-    elif args.command == "simple-reinstall":
-        if not args.packages:
-            print("Error: simple-reinstall requires package names")
-            sys.exit(1)
-        success = manager.simple_reinstall_packages(args.packages)
-        sys.exit(0 if success else 1)
-    elif args.command == "check-outdated":
-        outdated = manager.detect_outdated_source_builds()
-        if not outdated:
-            print("✅ No source-built packages have outdated dependencies")
-            sys.exit(0)
-        else:
-            print(f"⚠️  Found {len(outdated)} source-built packages with outdated dependencies:\n")
-            for pkg in outdated:
-                print(f"• {pkg['name']}")
-                print(f"  {pkg['newer_deps_count']}/{pkg['total_deps']} dependencies are newer")
-                if pkg['newer_deps'][:3]:
-                    print(f"  Examples: {', '.join(pkg['newer_deps'][:3])}")
-                print()
-            print(f"Run 'chezmoi-homebrew-manager rebuild-outdated' to rebuild them")
-            sys.exit(1)
-    elif args.command == "rebuild-outdated":
-        success = manager.rebuild_outdated_packages()
-        sys.exit(0 if success else 1)
-    else:
+
+    handler = COMMAND_HANDLERS.get(args.command)
+    if handler is None:
         print(f"Unknown command: {args.command}")
         sys.exit(1)
+
+    if args.dry_run:
+        print(f"[dry-run] Executing command '{args.command}'")
+
+    exit_code = handler(manager, args)
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":
