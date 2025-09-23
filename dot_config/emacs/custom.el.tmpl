@@ -104,6 +104,7 @@
         scroll-error-top-bottom t
         scroll-preserve-screen-position t
         scroll-margin 0
+        scroll-conservatively 101
         hscroll-margin 2
         hscroll-step 1)
 
@@ -181,7 +182,10 @@
 (setopt mouse-wheel-flip-direction t)
 
 (blink-cursor-mode -1)                                ; Steady cursor
-(pixel-scroll-precision-mode)                         ; Smooth scrolling
+(when (display-graphic-p)
+  (if (require 'ultra-scroll nil 'noerror)
+      (ultra-scroll-mode 1)                           ; Smooth, inertial scrolling
+    (pixel-scroll-precision-mode 1)))                 ; Fallback when ultra-scroll unavailable
 
 ;; Display line numbers in programming mode
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)

@@ -135,6 +135,10 @@
   :init
   (simple-modeline-mode))
 
+;; Pixel-perfect inertial scrolling with hardware deltas
+(use-package ultra-scroll :ensure t
+  :demand t)
+
 ;; treemacs for visual navigation
 (use-package treemacs :ensure t)
 (use-package treemacs-projectile :ensure t)

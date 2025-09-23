@@ -151,6 +151,17 @@ EOF
 # 2. Installing newly added packages
 "{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-homebrew-manager" full-install --config "$RUNTIME_CONFIG"
 
+# Reinstall Ruby via mise to refresh native extensions when Homebrew deps change
+if command -v mise >/dev/null 2>&1; then
+  echo "Reinstalling Ruby toolchain via mise..."
+  if ! mise install ruby --force; then
+    echo "Error: mise failed to reinstall Ruby"
+    exit 1
+  fi
+else
+  echo "mise not found; skipping Ruby reinstall"
+fi
+
 {{ end -}}
 
 {{- end }}
