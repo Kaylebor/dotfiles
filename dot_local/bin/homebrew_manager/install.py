@@ -277,6 +277,21 @@ class InstallService:
             print(f"    Error: {exc}")
             return False
 
+    def install_package_by_name(self, package_name: str) -> bool:
+        helper = self._packages()
+        pkg_config = helper.get_entry(package_name)
+
+        if not pkg_config:
+            print(f"Installing {package_name} (not in config)")
+            try:
+                subprocess.run(["brew", "install", package_name], check=True)
+                return True
+            except subprocess.CalledProcessError as exc:
+                print(f"Error installing {package_name}: {exc}")
+                return False
+
+        return self.install_individual_package(pkg_config, reinstall=False)
+
     def generate_brew_bundle(self, brews: List[Dict[str, Any]], casks: List[str]) -> str:
         lines: List[str] = []
         for brew in brews:

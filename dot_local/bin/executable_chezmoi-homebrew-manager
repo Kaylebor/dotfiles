@@ -248,21 +248,7 @@ class HomebrewManager:
     
     def _install_single_package(self, package_name: str) -> bool:
         """Install a single package with its configuration from packages.yml."""
-        helper = self._get_packages_helper()
-        pkg_config = helper.get_entry(package_name)
-
-        if not pkg_config:
-            # Package not in config, install with defaults
-            print(f"Installing {package_name} (not in config)")
-            try:
-                subprocess.run(["brew", "install", package_name], check=True)
-                return True
-            except subprocess.CalledProcessError as e:
-                print(f"Error installing {package_name}: {e}")
-                return False
-
-        # Install with configuration
-        return self.install_individual_package(pkg_config)
+        return self._get_install_service().install_package_by_name(package_name)
 
     def detect_outdated_source_builds(self) -> List[Dict[str, Any]]:
         """Wrapper around the rebuild service detection."""
