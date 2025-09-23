@@ -7,6 +7,8 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Set
 
 import networkx as nx
 
+from . import log
+
 
 @dataclass
 class RebuildResult:
@@ -96,7 +98,7 @@ class RebuildService:
 
     def rebuild(self, outdated: List[Dict[str, Any]]) -> RebuildResult:
         if self._dry_run:
-            print("[dry-run] RebuildService would rebuild: %s" % ", ".join(pkg["name"] for pkg in outdated))
+            log.info("[dry-run] RebuildService would rebuild: %s" % ", ".join(pkg["name"] for pkg in outdated))
             return RebuildResult(rebuilt=0, failed=())
 
         packages_to_rebuild = {pkg["name"] for pkg in outdated}
@@ -104,7 +106,7 @@ class RebuildService:
 
         running_services = self._detect_running_services(rebuild_order)
         if running_services:
-            print(f"\nWill manage {len(running_services)} service(s) during rebuild")
+            log.step(f"\nWill manage {len(running_services)} service(s) during rebuild")
 
         pkg_configs = {entry["name"]: entry for entry in self._packages_helper.iter_entries()}
 
@@ -112,7 +114,7 @@ class RebuildService:
         rebuilt_count = 0
 
         for index, pkg_name in enumerate(rebuild_order, start=1):
-            print(f"\n[{index}/{len(rebuild_order)}] Rebuilding {pkg_name}...")
+            log.step(f"\n[{index}/{len(rebuild_order)}] Rebuilding {pkg_name}...")
 
             pkg_config = pkg_configs.get(pkg_name, {"name": pkg_name})
 
@@ -123,14 +125,14 @@ class RebuildService:
             # Packages that always force reinstall
             if pkg_name in {"emacs-plus@31", "emacs-plus@30", "emacs-plus@29"}:
                 force_reinstall = True
-                print(f"  Note: {pkg_name} always uses force reinstall")
+                log.info(f"  Note: {pkg_name} always uses force reinstall")
 
             if force_reinstall:
                 try:
                     subprocess_run(["brew", "uninstall", "--ignore-dependencies", pkg_name])
-                    print(f"  Uninstalled {pkg_name} for clean reinstall")
+                    log.info(f"  Uninstalled {pkg_name} for clean reinstall")
                 except Exception:
-                    print(f"  Warning: Failed to uninstall {pkg_name}, continuing anyway...")
+                    log.warning(f"  Failed to uninstall {pkg_name}, continuing anyway...")
 
             if self._install_package(pkg_config, reinstall=(not force_reinstall)):
                 rebuilt_count += 1
@@ -172,12 +174,12 @@ class RebuildService:
         try:
             cycles = list(nx.simple_cycles(graph))
             if cycles:
-                print("⚠️  Warning: Circular dependencies detected:")
+                log.warning("Circular dependencies detected:")
                 for cycle in cycles[:3]:
-                    print(f"    {' -> '.join(cycle + [cycle[0]])}")
+                    log.warning(f"    {' -> '.join(cycle + [cycle[0]])}")
                 if len(cycles) > 3:
-                    print(f"    ... and {len(cycles) - 3} more cycles")
-                print("  Breaking cycles by ignoring back-edges...")
+                    log.warning(f"    ... and {len(cycles) - 3} more cycles")
+                log.info("  Breaking cycles by ignoring back-edges...")
                 graph = nx.DiGraph(nx.dag.transitive_reduction(nx.DiGraph(graph)))
         except nx.NetworkXException:
             pass
@@ -192,7 +194,7 @@ class RebuildService:
             order.reverse()
             return order
         except nx.NetworkXUnfeasible:
-            print("⚠️  Warning: Could not determine dependency order, using original order")
+            log.warning("Could not determine dependency order, using original order")
             return list(packages_affected)
 
     def _detect_running_services(self, rebuild_order: List[str]) -> Dict[str, str]:
@@ -215,7 +217,7 @@ class RebuildService:
             status = services.get(pkg_name)
             if status in {"started", "running"}:
                 active[pkg_name] = status
-                print(f"  Found running service: {pkg_name}")
+                log.info(f"  Found running service: {pkg_name}")
         return active
 
 

@@ -8,6 +8,8 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, TYPE_CHECKING
 import os
 import subprocess
 
+from . import log
+
 if TYPE_CHECKING:  # pragma: no cover
     from .config import PackagesHelper
     from typing import Any
@@ -39,16 +41,16 @@ class InstallService:
         if config.get("has_brew"):
             return True
 
-        print("Installing Homebrew...")
+        log.step("Installing Homebrew...")
 
         if self._is_alternative():
             homebrew_path = config.get("homebrew_path", "homebrew")
             tarball_url = config.get("homebrew_tarball_url")
             if not tarball_url:
-                print("Error: Missing homebrew_tarball_url in config")
+                log.error("Missing homebrew_tarball_url in config")
                 return False
 
-            print(f"Installing Homebrew to {homebrew_path} for MDM compatibility...")
+            log.step(f"Installing Homebrew to {homebrew_path} for MDM compatibility...")
             home_dir = Path.home()
             homebrew_dir = home_dir / homebrew_path
 
@@ -85,7 +87,7 @@ class InstallService:
                         subprocess.run(["chmod", "-R", "go-w", str(zsh_dir)], check=False)
                 return True
             except subprocess.CalledProcessError as exc:
-                print(f"Error installing alternative Homebrew: {exc}")
+                log.error(f"Error installing alternative Homebrew: {exc}")
                 return False
 
         install_url = config.get(
@@ -97,7 +99,7 @@ class InstallService:
             subprocess.run(cmd, shell=True, check=True)
             return True
         except subprocess.CalledProcessError as exc:
-            print(f"Error installing standard Homebrew: {exc}")
+            log.error(f"Error installing standard Homebrew: {exc}")
             return False
 
     def verify_formula_patches(self) -> bool:
@@ -108,7 +110,7 @@ class InstallService:
         if not formula_patches:
             return True
 
-        print("Verifying formula patches for alternative Homebrew...")
+        log.step("Verifying formula patches for alternative Homebrew...")
         for formula, patch_config in formula_patches.items():
             result = subprocess.run(["brew", "list", formula], capture_output=True)
             if result.returncode == 0:
@@ -117,10 +119,10 @@ class InstallService:
             expected_hash = (patch_config or {}).get("expected_hash")
             patch_file_path = self.manager.chezmoi_source_dir / "scripts" / "patches" / f"{formula}.patch"
             if not expected_hash and not patch_file_path.exists():
-                print(f"Skipping hash check for {formula} (no expected_hash and no patch file)")
+                log.info(f"Skipping hash check for {formula} (no expected_hash and no patch file)")
                 continue
 
-            print(f"Verifying {formula} formula hash...")
+            log.step(f"Verifying {formula} formula hash...")
             try:
                 repo_result = subprocess.run(
                     ["brew", "--repository", "homebrew/core"],
@@ -131,7 +133,7 @@ class InstallService:
                 repo_path = Path(repo_result.stdout.strip())
                 formula_path = repo_path / "Formula" / formula[0] / f"{formula}.rb"
                 if not formula_path.exists():
-                    print(f"⚠️  Formula not found: {formula_path}")
+                    log.warning(f"Formula not found: {formula_path}")
                     continue
 
                 result = subprocess.run(
@@ -142,21 +144,20 @@ class InstallService:
                 )
                 actual_hash = result.stdout.split()[0]
                 if actual_hash != expected_hash:
-                    print("❌ Hash mismatch for {formula}!")
-                    print(f"   Expected: {expected_hash}")
-                    print(f"   Actual:   {actual_hash}")
-                    print(f"   Description: {patch_config.get('description', 'No description')}")
+                    log.error(f"Hash mismatch for {formula}!")
+                    log.info(f"   Expected: {expected_hash}")
+                    log.info(f"   Actual:   {actual_hash}")
+                    log.info(f"   Description: {patch_config.get('description', 'No description')}")
                     issue_url = patch_config.get("issue_url")
                     if issue_url:
-                        print(f"   Related issue: {issue_url}")
-                    print("   The formula may have been updated upstream.")
-                    print("   Please update the patch and expected hash.")
+                        log.info(f"   Related issue: {issue_url}")
+                    log.warning("   The formula may have been updated upstream. Please update the patch and expected hash.")
                     return False
                 else:
-                    print(f"✅ {formula} formula hash verified")
-                    print(f"   Patch: {patch_config.get('description', 'No description')}")
+                    log.success(f"{formula} formula hash verified")
+                    log.info(f"   Patch: {patch_config.get('description', 'No description')}")
             except subprocess.CalledProcessError as exc:
-                print(f"Error verifying formula {formula}: {exc}")
+                log.error(f"Error verifying formula {formula}: {exc}")
                 return False
         return True
 
@@ -165,13 +166,13 @@ class InstallService:
         if not taps:
             return True
 
-        print("Installing Homebrew taps...")
+        log.step("Installing Homebrew taps...")
         for tap in taps:
             try:
-                print(f"Tapping {tap}...")
+                log.info(f"Tapping {tap}...")
                 subprocess.run(["brew", "tap", tap], check=True)
             except subprocess.CalledProcessError as exc:
-                print(f"Error tapping {tap}: {exc}")
+                log.error(f"Error tapping {tap}: {exc}")
                 return False
         return True
 
@@ -210,22 +211,22 @@ class InstallService:
         if not packages:
             self._installed_any = False
             return True
-        print("Installing packages with isolated environments...")
+        log.step("Installing packages with isolated environments...")
         self._installed_any = True
         helper = self._packages()
         for pkg in packages:
             pkg_name = pkg.get("name") if isinstance(pkg, dict) else pkg
             if not pkg_name:
                 continue
-            print(f"Installing {pkg_name} with isolated environment...")
+            log.info(f"Installing {pkg_name} with isolated environment...")
             env = os.environ.copy()
             base_env, alt_env = helper.entry_envs(pkg)
             if base_env:
                 env.update(base_env)
-                print(f"Applied environment variables: {base_env}")
+                log.info(f"Applied environment variables: {base_env}")
             if self._is_alternative() and alt_env:
                 env.update(alt_env)
-                print(f"Applied alternative environment variables: {alt_env}")
+                log.info(f"Applied alternative environment variables: {alt_env}")
 
             cmd = ["brew", "install", pkg_name]
             base_args = helper.entry_args(pkg)
@@ -238,9 +239,9 @@ class InstallService:
                 cmd.extend(f"--{arg}" for arg in alt_specific)
             try:
                 subprocess.run(cmd, env=env, check=True)
-                print(f"✅ Successfully installed {pkg_name}")
+                log.success(f"Successfully installed {pkg_name}")
             except subprocess.CalledProcessError as exc:
-                print(f"❌ Error installing {pkg_name}: {exc}")
+                log.error(f"Error installing {pkg_name}: {exc}")
                 return False
         return True
 
@@ -250,17 +251,17 @@ class InstallService:
             return False
 
         action = "Reinstalling" if reinstall else "Installing"
-        print(f"  {action} {pkg_name}...")
+        log.info(f"  {action} {pkg_name}...")
         env = os.environ.copy()
         helper = self._packages()
         if isinstance(pkg_config, dict):
             base_env, alt_env = helper.entry_envs(pkg_config)
             if base_env:
                 env.update(base_env)
-                print(f"    With env: {base_env}")
+                log.info(f"    With env: {base_env}")
             if self._is_alternative() and alt_env:
                 env.update(alt_env)
-                print(f"    With alt env: {alt_env}")
+                log.info(f"    With alt env: {alt_env}")
         cmd = ["brew", "reinstall" if reinstall else "install", pkg_name]
         if isinstance(pkg_config, dict):
             base_args = helper.entry_args(pkg_config)
@@ -274,7 +275,7 @@ class InstallService:
             subprocess.run(cmd, env=env, check=True)
             return True
         except subprocess.CalledProcessError as exc:
-            print(f"    Error: {exc}")
+            log.error(f"    Error: {exc}")
             return False
 
     def install_package_by_name(self, package_name: str) -> bool:
@@ -282,13 +283,13 @@ class InstallService:
         pkg_config = helper.get_entry(package_name)
 
         if not pkg_config:
-            print(f"Installing {package_name} (not in config)")
+            log.info(f"Installing {package_name} (not in config)")
             try:
                 subprocess.run(["brew", "install", package_name], check=True)
                 self._installed_any = True
                 return True
             except subprocess.CalledProcessError as exc:
-                print(f"Error installing {package_name}: {exc}")
+                log.error(f"Error installing {package_name}: {exc}")
                 return False
 
         success = self.install_individual_package(pkg_config, reinstall=False)
@@ -320,28 +321,28 @@ class InstallService:
     def install_with_bundle(self, bundle_content: str) -> bool:
         if not bundle_content.strip():
             return True
-        print("Installing remaining packages with brew bundle...")
+        log.step("Installing remaining packages with brew bundle...")
         try:
             process = subprocess.Popen(["brew", "bundle", "--file=-"], stdin=subprocess.PIPE, text=True)
             process.communicate(input=bundle_content)
             if process.returncode == 0:
-                print("✅ Brew bundle installation completed successfully")
+                log.success("Brew bundle installation completed successfully")
                 return True
-            print("❌ Brew bundle installation failed")
+            log.error("Brew bundle installation failed")
             return False
         except Exception as exc:  # pragma: no cover - defensive
-            print(f"❌ Error running brew bundle: {exc}")
+            log.error(f"Error running brew bundle: {exc}")
             return False
 
     def install_missing_packages_only(self) -> bool:
-        print("Checking for missing packages...")
+        log.step("Checking for missing packages...")
         try:
             result = subprocess.run(["brew", "list", "--formula"], capture_output=True, text=True, check=True)
             installed_formulae = set(result.stdout.strip().split("\n"))
             result = subprocess.run(["brew", "list", "--cask"], capture_output=True, text=True, check=True)
             installed_casks = set(result.stdout.strip().split("\n"))
         except subprocess.CalledProcessError as exc:
-            print(f"Error getting installed packages: {exc}")
+            log.error(f"Error getting installed packages: {exc}")
             return False
 
         individual, bundle, casks = self.classify_packages()
@@ -352,9 +353,9 @@ class InstallService:
         self._installed_any = bool(missing_individual or missing_bundle or missing_casks)
 
         for pkg in missing_individual + missing_bundle:
-            print(f"  Missing formula: {pkg.get('name')}")
+            log.info(f"  Missing formula: {pkg.get('name')}")
         for cask in missing_casks:
-            print(f"  Missing cask: {cask}")
+            log.info(f"  Missing cask: {cask}")
 
         if missing_individual and not self.install_individual_packages(missing_individual):
             return False
@@ -371,7 +372,7 @@ class InstallService:
         try:
             result = subprocess.run(["brew", "list", "--cask"], capture_output=True, text=True, check=True)
             if "kitty" not in result.stdout.splitlines():
-                print("Skipping kitty TERMINFO setup (kitty not installed via Homebrew)")
+                log.info("Skipping kitty TERMINFO setup (kitty not installed via Homebrew)")
                 return True
         except subprocess.CalledProcessError:
             return True
@@ -379,10 +380,10 @@ class InstallService:
         applications_path = self.manager.config.get("applications_path", "/Applications")
         kitty_terminfo_path = Path(applications_path) / "kitty.app" / "Contents" / "Resources" / "kitty" / "terminfo"
         if not kitty_terminfo_path.exists():
-            print(f"⚠️  Warning: kitty terminfo directory not found: {kitty_terminfo_path}")
+            log.warning(f"kitty terminfo directory not found: {kitty_terminfo_path}")
             return True
 
-        print("Setting up kitty TERMINFO database for Emacs compatibility...")
+        log.step("Setting up kitty TERMINFO database for Emacs compatibility...")
         home_dir = Path.home()
         terminfo_dirs = [home_dir / ".terminfo" / "x", home_dir / ".terminfo" / "78"]
         for dir_path in terminfo_dirs:
@@ -390,23 +391,23 @@ class InstallService:
 
         source_file = kitty_terminfo_path / "78" / "xterm-kitty"
         if not source_file.exists():
-            print(f"⚠️  Warning: kitty terminfo file not found at expected location: {source_file}")
+            log.warning(f"kitty terminfo file not found at expected location: {source_file}")
             return True
         try:
             import shutil
 
             dest_file = home_dir / ".terminfo" / "x" / "xterm-kitty"
             shutil.copy2(source_file, dest_file)
-            print("Updated kitty terminfo at ~/.terminfo/x/xterm-kitty")
+            log.info("Updated kitty terminfo at ~/.terminfo/x/xterm-kitty")
             symlink_path = home_dir / ".terminfo" / "78" / "xterm-kitty"
             if symlink_path.exists() or symlink_path.is_symlink():
                 symlink_path.unlink()
             symlink_path.symlink_to("../x/xterm-kitty")
-            print("Updated symlink ~/.terminfo/78/xterm-kitty -> ~/.terminfo/x/xterm-kitty")
-            print("✅ Kitty TERMINFO setup complete - Emacs should work properly in terminal mode")
+            log.info("Updated symlink ~/.terminfo/78/xterm-kitty -> ~/.terminfo/x/xterm-kitty")
+            log.success("Kitty TERMINFO setup complete - Emacs should work properly in terminal mode")
             return True
         except Exception as exc:
-            print(f"❌ Error setting up kitty TERMINFO: {exc}")
+            log.error(f"Error setting up kitty TERMINFO: {exc}")
             return False
 
     def update_spotlight_index(self) -> bool:
@@ -414,9 +415,9 @@ class InstallService:
             return True
         applications_dir = Path.home() / "Applications"
         if applications_dir.exists():
-            print("Indexing ~/Applications for Spotlight...")
+            log.step("Indexing ~/Applications for Spotlight...")
             try:
                 subprocess.run(["mdimport", str(applications_dir)], check=False)
             except Exception as exc:
-                print(f"Warning: Failed to index Applications directory: {exc}")
+                log.warning(f"Failed to index Applications directory: {exc}")
         return True
