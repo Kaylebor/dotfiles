@@ -1410,7 +1410,8 @@ background_opacity 0.9
 
 #: Advanced {{{
 
-shell << .preferredShell >>
+<<- $zellijPath := lookPath "zellij" >>
+shell << default .preferredShell $zellijPath >>
 
 #: The shell program to execute. The default value of . means to use
 #: the value of of the SHELL environment variable or if unset,
