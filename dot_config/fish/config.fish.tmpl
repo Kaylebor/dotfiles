@@ -8,17 +8,13 @@ ulimit -n 65536 2>/dev/null || true
 
 {{ end -}}
 
-{{/* Prompt */}}
-{{- if lookPath "starship" }}
-if test "$TERM" != "dumb"
-  function starship_transient_prompt_func
-    starship module character
-  end
-  starship init fish | source
-  enable_transience # Enable transience for prompt, so it can remove/modify previous prompt lines
-end
-{{- end }}
-
 # overwrite greeting
 function fish_greeting
+end
+
+# Minimal prompt showing current directory and status
+function fish_prompt
+    set -l color (set_color cyan)
+    set -l reset (set_color normal)
+    printf '%s%s%s ❯ ' $color (prompt_pwd) $reset
 end

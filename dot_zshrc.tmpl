@@ -81,13 +81,6 @@ eval "$(tv init zsh)"
 source <(op completion zsh)
 {{- end }}
 
-{{- if lookPath "starship" }}
-# Load starship prompt
-if [[ "$TERM" != "dumb" ]]; then
-  source <(starship init zsh)
-fi
-{{- end }}
-
 ## Envs
 
 {{- if lookPath "bat" }}
@@ -128,4 +121,3 @@ export OPENAI_MODEL="qwen3coder-a3b-q4-16l-256k-kq8fa"
 # Per-machine configuration
 source {{ .paths.configDir }}/zsh/.zshrc.local
 {{- end }}
-

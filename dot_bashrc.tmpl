@@ -28,13 +28,6 @@ export CARAPACE_BRIDGES='zsh,fish,bash'
 source <(carapace _carapace bash)
 {{- end }}
 
-{{- if lookPath "starship" }}
-# Load starship prompt
-if [[ "$TERM" != "dumb" ]]; then
-  source <(starship init bash)
-fi
-{{- end }}
-
 {{- if lookPath "bat" }}
 # Bat as man pager
 export MANPAGER="sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p -lman'"

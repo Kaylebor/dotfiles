@@ -1,8 +1,5 @@
 #!/bin/bash
 # Setup tool integrations for nushell
-{{- if lookPath "starship" }}
-# hash: {{ output "starship" "--version" | sha256sum }}
-{{- end }}
 {{- if lookPath "carapace" }}
 # hash: {{ output "sh" "-c" "carapace --version 2>&1" | sha256sum }}
 {{- end }}
@@ -14,7 +11,6 @@ set -euo pipefail
 
 # Create necessary directories
 mkdir -p "$HOME/.cache/carapace"
-mkdir -p "$HOME/.cache/starship"
 NU_DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/nushell"
 mkdir -p "$NU_DATA_DIR/vendor/autoload"
 
@@ -22,12 +18,6 @@ mkdir -p "$NU_DATA_DIR/vendor/autoload"
 {{- if lookPath "mise" }}
 echo "Generating Mise activation for nushell..."
 mise activate nu > "$NU_DATA_DIR/vendor/autoload/mise.nu"
-{{- end }}
-
-# Initialize Starship for nushell
-{{- if lookPath "starship" }}
-echo "Generating Starship init for nushell..."
-starship init nu > "$NU_DATA_DIR/vendor/autoload/starship.nu"
 {{- end }}
 
 # Initialize Carapace completions for nushell

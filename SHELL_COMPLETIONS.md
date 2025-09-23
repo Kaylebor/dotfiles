@@ -15,7 +15,7 @@ Direct communication with tool's built-in completion system:
 
 #### Clap (Rust)
 - `fd`, `rg`, `bat`, `eza`, `difftastic`
-- `mise`, `just`, `starship`
+- `mise`, `just`
 
 #### Click (Python)
 - `pgcli`, `litecli`
