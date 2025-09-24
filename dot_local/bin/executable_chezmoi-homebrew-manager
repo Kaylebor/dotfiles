@@ -69,59 +69,6 @@ class HomebrewManager:
         """Check if this is an alternative Homebrew installation."""
         return self.config.get("homebrew_type") == "alternative"
     
-    def _get_running_services(self) -> Dict[str, str]:
-        """Get currently running brew services and their status."""
-        try:
-            result = subprocess.run(["brew", "services", "list"], 
-                                  capture_output=True, text=True, check=True)
-            
-            services = {}
-            for line in result.stdout.strip().split('\n')[1:]:  # Skip header
-                if line:
-                    parts = line.split()
-                    if len(parts) >= 2:
-                        service_name = parts[0]
-                        status = parts[1]  # 'started', 'stopped', 'error', etc.
-                        services[service_name] = status
-            
-            return services
-            
-        except subprocess.CalledProcessError as e:
-            print(f"Warning: Could not get brew services list: {e}")
-            return {}
-    
-    def _stop_service(self, service_name: str) -> bool:
-        """Stop a brew service."""
-        try:
-            print(f"  Stopping service: {service_name}")
-            subprocess.run(["brew", "services", "stop", service_name], 
-                         check=True, capture_output=True)
-            return True
-        except subprocess.CalledProcessError:
-            return False
-    
-    def _start_service(self, service_name: str) -> bool:
-        """Start a brew service."""
-        try:
-            print(f"  Starting service: {service_name}")
-            subprocess.run(["brew", "services", "start", service_name], 
-                         check=True, capture_output=True)
-            return True
-        except subprocess.CalledProcessError as e:
-            print(f"  Warning: Failed to start service {service_name}: {e}")
-            return False
-    
-    def _restart_service(self, service_name: str) -> bool:
-        """Restart a brew service."""
-        try:
-            print(f"  Restarting service: {service_name}")
-            subprocess.run(["brew", "services", "restart", service_name], 
-                         check=True, capture_output=True)
-            return True
-        except subprocess.CalledProcessError as e:
-            print(f"  Warning: Failed to restart service {service_name}: {e}")
-            return False
-    
     def _get_all_formulae_info(self, force_refresh: bool = False) -> Dict[str, Any]:
         """Get cached formulae info, fetching if needed."""
         if self._formulae_cache is None or force_refresh:
@@ -158,8 +105,6 @@ class HomebrewManager:
             self._rebuild_service = RebuildService(
                 get_formulae_info=self._get_all_formulae_info,
                 packages_helper=self._get_packages_helper(),
-                stop_service=self._stop_service,
-                start_service=self._start_service,
                 install_package=lambda pkg_config, reinstall=True: self.install_individual_package(
                     pkg_config, reinstall=reinstall
                 ),
