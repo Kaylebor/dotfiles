@@ -24,16 +24,12 @@ class RebuildService:
         *,
         get_formulae_info: Callable[[bool], Dict[str, Dict]],
         packages_helper,
-        stop_service: Callable[[str], bool],
-        start_service: Callable[[str], bool],
         install_package: Callable[[Dict, bool], bool],
         dry_run: bool = False,
         is_alternative: Callable[[], bool],
     ) -> None:
         self._get_formulae_info = get_formulae_info
         self._packages_helper = packages_helper
-        self._stop_service = stop_service
-        self._start_service = start_service
         self._install_package = install_package
         self._dry_run = dry_run
         self._is_alternative = is_alternative
@@ -104,7 +100,7 @@ class RebuildService:
         packages_to_rebuild = {pkg["name"] for pkg in outdated}
         rebuild_order = self._compute_rebuild_order(packages_to_rebuild)
 
-        running_services = self._detect_running_services(rebuild_order)
+        running_services = services.active_services(rebuild_order)
         if running_services:
             log.step(f"\nWill manage {len(running_services)} service(s) during rebuild")
 
@@ -119,7 +115,7 @@ class RebuildService:
             pkg_config = pkg_configs.get(pkg_name, {"name": pkg_name})
 
             if pkg_name in running_services:
-                self._stop_service(pkg_name)
+                services.stop_service(pkg_name)
 
             force_reinstall = self._packages_helper.force_reinstall_enabled(pkg_name)
             # Packages that always force reinstall
@@ -137,7 +133,7 @@ class RebuildService:
             if self._install_package(pkg_config, reinstall=(not force_reinstall)):
                 rebuilt_count += 1
                 if pkg_name in running_services:
-                    self._start_service(pkg_name)
+                    services.start_service(pkg_name)
             else:
                 failed.append(pkg_name)
 
@@ -197,28 +193,6 @@ class RebuildService:
             log.warning("Could not determine dependency order, using original order")
             return list(packages_affected)
 
-    def _detect_running_services(self, rebuild_order: List[str]) -> Dict[str, str]:
-        try:
-            from subprocess import run
-
-            result = run(["brew", "services", "list"], capture_output=True, text=True, check=True)
-        except Exception:
-            return {}
-
-        services: Dict[str, str] = {}
-        lines = result.stdout.strip().splitlines()[1:]
-        for line in lines:
-            parts = line.split()
-            if len(parts) >= 2:
-                services[parts[0]] = parts[1]
-
-        active = {}
-        for pkg_name in rebuild_order:
-            status = services.get(pkg_name)
-            if status in {"started", "running"}:
-                active[pkg_name] = status
-                log.info(f"  Found running service: {pkg_name}")
-        return active
 
 
 def subprocess_run(cmd):  # pragma: no cover - thin wrapper for mocking if needed
