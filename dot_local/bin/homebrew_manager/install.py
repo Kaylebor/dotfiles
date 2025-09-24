@@ -25,6 +25,7 @@ class InstallService:
     def __init__(self, manager: "HomebrewManager") -> None:
         self.manager = manager
         self._installed_any = False
+        self._formulae_installed: List[str] = []
 
     # ------------------------------------------------------------------
     # Helpers
@@ -289,6 +290,7 @@ class InstallService:
             try:
                 subprocess.run(["brew", "install", package_name], check=True)
                 self._installed_any = True
+                self._formulae_installed.append(package_name)
                 return True
             except subprocess.CalledProcessError as exc:
                 log.error(f"Error installing {package_name}: {exc}")
@@ -297,6 +299,7 @@ class InstallService:
         success = self.install_individual_package(pkg_config, reinstall=False)
         if success:
             self._installed_any = True
+            self._formulae_installed.append(package_name)
         return success
 
     def generate_brew_bundle(self, brews: List[Dict[str, Any]], casks: List[str]) -> str:
@@ -362,7 +365,12 @@ class InstallService:
         if missing_individual and not self.install_individual_packages(missing_individual):
             return False
         bundle_content = self.generate_brew_bundle(missing_bundle, missing_casks)
-        return self.install_with_bundle(bundle_content)
+        if bundle_content:
+            if self.install_with_bundle(bundle_content):
+                self._formulae_installed.extend(pkg.get("name") for pkg in missing_bundle if pkg.get("name"))
+                return True
+            return False
+        return True
 
 
     def refresh_mise_tools(
