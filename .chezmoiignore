@@ -10,10 +10,13 @@ scripts/
 docs/
 
 # Repo-local helper scripts (invoked via sourceDir, not copied to $HOME)
-.local/bin/executable_chezmoi-homebrew-manager
-.local/bin/executable_brew-check-outdated
-.local/bin/executable_chezmoi-sqlite
+.local/bin/chezmoi-homebrew-manager
+.local/bin/brew-check-outdated
+.local/bin/chezmoi-sqlite
 .local/bin/homebrew_manager/**
+.local/bin/__pycache__/**
+*.pyc
+*.pyo
 
 # Editor temporary files
 flycheck_*.el
