@@ -28,7 +28,7 @@ The CLI is organised into small modules under `dot_local/bin/homebrew_manager/`:
 | `simple-reinstall <pkg,…>` | Runs `brew reinstall` for the provided formulae; mirrors the legacy `CHEZMOI_REINSTALL_PACKAGES` behaviour. |
 | `check-outdated` | Detects source-built formulae with newer dependencies. Returns `0` when nothing needs rebuild, `1` otherwise. Dry-run just prints a message. |
 | `rebuild-outdated` | Rebuilds packages identified by the detection step, stopping/starting relevant services. Returns `0` when everything succeeds, `1` if any rebuild fails. |
-| `mise-refresh [--tool ruby] [--yes] [--dry-run]` | Lists installed Ruby versions and prompts before reinstalling each (optional `--yes` auto-confirms). Runs `mise reshim` after successful reinstalls. |
+| `mise-refresh [--tool ruby] [--yes] [--global-only] [--dry-run]` | Lists every installed Ruby version (project and global by default), confirms before reinstalling, and runs `mise reshim` when rebuilds succeed. Use `--global-only` to skip project-local installs; `--yes` auto-confirms. |
 
 The interactive `brew-check-outdated` wrapper simply calls `check-outdated` and, if needed, asks whether to run `rebuild-outdated`.
 
@@ -39,5 +39,5 @@ Chezmoi run hooks must be shell scripts, so the wrapper handles templating and e
 ## Maintenance Notes
 
 - The CLI accepts `--dry-run` for all subcommands, making it safe to preview actions during `chezmoi apply --dry-run` or ad-hoc runs.
-- Run hooks now call `mise-refresh --tool ruby`, which prompts before rebuilding each installed Ruby version (including inactive ones). Use `--yes` to bypass prompts in scripted contexts.
+- Ruby gets rebuilt automatically after Homebrew updates that touch key dependencies (`libyaml`, `openssl`, `openssl@3`, `openssl@1.1`, `gmp`, `readline`, `libffi`). The Python CLI keeps track of which formulae were rebuilt and prompts—via `mise install <tool> --force`—for every installed Ruby version (project and global). The manual `mise-refresh` subcommand remains available for ad-hoc use.
 - Git and Chezmoi ignore helper executables (e.g., `~/.local/bin/chezmoi-homebrew-manager`) and Python bytecode so the helpers run from the source directory without being copied into `$HOME`.

@@ -151,13 +151,6 @@ EOF
 # 2. Installing newly added packages
 "{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-homebrew-manager" full-install --config "$RUNTIME_CONFIG"
 
-# Refresh critical mise-managed tools after Homebrew updates
-if command -v "{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-homebrew-manager" >/dev/null 2>&1; then
-  "{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-homebrew-manager" mise-refresh --tool ruby
-else
-  echo "chezmoi homebrew manager not found; skipping mise refresh"
-fi
-
 {{ end -}}
 
 {{- end }}

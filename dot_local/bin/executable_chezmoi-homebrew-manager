@@ -125,6 +125,31 @@ class HomebrewManager:
             auto_confirm=auto_confirm,
         )
 
+    def handle_mise_triggers(
+        self,
+        *,
+        include_projects: bool = True,
+        auto_confirm: bool = False,
+    ) -> bool:
+        install_service = self._get_install_service()
+        triggered = install_service.triggered_mise_tools()
+        if not triggered:
+            return True
+
+        print("\n⚙️  Detected Homebrew changes that impact mise-managed tools:")
+        for tool, deps in triggered.items():
+            reasons = ", ".join(deps)
+            print(f"  • {tool} (due to: {reasons})")
+
+        success = self.refresh_mise_tools(
+            sorted(triggered.keys()),
+            include_projects=include_projects,
+            auto_confirm=auto_confirm,
+        )
+        if success:
+            install_service.reset_install_tracking()
+        return success
+
     def install_homebrew(self) -> bool:
         """Install Homebrew if not present."""
         return self._get_install_service().install_homebrew()
@@ -223,6 +248,10 @@ class HomebrewManager:
 
         result = service.rebuild(outdated)
 
+        mise_ok = True
+        if result.rebuilt:
+            mise_ok = self.handle_mise_triggers()
+
         if result.failed:
             print(f"\n❌ Failed to rebuild {len(result.failed)} packages: {', '.join(result.failed)}")
             print(f"✅ Successfully rebuilt {result.rebuilt} packages")
@@ -230,7 +259,7 @@ class HomebrewManager:
 
         print(f"\n✅ Successfully rebuilt all {result.rebuilt} packages")
         self._formulae_cache = None
-        return True
+        return mise_ok
     
     def install_individual_package(self, pkg_config: Dict[str, Any], reinstall: bool = False) -> bool:
         """Install a single package with its configuration."""
@@ -271,9 +300,19 @@ class HomebrewManager:
         """Generate brew bundle content."""
         return self._get_install_service().generate_brew_bundle(brews, casks)
 
-    def install_with_bundle(self, bundle_content: str) -> bool:
+    def install_with_bundle(
+        self,
+        bundle_content: str,
+        *,
+        brews: Optional[List[Dict[str, Any]]] = None,
+        casks: Optional[List[str]] = None,
+    ) -> bool:
         """Install packages using brew bundle."""
-        return self._get_install_service().install_with_bundle(bundle_content)
+        return self._get_install_service().install_with_bundle(
+            bundle_content,
+            brews=brews or (),
+            casks=casks or (),
+        )
 
     def setup_terminfo(self) -> bool:
         """Set up kitty TERMINFO for Emacs compatibility."""
@@ -345,7 +384,11 @@ class HomebrewManager:
             
             # Install remaining packages with brew bundle
             bundle_content = self.generate_brew_bundle(bundle_brews, casks)
-            if not self.install_with_bundle(bundle_content):
+            if not self.install_with_bundle(
+                bundle_content,
+                brews=bundle_brews,
+                casks=casks,
+            ):
                 return False
         else:
             # Subsequent runs: Check for outdated packages first, then install missing
@@ -380,8 +423,15 @@ class HomebrewManager:
         # Update homebrew state file for alternative installations
         if self._is_alternative_homebrew():
             try:
-                subprocess.run(["bash", "-c", "update_homebrew_state"], check=False)
-                print("Updated homebrew state file")
+                homebrew_path = self.config.get("homebrew_path")
+                if homebrew_path:
+                    current_prefix = Path.home() / homebrew_path
+                    state_file = Path.home() / ".config" / "chezmoi" / ".homebrew-state"
+                    state_file.parent.mkdir(parents=True, exist_ok=True)
+                    state_file.write_text(str(current_prefix))
+                    print(f"Updated homebrew state file at {state_file}")
+                else:
+                    print("⚠️  Skipping homebrew state update (homebrew_path missing from config)")
             except Exception as e:
                 print(f"Warning: Failed to update homebrew state: {e}")
         
@@ -398,7 +448,9 @@ class HomebrewManager:
             except Exception as e:
                 print(f"⚠️  Warning: Could not check for outdated packages: {e}")
                 print("  Run 'brew-check-outdated' manually to check")
-        
+
+        self.handle_mise_triggers()
+
         print("✅ Full Homebrew installation completed successfully!")
         return True
 
@@ -448,8 +500,15 @@ def build_parser() -> argparse.ArgumentParser:
         "--include-project",
         dest="mise_include_projects",
         action="store_true",
-        help="Include non-global mise tool installations (project-specific).",
+        help="(Deprecated) Project installs are included by default.",
     )
+    parser.add_argument(
+        "--global-only",
+        dest="mise_include_projects",
+        action="store_false",
+        help="Skip project-specific mise tool installations.",
+    )
+    parser.set_defaults(mise_include_projects=True)
     parser.add_argument(
         "--yes",
         dest="mise_auto_confirm",
@@ -469,6 +528,7 @@ def run_full_install(manager: HomebrewManager, args: argparse.Namespace) -> int:
         print("[dry-run] full-install would run (first-run=%s)" % args.first_run)
         return 0
     success = manager.full_installation(first_run=args.first_run)
+    manager.handle_mise_triggers()
     return 0 if success else 1
 
 

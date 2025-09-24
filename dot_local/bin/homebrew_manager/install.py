@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import shutil
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple, TYPE_CHECKING
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, TYPE_CHECKING
 
 import os
 import subprocess
@@ -22,10 +22,53 @@ if TYPE_CHECKING:  # pragma: no cover
 class InstallService:
     """Encapsulates install/patch helper logic used by HomebrewManager."""
 
+    MISE_TOOL_TRIGGERS: Dict[str, Set[str]] = {
+        "ruby": {
+            "libyaml",
+            "openssl",
+            "openssl@3",
+            "openssl@1.1",
+            "readline",
+            "gmp",
+            "libffi",
+        }
+    }
+
     def __init__(self, manager: "HomebrewManager") -> None:
         self.manager = manager
         self._installed_any = False
         self._formulae_installed: List[str] = []
+        self._casks_installed: List[str] = []
+
+    # ------------------------------------------------------------------
+    # Tracking helpers
+
+    def reset_install_tracking(self) -> None:
+        self._installed_any = False
+        self._formulae_installed.clear()
+        self._casks_installed.clear()
+
+    def formulae_installed(self) -> List[str]:
+        # Preserve order while removing duplicates
+        seen: Set[str] = set()
+        ordered: List[str] = []
+        for name in self._formulae_installed:
+            if name and name not in seen:
+                seen.add(name)
+                ordered.append(name)
+        return ordered
+
+    def triggered_mise_tools(self) -> Dict[str, List[str]]:
+        if not self._formulae_installed:
+            return {}
+
+        formulae = set(self._formulae_installed)
+        triggered: Dict[str, List[str]] = {}
+        for tool, watchers in self.MISE_TOOL_TRIGGERS.items():
+            hits = sorted(formulae & watchers)
+            if hits:
+                triggered[tool] = hits
+        return triggered
 
     # ------------------------------------------------------------------
     # Helpers
@@ -243,6 +286,7 @@ class InstallService:
             try:
                 subprocess.run(cmd, env=env, check=True)
                 log.success(f"Successfully installed {pkg_name}")
+                self._formulae_installed.append(pkg_name)
             except subprocess.CalledProcessError as exc:
                 log.error(f"Error installing {pkg_name}: {exc}")
                 return False
@@ -276,6 +320,8 @@ class InstallService:
                 cmd.extend(f"--{arg}" for arg in alt_specific)
         try:
             subprocess.run(cmd, env=env, check=True)
+            self._installed_any = True
+            self._formulae_installed.append(pkg_name)
             return True
         except subprocess.CalledProcessError as exc:
             log.error(f"    Error: {exc}")
@@ -296,11 +342,10 @@ class InstallService:
                 log.error(f"Error installing {package_name}: {exc}")
                 return False
 
-        success = self.install_individual_package(pkg_config, reinstall=False)
-        if success:
+        if self.install_individual_package(pkg_config, reinstall=False):
             self._installed_any = True
-            self._formulae_installed.append(package_name)
-        return success
+            return True
+        return False
 
     def generate_brew_bundle(self, brews: List[Dict[str, Any]], casks: List[str]) -> str:
         lines: List[str] = []
@@ -323,7 +368,13 @@ class InstallService:
             lines.append(f'cask "{cask}"')
         return "\n".join(lines)
 
-    def install_with_bundle(self, bundle_content: str) -> bool:
+    def install_with_bundle(
+        self,
+        bundle_content: str,
+        *,
+        brews: Iterable[Dict[str, Any]] = (),
+        casks: Iterable[str] = (),
+    ) -> bool:
         if not bundle_content.strip():
             return True
         log.step("Installing remaining packages with brew bundle...")
@@ -332,6 +383,16 @@ class InstallService:
             process.communicate(input=bundle_content)
             if process.returncode == 0:
                 log.success("Brew bundle installation completed successfully")
+                for brew in brews:
+                    if isinstance(brew, dict):
+                        name = brew.get("name")
+                    else:
+                        name = brew
+                    if name:
+                        self._formulae_installed.append(name)
+                for cask in casks:
+                    if cask:
+                        self._casks_installed.append(cask)
                 return True
             log.error("Brew bundle installation failed")
             return False
@@ -366,8 +427,11 @@ class InstallService:
             return False
         bundle_content = self.generate_brew_bundle(missing_bundle, missing_casks)
         if bundle_content:
-            if self.install_with_bundle(bundle_content):
-                self._formulae_installed.extend(pkg.get("name") for pkg in missing_bundle if pkg.get("name"))
+            if self.install_with_bundle(
+                bundle_content,
+                brews=missing_bundle,
+                casks=missing_casks,
+            ):
                 return True
             return False
         return True
@@ -410,10 +474,31 @@ class InstallService:
         success = True
         any_run = False
 
+        seen_versions: Set[str] = set()
+        filtered_entries: List[Dict[str, Any]] = []
         for entry in entries:
             version = entry.get("version")
-            if not version:
+            if not version or version in seen_versions:
                 continue
+            seen_versions.add(version)
+            contexts = entry.get("contexts") or []
+            project_only = bool(contexts) and all(ctx.get("type") == "project" for ctx in contexts)
+            if project_only and not include_projects:
+                log.info(
+                    f"Skipping ruby@{version} (project-specific; pass --include-project to include)"
+                )
+                continue
+            entry_copy = dict(entry)
+            entry_copy["__project_only"] = project_only
+            filtered_entries.append(entry_copy)
+
+        if not filtered_entries:
+            log.info("No matching ruby installations found after filtering; nothing to refresh")
+            return True
+
+        for entry in filtered_entries:
+            version = entry.get("version")
+            project_only = bool(entry.get("__project_only"))
 
             cmd_tool = f"ruby@{version}"
             if self.manager.dry_run:
@@ -421,8 +506,11 @@ class InstallService:
                 continue
 
             if not auto_confirm:
+                prompt = f"Reinstall {cmd_tool}"
+                if project_only:
+                    prompt += " (project scope)"
                 try:
-                    answer = input(f"Reinstall {cmd_tool}? [y/N] ").strip().lower()
+                    answer = input(f"{prompt}? [y/N] ").strip().lower()
                 except EOFError:
                     answer = ""
                 if answer not in ("y", "yes"):

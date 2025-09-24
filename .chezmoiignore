@@ -13,6 +13,7 @@ docs/
 .local/bin/chezmoi-homebrew-manager
 .local/bin/brew-check-outdated
 .local/bin/chezmoi-sqlite
+.local/bin/managed-configs-status
 .local/bin/homebrew_manager/**
 .local/bin/__pycache__/**
 *.pyc
