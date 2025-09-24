@@ -7,7 +7,7 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Set
 
 import networkx as nx
 
-from . import log
+from . import log, services
 
 
 @dataclass
