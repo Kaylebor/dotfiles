@@ -79,6 +79,10 @@ CHEZMOI_FORCE_REINSTALL_PACKAGES="emacs-plus@31" chezmoi apply
 
 You can specify multiple packages separated by commas, and use both variables together if needed.
 
+### Homebrew Manager CLI
+
+The automation behind these installers lives in `dot_local/bin/chezmoi-homebrew-manager`. The CLI exposes commands such as `full-install`, `check-outdated`, `rebuild-outdated`, and an interactive `mise-refresh` for rebuilding managed Ruby toolchains. Full architecture notes and usage details are documented in `docs/homebrew-manager.md`.
+
 ## Shell Completions
 
 This repository uses [carapace](https://carapace-sh.github.io/carapace-bin/) for universal shell completions across Fish, Zsh, and Bash.
