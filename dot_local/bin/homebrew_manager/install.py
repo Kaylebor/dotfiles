@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+import shutil
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple, TYPE_CHECKING
 
@@ -361,6 +363,81 @@ class InstallService:
             return False
         bundle_content = self.generate_brew_bundle(missing_bundle, missing_casks)
         return self.install_with_bundle(bundle_content)
+
+
+    def refresh_mise_tools(
+        self,
+        tools: Iterable[str],
+        *,
+        include_projects: bool = False,
+        auto_confirm: bool = False,
+    ) -> bool:
+        # Only ruby is refreshed for now.
+        tools = [tool.lower() for tool in tools if tool.lower() == "ruby"]
+        if not tools:
+            log.info("Currently only ruby refresh is supported; skipping")
+            return True
+
+        if shutil.which("mise") is None:
+            log.warning("mise not found on PATH; skipping mise tool refresh")
+            return True
+
+        try:
+            result = subprocess.run(["mise", "list", "--json"], capture_output=True, text=True, check=True)
+        except subprocess.CalledProcessError as exc:
+            log.error(f"Failed to list mise tools: {exc}")
+            return False
+
+        try:
+            data = json.loads(result.stdout or "{}")
+        except json.JSONDecodeError as exc:
+            log.error(f"Unable to parse mise list output: {exc}")
+            return False
+
+        entries = data.get("ruby") or []
+        if not entries:
+            log.info("No ruby entries found in mise; nothing to refresh")
+            return True
+
+        success = True
+        any_run = False
+
+        for entry in entries:
+            version = entry.get("version")
+            if not version:
+                continue
+
+            cmd_tool = f"ruby@{version}"
+            if self.manager.dry_run:
+                log.info(f"[dry-run] Would reinstall {cmd_tool} via mise")
+                continue
+
+            if not auto_confirm:
+                try:
+                    answer = input(f"Reinstall {cmd_tool}? [y/N] ").strip().lower()
+                except EOFError:
+                    answer = ""
+                if answer not in ("y", "yes"):
+                    log.info(f"Skipping {cmd_tool}")
+                    continue
+
+            log.step(f"Reinstalling {cmd_tool} via mise...")
+            try:
+                subprocess.run(["mise", "install", cmd_tool, "--force"], check=True)
+                any_run = True
+            except subprocess.CalledProcessError as exc:
+                log.error(f"mise install failed for {cmd_tool}: {exc}")
+                success = False
+
+        if any_run:
+            try:
+                log.step("Running mise reshim...")
+                subprocess.run(["mise", "reshim"], check=True)
+            except subprocess.CalledProcessError as exc:
+                log.warning(f"mise reshim failed: {exc}")
+                success = False
+
+        return success
 
     def installed_any(self) -> bool:
         return self._installed_any

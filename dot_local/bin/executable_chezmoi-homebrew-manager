@@ -118,6 +118,13 @@ class HomebrewManager:
             self._install_service = InstallService(self)
         return self._install_service
 
+    def refresh_mise_tools(self, tools: List[str], include_projects: bool = False, auto_confirm: bool = False) -> bool:
+        return self._get_install_service().refresh_mise_tools(
+            tools,
+            include_projects=include_projects,
+            auto_confirm=auto_confirm,
+        )
+
     def install_homebrew(self) -> bool:
         """Install Homebrew if not present."""
         return self._get_install_service().install_homebrew()
@@ -408,6 +415,7 @@ def build_parser() -> argparse.ArgumentParser:
             "simple-reinstall",
             "check-outdated",
             "rebuild-outdated",
+            "mise-refresh",
         ],
         help="Command to execute",
     )
@@ -429,6 +437,24 @@ def build_parser() -> argparse.ArgumentParser:
         "--dry-run",
         action="store_true",
         help="Show planned actions without executing them",
+    )
+    parser.add_argument(
+        "--tool",
+        dest="mise_tools",
+        action="append",
+        help="Mise tool to refresh (repeat for multiple tools). Applies to mise-refresh command.",
+    )
+    parser.add_argument(
+        "--include-project",
+        dest="mise_include_projects",
+        action="store_true",
+        help="Include non-global mise tool installations (project-specific).",
+    )
+    parser.add_argument(
+        "--yes",
+        dest="mise_auto_confirm",
+        action="store_true",
+        help="Automatically confirm mise tool reinstalls (including project-specific entries).",
     )
     parser.add_argument(
         "packages",
@@ -496,12 +522,29 @@ def run_rebuild_outdated(manager: HomebrewManager, args: argparse.Namespace) -> 
     return 0 if success else 1
 
 
+DEFAULT_MISE_TOOLS = ["ruby"]
+
+
+def run_mise_refresh(manager: HomebrewManager, args: argparse.Namespace) -> int:
+    tools = args.mise_tools if args.mise_tools else DEFAULT_MISE_TOOLS
+    if args.dry_run:
+        print(f"[dry-run] mise-refresh would reinstall tools: {', '.join(tools)}")
+        return 0
+    success = manager.refresh_mise_tools(
+        tools,
+        include_projects=args.mise_include_projects,
+        auto_confirm=args.mise_auto_confirm,
+    )
+    return 0 if success else 1
+
+
 COMMAND_HANDLERS = {
     "full-install": run_full_install,
     "force-reinstall": run_force_reinstall,
     "simple-reinstall": run_simple_reinstall,
     "check-outdated": run_check_outdated,
     "rebuild-outdated": run_rebuild_outdated,
+    "mise-refresh": run_mise_refresh,
 }
 
 
