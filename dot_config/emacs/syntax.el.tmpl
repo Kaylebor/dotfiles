@@ -38,7 +38,8 @@
           (html-mode . html-ts-mode)
           (json-mode . json-ts-mode)
           (sh-mode . bash-ts-mode)
-          (lua-mode . lua-ts-mode))))
+          (lua-mode . lua-ts-mode)
+          (yaml-mode . yaml-ts-mode))))
 
 (use-package ruby-ts-mode
   :ensure nil
@@ -66,7 +67,7 @@
 (use-package yaml-ts-mode
   :ensure nil
   :delight
-  :mode ("\\.\\(ya?ml\\)\\(?:-cpp\\)?\\'" . yaml-ts-mode))
+  :mode ("\\.\\(ya?ml\\)\\'" . yaml-ts-mode))
 (use-package toml-ts-mode
   :ensure nil
   :delight
