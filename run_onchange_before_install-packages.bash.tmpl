@@ -63,6 +63,15 @@ echo "Initializing SQLite database..."
 
 {{/* MacOS setup commands - delegated to Python script */}}
 {{ if eq .chezmoi.os "darwin" -}}
+{{- if .skip1Password }}
+{{- $signingKey := .signingKey }}
+# signing_key_status: {{ if stat $signingKey }}present{{ else }}missing{{ end }}
+if command -v ssh-add >/dev/null 2>&1 && [ -f "{{ $signingKey }}" ]; then
+  if ! ssh-add -l | grep -Fq "{{ $signingKey }}"; then
+    ssh-add --apple-use-keychain "{{ $signingKey }}"
+  fi
+fi
+{{- end }}
 # Handle package reinstalls (legacy environment variables)
 if [ -n "$CHEZMOI_REINSTALL_PACKAGES" ]; then
   echo "Reinstalling packages (brew reinstall): $CHEZMOI_REINSTALL_PACKAGES"
@@ -70,7 +79,7 @@ if [ -n "$CHEZMOI_REINSTALL_PACKAGES" ]; then
   "{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-homebrew-manager" simple-reinstall "${PACKAGES[@]}"
 fi
 
-{{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
+{{- if eq .homebrewInstallType "alternative" }}
 {{- $script_path := printf "%s/dot_local/bin/executable_chezmoi-sqlite" .chezmoi.sourceDir }}
 {{- $trigger_id := "" }}
 {{- $is_new_id := false }}
@@ -116,7 +125,9 @@ echo "Using Python script for comprehensive Homebrew management..."
 
 {{/* Execute the patch script template */}}
 {{- if eq .homebrewInstallType "alternative" }}
+{{- if and (hasKey . "packages") (hasKey .packages "darwin") (hasKey .packages.darwin "taps") }}
 {{- template "patch-homebrew-formulas" . }}
+{{- end }}
 {{- end }}
 
 # Prepare runtime configuration

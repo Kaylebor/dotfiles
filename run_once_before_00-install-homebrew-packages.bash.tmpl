@@ -33,6 +33,13 @@ fi
 echo "Initializing SQLite database..."
 "{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-sqlite" init
 
+# Ensure SSH signing key is cached in the login keychain for git commit signing
+if command -v ssh-add >/dev/null 2>&1; then
+  if ! ssh-add -l | grep -Fq "{{ .signingKey }}"; then
+    ssh-add --apple-use-keychain "{{ .signingKey }}"
+  fi
+fi
+
 echo "Performing initial package installation..."
 
 {{/* Check for Homebrew path migrations and packages needing rebuild */}}
@@ -40,7 +47,9 @@ echo "Performing initial package installation..."
 
 {{/* Execute the patch script template */}}
 {{- if eq .homebrewInstallType "alternative" }}
+{{- if and (hasKey . "packages") (hasKey .packages "darwin") (hasKey .packages.darwin "taps") }}
 {{- template "patch-homebrew-formulas" . }}
+{{- end }}
 {{- end }}
 
 # Prepare runtime configuration

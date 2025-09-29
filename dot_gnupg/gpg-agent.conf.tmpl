@@ -1,0 +1,17 @@
+{{- if eq .chezmoi.os "darwin" }}
+{{- $pinentryPath := lookPath "pinentry-mac" }}
+{{- if not $pinentryPath }}
+{{- $pinentryCandidates := list (printf "%s/homebrew/bin/pinentry-mac" .chezmoi.homeDir) "/opt/homebrew/bin/pinentry-mac" "/usr/local/bin/pinentry-mac" }}
+{{- range $candidate := $pinentryCandidates }}
+{{- if (stat $candidate) }}
+{{- $pinentryPath = $candidate }}
+{{- break }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if $pinentryPath }}
+pinentry-program {{$pinentryPath}}
+{{- end }}
+allow-emacs-pinentry
+allow-loopback-pinentry
+{{- end }}

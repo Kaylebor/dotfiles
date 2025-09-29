@@ -124,6 +124,7 @@ packages:
       - 'neovim'
       - 'nmap'
       - 'nushell'
+      - 'pinentry-mac'
       - 'pgcli'
       - 'pgformatter'
       - name: 'pkgconfig'

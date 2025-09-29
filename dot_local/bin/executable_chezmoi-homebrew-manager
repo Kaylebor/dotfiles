@@ -100,6 +100,14 @@ class HomebrewManager:
             )
         return self._packages_helper
 
+    def _get_install_order(self, name: str) -> float:
+        """Return install order for a package, defaulting to infinity."""
+        try:
+            order = self._get_packages_helper().install_order(name)
+        except Exception:
+            order = float("inf")
+        return order
+
     def _get_rebuild_service(self) -> RebuildService:
         if self._rebuild_service is None:
             self._rebuild_service = RebuildService(
