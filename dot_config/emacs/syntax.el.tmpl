@@ -385,51 +385,6 @@
 (with-eval-after-load 'apheleia
   (add-to-list 'apheleia-mode-alist '(lua-ts-mode . stylua)))
 
-{{- if .prewarmRubyLSP }}
-;; Prewarm Ruby LSP server configuration
-(with-eval-after-load 'lsp-mode
-  (defun my/prewarm-ruby-lsp-on-startup ()
-    "Start Ruby LSP server in the background without opening a visible buffer.
-This is intended to be run on startup to avoid delays when opening the first Ruby file."
-    (when (and (executable-find "ruby-lsp")
-               (not (seq-find (lambda (ws)
-                                (string-match-p "ruby-lsp" (lsp--workspace-print ws)))
-                              (lsp-workspaces))))
-      ;; Create a dedicated directory for prewarming to avoid /tmp project detection
-      (let* ((prewarm-dir (expand-file-name "lsp-prewarm" user-emacs-directory))
-             (_ (make-directory prewarm-dir t))
-             (temp-file (expand-file-name "ruby-prewarm.rb" prewarm-dir))
-             (buf (find-file-noselect temp-file t)))
-        ;; Add to LSP session blocklist to prevent "import project" prompts
-        (when (boundp 'lsp-session-folders-blocklist)
-          (add-to-list 'lsp-session-folders-blocklist prewarm-dir))
-        (with-current-buffer buf
-          (ruby-ts-mode)
-          (condition-case err
-              (progn
-                ;; Start LSP with minimal features
-                (let ((lsp-auto-guess-root t)
-                      (lsp-enable-file-watchers nil))
-                  (lsp))
-                (message "Ruby LSP server prewarmed successfully"))
-            (error (message "Failed to prewarm Ruby LSP: %s" err)))
-          ;; Clean up buffer immediately, but keep server running
-          (kill-buffer buf))
-        ;; Clean up file after a delay
-        (run-at-time "5 sec" nil
-                     (lambda ()
-                       (ignore-errors
-                         (delete-file temp-file))))))))
-
-;; Add elpaca-after-init-hook to run prewarming after all packages are loaded
-(add-hook 'elpaca-after-init-hook
-          (lambda ()
-            (run-at-time "2 sec" nil
-                         (lambda ()
-                           ;; Ensure lsp-mode is loaded before calling our function
-                           (require 'lsp-mode)
-                           (my/prewarm-ruby-lsp-on-startup)))))
-{{- end }}
 (use-package lsp-treemacs :ensure t
   :defer t
   :after lsp-mode

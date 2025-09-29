@@ -29,13 +29,6 @@
 {{- $signingKey = promptString "Enter the signing key path" (print .chezmoi.homeDir "/.ssh/id_ed25519") }}
 {{- end }}
 
-{{- $prewarmRubyLSP := false }}
-{{- if hasKey . "prewarmRubyLSP" }}
-{{-   $prewarmRubyLSP = .prewarmRubyLSP }}
-{{- else }}
-{{-   $prewarmRubyLSP = promptBool "Prewarm Ruby LSP on Emacs startup? (recommended for work machines)" false }}
-{{- end }}
-
 {{- $ollamaHost := "localhost:11434" }}
 {{- if hasKey . "ollamaHost" }}
 {{-   $ollamaHost = .ollamaHost }}
@@ -105,7 +98,6 @@ data:
 {{- end }}
   skip1Password: {{ $skip1Password }}
   signingKey: {{ $signingKey }}
-  prewarmRubyLSP: {{ $prewarmRubyLSP }}
   ollamaHost: {{ $ollamaHost | quote }}
   ollamaApiBase: {{ printf "http://%s" $ollamaHost | quote }}
   pullOllamaModels: {{ $pullOllamaModels }}

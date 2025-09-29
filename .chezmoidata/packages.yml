@@ -62,9 +62,8 @@ packages:
       - 'zsh'
       - 'zsh-antidote'
   darwin:
-    taps:
-      - 'railwaycat/emacsmacport'
     brews:
+      - 'emacs'
       - 'antidote'
       - name: 'aspell'
         watch_versions: true
@@ -77,14 +76,6 @@ packages:
       - 'curl'
       - 'diffutils'
       - 'elixir-ls'
-      - name: 'emacs-mac'
-        args:
-          - 'with-mac-metal'
-          - 'with-natural-title-bar'
-          - 'with-starter'
-          - 'with-xwidgets'
-          - 'with-unlimited-select'
-          - 'with-emacs-big-sur-icon'
       - 'enchant'
       - 'ffmpegthumbnailer'
       - 'findutils'
@@ -170,6 +161,7 @@ packages:
           - '~/Applications/1Password.app'
           - '~/Applications/1Password 7 - Password Manager.app'
       - '1password-cli'
+      - 'emacs-app'
       - 'font-maple-mono'
       - 'font-maple-mono-nf'
       - 'kitty'

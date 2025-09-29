@@ -13,9 +13,6 @@
       '(read-only t intangible t cursor-intangible t face minibuffer-prompt))
 (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
 
-;; By default, Emacs "updates" its ui more often than it needs to
-(setopt idle-update-delay 1.0)
-
 (setopt ring-bell-function #'ignore)
 
 ;; Can be activated with `display-line-numbers-mode'

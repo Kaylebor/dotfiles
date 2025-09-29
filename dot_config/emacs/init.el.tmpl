@@ -43,6 +43,9 @@
 ;; transient
 (use-package transient :ensure t)
 
+;; Compatibility shims required by some completion packages (Vertico, etc.)
+(use-package compat :ensure t :demand t)
+
 ;; websocket (required for claude-code-ide)
 (use-package websocket :ensure t)
 
