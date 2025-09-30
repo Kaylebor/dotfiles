@@ -11,7 +11,7 @@
     "github": {
       "url": "https://api.githubcopilot.com/mcp/",
       "headers": {
-        "Authorization": "Bearer {{ template "onepassword_safe" dict "opPath" "op://Private/GitHub MCP/credential" "envVar" "CHEZMOI_GITHUB_PAT" "context" . }}"
+        "Authorization": "Bearer {{ template "onepassword_safe" dict "opPath" "op://Private/GitHub MCP/credential" "keychainAccount" "github-mcp" "keychainService" "cursor-github-mcp" "envVar" "CHEZMOI_GITHUB_PAT" "context" . }}"
       }
     }{{- end }}
   }

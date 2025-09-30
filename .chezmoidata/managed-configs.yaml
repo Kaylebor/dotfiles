@@ -32,6 +32,7 @@ managed_configs:
     destination: ".cursor/mcp.json"
     preserve_fields: []
     merge_strategy: "shallow"
+    template_priority: true  # Template always wins - fully managed config
     description: "Cursor MCP server configuration - fully managed"
     
   # Claude Code Settings
@@ -69,14 +70,22 @@ managed_configs:
     max_backups: 7  # Zed settings change less often, keep more backups for safety
 
 # Merge strategy options:
-# - "shallow": Object.assign-like merge (.[0] * .[1] in jq)
+# - "shallow": Object.assign-like merge
 #   Use when: Most configurations, simple key-value overrides
-#   Behavior: Existing top-level fields completely override template fields
+#   Behavior: By default existing top-level fields override template fields
+#   With template_priority: true, template fields override existing fields
 #
 # - "deep": Recursive merge preserving nested structures  
 #   Use when: Complex nested objects where you want template updates to flow through
-#   Behavior: Recursively merges objects, existing values override at all levels
+#   Behavior: By default recursively merges objects, existing values override at all levels
+#   With template_priority: true, template values override existing at all levels
 #   Example: Template adds new nested setting, existing nested settings preserved
+#
+# Template priority modifier:
+# - template_priority: true|false (default: false)
+#   When true: Template values override existing file values
+#   When false: Existing file values override template values (preserve user changes)
+#   Use true for fully managed configs with no device-specific settings
 #
 # Preserve fields support:
 # - Simple field names: "model", "fontSize"

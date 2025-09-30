@@ -8,6 +8,7 @@
 {{- range $configName, $config := .managed_configs }}
 # hash: {{ include $config.template | sha256sum }}
 {{- end }}
+# hash: {{ include ".chezmoitemplates/onepassword_safe" | sha256sum }}
 # Environment-based hashes for dynamic content
 # hash: {{ env "CHEZMOI_GITHUB_PAT" | sha256sum }}
 # hash: {{ .skip1Password | toString | sha256sum }}
@@ -115,27 +116,47 @@ create_backup_with_rotation() {
 # Function to create jq filter for merging configurations
 create_merge_filter() {
     local merge_strategy="$1"
+    local template_priority="$2"  # "true" means template wins, "false" means existing wins
     
     case "$merge_strategy" in
         "deep")
-            # Deep merge: recursively merge objects, arrays get replaced
-            # Template provides base, existing values override at all levels
-            echo 'def deep_merge(template; existing):
-                if (template | type) == "object" and (existing | type) == "object" then
-                    template * existing + 
-                    (template | to_entries | map(
-                        select(.value | type == "object") | 
-                        {key: .key, value: deep_merge(.value; existing[.key] // {})}
-                    ) | from_entries)
-                else
-                    existing // template
-                end;
-            deep_merge(.[0]; .[1])'
+            if [[ "$template_priority" == "true" ]]; then
+                # Deep merge with template priority: template values override existing at all levels
+                echo 'def deep_merge(template; existing):
+                    if (template | type) == "object" and (existing | type) == "object" then
+                        existing * template + 
+                        (template | to_entries | map(
+                            select(.value | type == "object") | 
+                            {key: .key, value: deep_merge(.value; existing[.key] // {})}
+                        ) | from_entries)
+                    else
+                        template // existing
+                    end;
+                deep_merge(.[0]; .[1])'
+            else
+                # Deep merge: recursively merge objects, existing values override at all levels
+                echo 'def deep_merge(template; existing):
+                    if (template | type) == "object" and (existing | type) == "object" then
+                        template * existing + 
+                        (template | to_entries | map(
+                            select(.value | type == "object") | 
+                            {key: .key, value: deep_merge(.value; existing[.key] // {})}
+                        ) | from_entries)
+                    else
+                        existing // template
+                    end;
+                deep_merge(.[0]; .[1])'
+            fi
             ;;
         "shallow"|*)
-            # Simple merge: template gets overridden by existing file values
-            # This preserves all existing device-specific settings automatically
-            echo '.[0] * .[1]'
+            if [[ "$template_priority" == "true" ]]; then
+                # Shallow merge with template priority: template overrides existing
+                echo '.[1] * .[0]'
+            else
+                # Simple merge: template gets overridden by existing file values
+                # This preserves all existing device-specific settings automatically
+                echo '.[0] * .[1]'
+            fi
             ;;
     esac
 }
@@ -149,6 +170,7 @@ merge_config_file() {
     local merge_strategy="$5"
     local description="$6"
     local max_backups="$7"
+    local template_priority="${8:-false}"  # Default to false (existing wins)
     
     log_info "Processing $config_name ($description)..."
     
@@ -198,8 +220,8 @@ merge_config_file() {
             return 0
         fi
         
-        # Create merge filter based on strategy
-        local merge_filter=$(create_merge_filter "$merge_strategy")
+        # Create merge filter based on strategy and priority
+        local merge_filter=$(create_merge_filter "$merge_strategy" "$template_priority")
         
         # Perform merge
         if ! jq -s "$merge_filter" "$temp_base" "$temp_existing" > "$temp_merged"; then
@@ -314,6 +336,12 @@ log_info "Detected OS: $CURRENT_OS"
 {{- if eq $maxBackups 0 }}
   {{- $maxBackups = $globalMaxBackups }}
 {{- end }}
+{{- $templatePriority := "false" }}
+{{- if hasKey $config "template_priority" }}
+{{-   if $config.template_priority }}
+{{-     $templatePriority = "true" }}
+{{-   end }}
+{{- end }}
 merge_config_file \
     "{{ $configName }}" \
     "{{ $templatePath }}" \
@@ -321,7 +349,8 @@ merge_config_file \
     "{{ $preserveFieldsStr }}" \
     "{{ $config.merge_strategy | default "shallow" }}" \
     "{{ $config.description | default "Managed configuration" }}" \
-    "{{ $maxBackups }}"
+    "{{ $maxBackups }}" \
+    "{{ $templatePriority }}"
 
 {{- else }}
 log_warning "Skipping {{ $configName }} - no destination path defined for OS: $CURRENT_OS"
