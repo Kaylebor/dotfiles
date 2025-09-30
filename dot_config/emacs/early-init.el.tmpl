@@ -18,22 +18,11 @@
 {{-   $asyncJobs = 8 -}}
 {{- end -}}
 
-{{- if and (eq .chezmoi.os "darwin") (env "DISABLE_NATIVE_COMP") -}}
-;; Native compilation disabled due to Xcode license issues on macOS
-;; Set DISABLE_NATIVE_COMP=1 in your environment to enable this workaround
-(setq-default package-native-compile nil)
-(setq-default load-prefer-newer t)
-(setq-default native-comp-deferred-compilation nil)
-(setq-default native-comp-jit-compilation nil)
-(setq native-comp-eln-load-path nil)
-(setq comp-enable-subr-trampolines nil)
-{{- else -}}
 ;; Always precompile packages on install instead of on load
 (setq-default package-native-compile t)
 (setq-default load-prefer-newer t)
 (setq-default native-comp-deferred-compilation t)
 (setq-default native-comp-jit-compilation t)
-{{- end -}}
 
 ;; Async native compilation settings to reduce blocking
 ;; Using {{ $asyncJobs }} parallel jobs (based on {{ $cpuCores }} physical cores, {{ $cpuThreads }} threads)
@@ -45,15 +34,10 @@
 ;; 0 = no optimization, 2 = default, 3 = maximum
 (setq native-comp-speed 2)  ; Balance between compilation time and runtime performance
 
-{{- if and (eq .chezmoi.os "darwin") (env "DISABLE_NATIVE_COMP") -}}
-;; Native compilation disabled due to Xcode license issues
-(message "Native compilation disabled (Xcode workaround active)")
-{{- else -}}
 ;; Message about native compilation on first load
 (when (and (boundp 'native-comp-available-p) (native-comp-available-p))
   (message "Native compilation enabled with %d async jobs (CPU: %d cores, %d threads)"
            {{ $asyncJobs }} {{ $cpuCores }} {{ $cpuThreads }}))
-{{- end -}}
 
 ;; Increase garbage collection threshold during startup
 (setq gc-cons-threshold 100000000)
