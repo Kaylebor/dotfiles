@@ -3,16 +3,6 @@
     "context7": {
       "command": "bunx",
       "args": ["-y", "@upstash/context7-mcp"]
-    },
-    "playwright": {
-      "command": "bunx",
-      "args": ["-y", "@playwright/mcp"]
-    }{{- if or (ne (env "CHEZMOI_GITHUB_PAT") "") (ne (lower (env "CHEZMOI_SKIP_1PASSWORD")) "true") }},
-    "github": {
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer {{ template "onepassword_safe" dict "opPath" "op://Private/GitHub MCP/credential" "keychainAccount" "github-mcp" "keychainService" "cursor-github-mcp" "envVar" "CHEZMOI_GITHUB_PAT" "context" . }}"
-      }
-    }{{- end }}
+    }
   }
 }
