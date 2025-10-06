@@ -227,7 +227,14 @@
 
 ;; Terminal emulators
 ;; eat - Pure elisp terminal emulator (no compilation needed)
-(use-package eat :ensure t)
+(use-package eat :ensure t
+  :custom
+  (eat-term-name "xterm-256color")
+  :hook
+  (eat-mode . (lambda ()
+                (setq-local eat-term-name "xterm-256color")
+                (setq-local eat-term-capabilities '(cursor unknown))
+                (setq-local eat-kill-buffer-on-exit t))))
 
 ;; vterm - DISABLED to avoid compilation issues on macOS
 ;; (use-package vterm :ensure t
