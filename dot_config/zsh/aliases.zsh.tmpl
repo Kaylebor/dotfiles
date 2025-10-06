@@ -81,3 +81,29 @@ alias liad='eza --icons=auto --all --only-dirs'
 {{- if lookPath "bunx" }}
 alias ccusage='bunx ccusage'
 {{- end }}
+
+# Shadow docker with a function that resolves and calls the real executables
+docker() {
+  local docker_path nerdctl_path lima_path
+
+  docker_path="$(builtin type -P docker 2>/dev/null || true)"
+  if [ -n "$docker_path" ]; then
+    "$docker_path" "$@"
+    return $?
+  fi
+
+  nerdctl_path="$(builtin type -P nerdctl 2>/dev/null || true)"
+  if [ -n "$nerdctl_path" ]; then
+    "$nerdctl_path" "$@"
+    return $?
+  fi
+
+  lima_path="$(builtin type -P lima 2>/dev/null || true)"
+  if [ -n "$lima_path" ] && "$lima_path" nerdctl version >/dev/null 2>&1; then
+    "$lima_path" nerdctl "$@"
+    return $?
+  fi
+
+  print -u2 "No container runtime found (docker, nerdctl, or lima nerdctl)."
+  return 1
+}
