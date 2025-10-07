@@ -79,11 +79,9 @@
   :mode ("\\.sql\\'" . sql-mode)
   :hook (sql-mode . lsp-deferred))
 
-;; PostgreSQL wire protocol library with lambda password support
+;; PostgreSQL wire protocol library (lambda password support is upstream)
 (use-package pg
-  :ensure (:host github 
-           :repo "Kaylebor/pg-el" 
-           :branch "feature/lambda-password-support"))
+  :ensure t)
 
 ;; PostgreSQL database browser and editor
 (use-package pgmacs
