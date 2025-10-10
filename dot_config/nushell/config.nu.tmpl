@@ -57,6 +57,7 @@ $env.VISUAL = $env.EDITOR
 $env.PAGER = "{{ if lookPath "bat" }}bat --style=plain{{ else if lookPath "less" }}less -R{{ else }}more{{ end }}"
 $env.LANG = "en_US.UTF-8"
 $env.LC_ALL = "en_US.UTF-8"
+$env.DOCKER_BUILDKIT = "1"
 
 # Path configuration
 $env.PATH = ($env.PATH | split row (char esep) | prepend [

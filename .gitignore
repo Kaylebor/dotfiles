@@ -2,3 +2,4 @@ dot_config/brewfile/Brewfile.lock.json
 __pycache__/
 *.pyc
 *.pyo
+.vscode/

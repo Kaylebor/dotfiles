@@ -27,6 +27,7 @@ if not command -q brew
 end
 
 set -U LC_ALL en_US.UTF-8
+set -Ux DOCKER_BUILDKIT 1
 
 # Set PATH
 set -l paths \

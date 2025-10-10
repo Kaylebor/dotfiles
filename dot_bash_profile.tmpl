@@ -57,6 +57,7 @@ export PATH
 
 # Force en_US.UTF-8 locale
 export LC_ALL=en_US.UTF-8
+export DOCKER_BUILDKIT=1
 
 {{- if eq .chezmoi.os "darwin" }}
 # Increase file descriptor limit for development work (macOS)
