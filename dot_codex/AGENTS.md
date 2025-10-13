@@ -7,6 +7,7 @@
 - When a command fails due to sandbox-related issues (permission denied, blocked network, socket errors, etc.), retry with elevated permissions to request the user’s approval to bypass the sandbox.
   - This also applies to `apply_patch`, as it can run into sandbox permission issues.
   - In general, most errors you run into will likely be sandbox-related, when trying to call shell commands.
+  - Every single time you see `failed in sandbox`, retry again the very same query, exactly as-is, while asking for permissions. That message always means "ask the user if I can run it".
 - When running a Python command that requires a missing dependency, switch to `uv run --with package1 package2 -- {script}` so it can be pulled at runtime.
 - The current environment uses mise to maintain tooling versions; this means:
   - If due to some misconfiguration a command fails, running it as `mise exec -- {command}` may work if it is managed by Mise.
