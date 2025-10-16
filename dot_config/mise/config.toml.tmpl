@@ -1,71 +1,73 @@
 [tools]
-ruby = "3"
-node = "latest"
-go = "latest"
-python = "latest"
-java = "graalvm-community-23"
-elixir = "latest"
-erlang = "latest"
-lua = "latest"
-lua-language-server = "latest"
-rust = { version = "stable", components = "rust-analyzer" }
-deno = "latest"
-bun = "latest"
-pipx = "latest"
-uv = "latest"
-zellij = "latest"
+ruby = "3" # Ruby interpreter for general scripting
+node = "latest" # Node.js runtime and tooling
+go = "latest" # Go toolchain for compiling Go code
+python = "latest" # CPython runtime for Python projects
+java = "graalvm-community-23" # GraalVM Java distribution with polyglot support
+elixir = "latest" # Elixir language running on the BEAM VM
+erlang = "latest" # Erlang/OTP runtime for BEAM ecosystems
+fzf = "latest" # Terminal fuzzy finder for interactive search
+lua = "latest" # Lua scripting language runtime
+lua-language-server = "latest" # LSP server providing Lua IDE features
+rust = { version = "stable", components = "rust-analyzer" } # Rust toolchain with rust-analyzer component
+deno = "latest" # Deno runtime for TypeScript/JavaScript
+bun = "latest" # Bun JavaScript runtime and toolkit
+pipx = "latest" # pipx installer for isolated Python CLIs
+uv = "latest" # uv fast Python package and project manager
 
-# CLI Tools (migrated from package managers)
-"aqua:sharkdp/bat" = "latest"
-"cargo:fd-find" = "latest"
-"cargo:ripgrep" = "latest"
-"cargo:eza" = "latest"
-"cargo:gitu" = "latest"
-"cargo:usage-cli" = "latest"
-"go:github.com/mikefarah/yq/v4" = "latest"
-"pipx:jc" = "latest"
-"aqua:cli/cli" = "latest"          # gh/github-cli
-"aqua:koalaman/shellcheck" = "latest"
-"aqua:golangci/golangci-lint" = "latest"
-"aqua:carapace-sh/carapace-bin" = "latest"
-"aqua:alexpasmantier/television" = "latest"
+# CLI Tools
+age = "latest" # age encryption tool for simple key-based file security
+bat = "latest" # cat alternative with syntax highlighting and git integration
+biome = "latest" # Biome formatter and linter for JS/TS projects
+carapace = "latest" # Multi-shell completion generator for CLIs
+claude = "latest" # Anthropic Claude command-line assistant
+codex = "latest" # OpenAI Codex local coding agent CLI
+ctop = "latest" # Top-like monitor for container metrics
+curlie = "latest" # HTTPie-style frontend built on curl
+difftastic = "latest" # Syntax-aware structural diff tool
+eza = "latest" # Modern ls replacement with git and icons
+fd = "latest" # Fast, user-friendly alternative to find
+gh = "latest" # GitHub command-line interface
+gitu = "latest" # Magit-inspired Git TUI client
+golangci-lint = "latest" # Aggregated Go linters runner
+gron = "latest" # Flatten JSON into grep-friendly output
+hyperfine = "latest" # Benchmarking tool for shell commands
+jc = "latest" # Convert CLI output into structured JSON
+lefthook = "latest" # Fast Git hooks manager
+lnav = "latest" # Log file navigator and viewer
+prettier = "latest" # Opinionated formatter for web languages
+rg = "latest" # Ripgrep search utility for source trees
+ripgrep-all = "latest" # Ripgrep variant that searches PDFs, ebooks, and archives
+shellcheck = "latest" # Static analyzer for shell scripts
+staticcheck = "latest" # Advanced static analysis for Go code
+stylua = "latest" # Lua code formatter
+television = "latest" # Extensible fuzzy finder TUI inspired by Telescope
+usage = "latest" # CLI specification and autocompletion toolkit
+yq = "latest" # YAML processor with jq-style syntax
+zellij = "latest" # Rust terminal multiplexer and workspace manager
+zoxide = "latest" # Smarter cd command with frecency-based navigation
 
-# Additional CLI Tools (avoiding asdf backends)
-"npm:@biomejs/biome" = "latest"        # biome - JS/TS formatter/linter
-"npm:prettier" = "latest"              # prettier - code formatter
-"aqua:Wilfred/difftastic" = "latest"   # difft - structural diff
-"aqua:tomnomnom/gron" = "latest"       # gron - JSON grep
-"aqua:rs/curlie" = "latest"            # curlie - better curl
-"aqua:FiloSottile/age" = "latest"      # age - encryption tool
-"aqua:sigstore/cosign" = "latest"      # cosign - supply chain security verification
-"cargo:mdopen" = "latest"
-"cargo:emacs-lsp-booster" = "latest"
-"cargo:stylua" = "latest"
-"go:github.com/chrishrb/go-grip" = "latest"
-"go:github.com/cweill/gotests/gotests" = "latest"
-"go:github.com/evilmartians/lefthook" = "latest"
-"go:github.com/fatih/gomodifytags" = "latest"
-"go:github.com/jessfraz/dockfmt" = "latest"
-"go:github.com/stamblerre/gocode" = "latest"
-"go:github.com/x-motemen/gore/cmd/gore" = "latest"
-"go:golang.org/x/tools/cmd/goimports" = "latest"
-"go:golang.org/x/tools/gopls" = "latest"
-"go:honnef.co/go/tools/cmd/staticcheck" = "latest"
-"go:mvdan.cc/sh/v3/cmd/shfmt" = "latest"
-"go:github.com/sqls-server/sqls" = "latest"
-"npm:@anthropic-ai/claude-code" = "latest"
-"npm:@mermaid-js/mermaid-cli" = "latest"
-"npm:@musistudio/claude-code-router" = "latest"
-"npm:@google/gemini-cli" = "latest"
-"npm:@github/copilot-language-server" = "latest"
-"npm:@openai/codex" = "latest"
-"npm:@qwen-code/qwen-code" = "latest"
-"npm:clipboard-cli" = "latest"
-"npm:nx" = "latest"
-"npm:typescript-language-server" = "latest"
-"npm:vscode-langservers-extracted" = "latest"
-"pipx:aider-chat" = { version = "latest", uvx_args = "--force --python python3.12" }
-"pipx:ramalama" = "latest"
+# Extra tools not present in mise registry or overriden
+"cargo:xan" = "latest" # xan CSV toolkit and visualization CLI
+"cargo:mdopen" = "latest" # mdopen utility to view Markdown in the browser
+"cargo:emacs-lsp-booster" = "latest" # Native helper to accelerate Emacs LSP
+"go:github.com/chrishrb/go-grip" = "latest" # Go Grip server for GitHub-style Markdown previews
+"go:github.com/cweill/gotests/gotests" = "latest" # Generate table-driven tests for Go code
+"go:github.com/fatih/gomodifytags" = "latest" # Modify struct tags in Go source
+"go:github.com/jessfraz/dockfmt" = "latest" # Format Dockerfiles consistently
+"go:github.com/stamblerre/gocode" = "latest" # Autocompletion daemon for Go tooling
+"go:github.com/x-motemen/gore/cmd/gore" = "latest" # Interactive Go REPL
+"go:golang.org/x/tools/cmd/goimports" = "latest" # gofmt variant that manages imports
+"go:golang.org/x/tools/gopls" = "latest" # Official Go language server
+"go:mvdan.cc/sh/v3/cmd/shfmt" = "latest" # Formatter for shell scripts
+"go:github.com/sqls-server/sqls" = "latest" # SQL language server for editors
+"npm:@mermaid-js/mermaid-cli" = "latest" # Render Mermaid diagrams from the CLI
+"npm:@github/copilot-language-server" = "latest" # GitHub Copilot LSP backend
+"npm:clipboard-cli" = "latest" # Copy text to the system clipboard from the CLI
+"npm:nx" = "latest" # Nx monorepo build and task runner
+"npm:typescript-language-server" = "latest" # Language Server Protocol support for TypeScript
+"npm:vscode-langservers-extracted" = "latest" # VS Code HTML/CSS/JSON language servers
+"pipx:aider-chat" = { version = "latest", uvx_args = "--force --python python3.12" } # Aider AI pair-programming assistant
 
 [settings]
 experimental = true
