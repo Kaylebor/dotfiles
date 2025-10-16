@@ -1,5 +1,5 @@
 {{- template "brew_eval" . }}
-eval "$(mise activate zsh)" # Mise [https://mise.jdx.dev]
+eval "$(mise activate zsh --shims)" # Mise shims for early PATH access
 
 {{- if and (hasKey . "homebrewPaths") (hasKey . "brewBin") .brewBin (stat .brewBin) }}
 # Install Homebrew Casks to specified directory
@@ -71,9 +71,14 @@ fpath=(
 ulimit -n 65536 2>/dev/null || true
 
 # Reload SSH identities from macOS Keychain when shells start
+if [ -z "${__SSH_KEYCHAIN_LOADED:-}" ]; then
 {{-   if lookPath "ssh-add" }}
-ssh-add --apple-load-keychain >/dev/null 2>&1
+  if command -v ssh-add >/dev/null 2>&1; then
+    ssh-add --apple-load-keychain >/dev/null 2>&1 || true
+  fi
 {{-   end }}
+  export __SSH_KEYCHAIN_LOADED=1
+fi
 
 # Set up gcc paths for alternative Homebrew installations
 export LANG=en_US.UTF-8

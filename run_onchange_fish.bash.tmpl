@@ -9,10 +9,21 @@
 
 {{/* Version management */}}
 {{- if lookPath "mise" }}
-# Activate mise
+# Ensure mise shims are always on PATH for fish
+mkdir -p ~/.config/fish/conf.d
+mise activate fish --shims > ~/.config/fish/conf.d/mise-path.fish
+
+# Activate full mise integration for interactive fish sessions
 echo 'if status --is-interactive' > ~/.config/fish/conf.d/mise.fish
 mise activate fish >> ~/.config/fish/conf.d/mise.fish
 echo 'end' >> ~/.config/fish/conf.d/mise.fish
+
+{{- if lookPath "nu" }}
+# Generate Nushell mise integration
+mkdir -p ~/.config/nushell
+mise activate nu --shims > ~/.config/nushell/mise-path.nu
+mise activate nu > ~/.config/nushell/mise.nu
+{{- end }}
 {{- end }}
 
 {{/* Completions via Carapace */}}

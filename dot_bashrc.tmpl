@@ -12,8 +12,11 @@ if [[ -n "$CLAUDECODE" ]]; then
     fi
 fi
 
-# Activate Mise hook-env for all shells (interactive and Claude Code)
-eval "$(mise hook-env -s bash)"
+# Ensure mise is activated for interactive shells
+if [[ -z "$__MISE_ACTIVATED" ]]; then
+    eval "$(mise activate bash)"
+    export __MISE_ACTIVATED=1
+fi
 
 
 {{- if lookPath "tv" }}

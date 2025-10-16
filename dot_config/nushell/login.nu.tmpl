@@ -2,6 +2,15 @@
 # This file is loaded when nushell is started as a login shell
 # See https://www.nushell.sh/book/configuration.html
 
+{{- if lookPath "mise" }}
+# Ensure mise shims are available in login shells
+let mise_config_dir = $nu.default-config-dir
+let mise_shim_file = ($mise_config_dir | path join "mise-path.nu")
+if (path exists $mise_shim_file) {
+    source-env $mise_shim_file
+}
+{{- end }}
+
 # Login shell specific environment variables
 # These will be inherited by all subprocesses
 
@@ -36,6 +45,15 @@ $env.SSH_AUTH_SOCK = "{{ .chezmoi.homeDir }}/Library/Group Containers/2BUA8C4S2C
 {{- else if eq .chezmoi.os "linux" }}
 $env.SSH_AUTH_SOCK = "{{ .chezmoi.homeDir }}/.1password/agent.sock"
 {{- end }}
+{{- end }}
+
+{{- if eq .chezmoi.os "darwin" }}
+if (($env.__SSH_KEYCHAIN_LOADED? | default "") | is-empty) {
+    if (which ssh-add | length) > 0 {
+        try { ssh-add --apple-load-keychain | ignore } catch { }
+    }
+    $env.__SSH_KEYCHAIN_LOADED = "1"
+}
 {{- end }}
 
 # GPG Configuration

@@ -12,8 +12,11 @@ if [[ -n "$CLAUDECODE" ]]; then
     fi
 fi
 
-# Activate Mise hook-env for all shells (interactive and Claude Code)
-eval "$(mise hook-env -s zsh)"
+# Ensure mise is activated for interactive shells
+if [[ -z "$__MISE_ACTIVATED" ]]; then
+    eval "$(mise activate zsh)"
+    export __MISE_ACTIVATED=1
+fi
 
 
 ## HISTORY
