@@ -6,6 +6,15 @@ source /usr/share/cachyos-fish-config/cachyos-config.fish
 # Increase file descriptor limit for development work (macOS)
 ulimit -n 65536 2>/dev/null || true
 
+if status is-login
+    if test -z "$__SSH_KEYCHAIN_LOADED"
+        if command -sq ssh-add
+            ssh-add --apple-load-keychain >/dev/null 2>&1
+        end
+        set -gx __SSH_KEYCHAIN_LOADED 1
+    end
+end
+
 {{ end -}}
 
 # overwrite greeting

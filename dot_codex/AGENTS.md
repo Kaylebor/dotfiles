@@ -4,6 +4,10 @@
   - `apply_patch` provides an easier to review output to the user than any other tool, and is also easier to give permissions to.
   - Despite the name, it is also fully capable of creating files.
   - Prefer `apply_patch` ALWAYS against python/cat/bash/etcetera
+- `apply_patch` specifics to remember:
+  - Paths are resolved relative to whichever `workdir` you pass, so default to repo-root or absolute paths to avoid touching the wrong file.
+  - Users can cancel the operation mid-flight; when that happens the tool often reports a generic failure such as “No such file or directory.” Treat user interruptions as a first-class cause before retrying.
+  - The preview shows only a small hunk. If a user questions the change, describe the surrounding file or show a `sed -n` excerpt so they see the broader context.
 - When a command fails due to sandbox-related issues (permission denied, blocked network, socket errors, etc.), retry with elevated permissions to request the user’s approval to bypass the sandbox.
   - This also applies to `apply_patch`, as it can run into sandbox permission issues.
   - In general, most errors you run into will likely be sandbox-related, when trying to call shell commands.

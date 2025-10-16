@@ -39,8 +39,6 @@ flycheck_*.tmpl
 {{- if and (hasKey . "homebrewInstallType") (ne .homebrewInstallType "alternative") }}
 .local/share/chezmoi-homebrew-state.db
 {{- end }}
-.local/bin/load-ssh-keychain
-Library/**
 {{- end }}
 
 # Linux-specific files to ignore on non-Linux systems
