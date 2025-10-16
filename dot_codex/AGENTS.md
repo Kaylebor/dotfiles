@@ -15,3 +15,5 @@
   - You may use a combination of `mise ls-remote {tool}` and "raw" `mise registry` to see what's available; `mise ls` to see what's locally installed/configured.
 - `run_shell` does NOT need you to wrap your command into a shell call; that is, `echo SOMETHING` will be the same as `zsh -cl 'echo SOMETHING`
   - As with `apply_patch`, calling it "simpler" without wrapping the command in an explicit shell call will be easier for the user to review and give wider permissions to when running into sandbox issues.
+- When both chrome-devtools and Playwright MCP servers are present, favor Playwright for building or regression-checking flows, and switch to chrome-devtools when you need Chrome-specific console/network/perf insight for bug hunts.
+- Browser sessions from different MCP servers are isolated; you cannot hop from one server to drive or inspect the other's state.
