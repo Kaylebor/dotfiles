@@ -22,6 +22,42 @@
 (when (getenv "PATH")
   (setq exec-path (append (parse-colon-path (getenv "PATH"))
                           (list exec-directory))))
+
+;; Ensure expected CLI tools (mise shims, local bin) are always present on exec-path
+(let* ((extra-paths
+        (delq nil
+              (list
+               "{{ joinPath .chezmoi.homeDir ".local" "bin" }}"
+               "{{ joinPath .chezmoi.homeDir ".local" "share" "mise" "shims" }}"
+{{- if stat (joinPath .chezmoi.homeDir "bin") }}
+               "{{ joinPath .chezmoi.homeDir "bin" }}"
+{{- end }}
+{{- $brewPrefix := "" }}
+{{- if and (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
+{{-   if and (hasKey . "homebrewPath") (ne .homebrewPath "") }}
+{{-     $brewPrefix = joinPath .chezmoi.homeDir .homebrewPath }}
+{{-   end }}
+{{- else if stat "/opt/homebrew" }}
+{{-   $brewPrefix = "/opt/homebrew" }}
+{{- else if stat "/usr/local" }}
+{{-   $brewPrefix = "/usr/local" }}
+{{- end }}
+{{- if $brewPrefix }}
+               (when (file-directory-p "{{ joinPath $brewPrefix "opt" "libpq" "bin" }}")
+                 "{{ joinPath $brewPrefix "opt" "libpq" "bin" }}")
+               (when (file-directory-p "{{ joinPath $brewPrefix "opt" "llvm" "bin" }}")
+                 "{{ joinPath $brewPrefix "opt" "llvm" "bin" }}")
+               (when (file-directory-p "{{ joinPath $brewPrefix "opt" "mise" "bin" }}")
+                 "{{ joinPath $brewPrefix "opt" "mise" "bin" }}")
+               (when (file-directory-p "{{ joinPath $brewPrefix "bin" }}")
+                 "{{ joinPath $brewPrefix "bin" }}")
+{{- end }}
+               )))
+       (current-path (getenv "PATH")))
+  (dolist (path extra-paths)
+    (when (and path (file-directory-p path))
+      (add-to-list 'exec-path path)
+      (setenv "PATH" (concat path path-separator (or (getenv "PATH") ""))))))
 {{- else }}
 ;; Linux/other: Use exec-path-from-shell in daemon mode
 (when (daemonp)
