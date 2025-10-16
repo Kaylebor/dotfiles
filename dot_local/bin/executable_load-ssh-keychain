@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# Only run on macOS where the Apple Keychain integration is available.
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  exit 0
+fi
+
+if ! command -v ssh-add >/dev/null 2>&1; then
+  exit 0
+fi
+
+# Load identities stored in the macOS Keychain into the current ssh-agent.
+# Suppress output so the launchd job stays quiet when there is nothing to load.
+ssh-add --apple-load-keychain >/dev/null 2>&1 || true

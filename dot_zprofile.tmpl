@@ -70,6 +70,11 @@ fpath=(
 # Increase file descriptor limit for development work (macOS)
 ulimit -n 65536 2>/dev/null || true
 
+# Reload SSH identities from macOS Keychain when shells start
+{{-   if lookPath "ssh-add" }}
+ssh-add --apple-load-keychain >/dev/null 2>&1
+{{-   end }}
+
 # Set up gcc paths for alternative Homebrew installations
 export LANG=en_US.UTF-8
 

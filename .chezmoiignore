@@ -1,5 +1,6 @@
 # Documentation and meta files
 README.md
+AGENTS.md
 chezmoi.toml
 CLAUDE.md
 PACKAGE_MANAGEMENT.md
@@ -38,6 +39,8 @@ flycheck_*.tmpl
 {{- if and (hasKey . "homebrewInstallType") (ne .homebrewInstallType "alternative") }}
 .local/share/chezmoi-homebrew-state.db
 {{- end }}
+.local/bin/load-ssh-keychain
+Library/**
 {{- end }}
 
 # Linux-specific files to ignore on non-Linux systems
