@@ -73,6 +73,9 @@ zoxide = "latest" # Smarter cd command with frecency-based navigation
 experimental = true
 idiomatic_version_file_enable_tools = ["ruby"]
 
+[settings.npm]
+bun = true
+
 [env]
 MISE_NODE_COREPACK=true
 {{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.idLike "arch") }}
