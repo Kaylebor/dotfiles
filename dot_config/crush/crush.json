@@ -10,9 +10,18 @@
     "ruby": {
         "command": "ruby-lsp"
     },
+    "rust": {
+        "command": "rust-analyzer"
+    },
     "typescript": {
       "command": "typescript-language-server",
       "args": ["--stdio"]
+    }
+  },
+  "tools": {
+    "ls": {
+        "max_depth": 0,
+        "max_items": 1000
     }
   }
 }
