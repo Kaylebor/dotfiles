@@ -40,6 +40,10 @@
 
 **Use structured note-taking** for long conversations - maintain task notes to preserve critical information across context window limits.
 
+## Tool Error Recovery
+
+**CRITICAL**: If you repeatedly fail to use a tool correctly, stop and read `$HOME/CRUSH.md` to verify exact tool signature and usage patterns before trying again. This documentation provides parameter names, types, and examples to prevent repeated tool-calling errors.
+
 ## Available Built-in Tools
 
 ### File Operations

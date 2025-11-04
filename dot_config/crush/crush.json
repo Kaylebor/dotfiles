@@ -7,7 +7,7 @@
   },
   "providers": {
     "zai": {
-      "system_prompt_prefix": "IMPORTANT: Before proceeding, check what tools are available. Use tools explicitly and reference their capabilities. Don't assume limitations - verify what tools you have access to in each interaction. Use structured note-taking for long conversations - maintain CRUSH_{short_description}_NOTES.md files to track tools used, important context, and task progress. This preserves critical information across context window limits."
+      "system_prompt_prefix": "IMPORTANT: Before proceeding, check what tools are available. Use tools explicitly and reference their capabilities. Don't assume limitations - verify what tools you have access to in each interaction. Use structured note-taking for long conversations - maintain CRUSH_{short_description}_NOTES.md files to track tools used, important context, and task progress. This preserves critical information across context window limits. CRITICAL: If you repeatedly fail to use a tool correctly, stop and read $HOME/CRUSH.md to verify the exact tool signature and usage patterns before trying again."
     }
   },
   "lsp": {
