@@ -1,5 +1,15 @@
 {
   "$schema": "https://charm.land/crush.json",
+  "options": {
+    "context_paths": [
+      "CHEZMOI_CRUSH.md"
+    ]
+  },
+  "providers": {
+    "zai": {
+      "system_prompt_prefix": "IMPORTANT: Before proceeding, check what tools are available. Use tools explicitly and reference their capabilities. Don't assume limitations - verify what tools you have access to in each interaction. Use structured note-taking for long conversations - maintain CRUSH_{short_description}_NOTES.md files to track tools used, important context, and task progress. This preserves critical information across context window limits."
+    }
+  },
   "lsp": {
     "go": {
       "command": "gopls",

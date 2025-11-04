@@ -147,4 +147,7 @@ $RECYCLE.BIN/
 .env
 .env.*
 
+# Crush task-specific notes (per-session, non-persistent)
+CRUSH_*_NOTES.md
+
 tmp_code_*
