@@ -33,6 +33,17 @@
       "filetypes": ["ts", "tsx", "js", "jsx"]
     }
   },
+  "mcp": {
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "timeout": 120,
+      "disabled": false,
+      "headers": {
+        "CONTEXT7_API_KEY": "$(echo $CONTEXT7_API_KEY)"
+      }
+    }
+  },
   "tools": {
     "ls": {
         "max_depth": 0,
