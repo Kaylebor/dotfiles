@@ -148,6 +148,11 @@ if type -q carapace
     set -Ux CARAPACE_BRIDGES 'zsh,fish,bash'
 end
 
+# If Crush is installed, add completions too
+if type -q crush
+    crush completion fish > ~/.config/fish/completions/crush.fish
+end
+
 # Update Fish completions from man pages
 # This generates completions for commands that don't have explicit completion files
 if type -q fish_update_completions
