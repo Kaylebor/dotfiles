@@ -13,19 +13,24 @@
   "lsp": {
     "go": {
       "command": "gopls",
-      "env": {
-        "GOTOOLCHAIN": "go1.24.5"
-      }
+      "root_markers": ["go.mod", "go.sum", ".git"],
+      "filetypes": ["go", "mod"]
     },
     "ruby": {
-        "command": "ruby-lsp"
+        "command": "ruby-lsp",
+        "root_markers": ["Gemfile", "Rakefile", "ruby.gemspec", ".git"],
+        "filetypes": ["rb", "rbw", "gemspec", "rake"]
     },
     "rust": {
-        "command": "rust-analyzer"
+        "command": "rust-analyzer",
+        "root_markers": ["Cargo.toml", "Cargo.lock", ".git"],
+        "filetypes": ["rs"]
     },
     "typescript": {
       "command": "typescript-language-server",
-      "args": ["--stdio"]
+      "args": ["--stdio"],
+      "root_markers": ["package.json", "tsconfig.json", "jsconfig.json", ".git"],
+      "filetypes": ["ts", "tsx", "js", "jsx"]
     }
   },
   "tools": {
