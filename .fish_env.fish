@@ -31,6 +31,7 @@ set -Ux DOCKER_BUILDKIT 1
 
 # Set PATH
 set -l paths \
+    ~/google-cloud-sdk/bin \
     ~/.local/share/google-cloud-sdk/bin \
     ~/.local/share/yabridge \
     ~/.rd/bin \

@@ -61,6 +61,58 @@ if (($env.__SSH_KEYCHAIN_LOADED? | default "") | is-empty) {
 $env.GPG_TTY = (tty)
 {{- end }}
 
+# PATH Management
+# Add each of the specified directories to PATH if they exist
+{{- if stat .paths.localBin }}
+$env.PATH = ($env.PATH | prepend $"($env.HOME)/.local/bin")
+{{- end }}
+{{- if stat .paths.mixEscripts }}
+$env.PATH = ($env.PATH | prepend $"($env.HOME)/.mix/escripts")
+{{- end }}
+{{- if stat .paths.bunBin }}
+$env.PATH = ($env.PATH | prepend $"($env.HOME)/.bun/bin")
+{{- end }}
+{{- if stat .paths.denoBin }}
+$env.PATH = ($env.PATH | prepend $"($env.HOME)/.deno/bin")
+{{- end }}
+{{- if stat .paths.rdBin }}
+$env.PATH = ($env.PATH | prepend $"($env.HOME)/.rd/bin")
+{{- end }}
+{{- if stat .paths.yabridge }}
+$env.PATH = ($env.PATH | prepend $"($env.HOME)/.local/share/yabridge")
+{{- end }}
+{{- $xdgDataHome := env "XDG_DATA_HOME" }}
+{{- if not $xdgDataHome }}
+{{-   $xdgDataHome = .paths.localShare }}
+{{- end }}
+{{- if stat (joinPath $xdgDataHome "google-cloud-sdk" "bin") }}
+$env.PATH = ($env.PATH | prepend $"($env.XDG_DATA_HOME? | default $"($env.HOME)/.local/share")/google-cloud-sdk/bin")
+{{- end }}
+{{- if stat (joinPath .chezmoi.homeDir "google-cloud-sdk" "bin") }}
+$env.PATH = ($env.PATH | prepend $"($env.HOME)/google-cloud-sdk/bin")
+{{- end }}
+
+{{- if eq .chezmoi.os "darwin" }}
+{{-   $brewPrefix := "" }}
+{{-   if and (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
+{{-     if and (hasKey . "homebrewPaths") (stat .homebrewPaths.base) }}
+{{-       $brewPrefix = .homebrewPaths.base }}
+{{-     end }}
+{{-   else }}
+{{-     if stat "/opt/homebrew" }}
+{{-       $brewPrefix = "/opt/homebrew" }}
+{{-     else if stat "/usr/local/Homebrew" }}
+{{-       $brewPrefix = "/usr/local" }}
+{{-     end }}
+{{-   end }}
+{{-   if and $brewPrefix (stat (joinPath $brewPrefix "opt" "libpq" "bin")) }}
+$env.PATH = ($env.PATH | prepend $"{{ $brewPrefix }}/opt/libpq/bin")
+{{-   end }}
+{{- end }}
+{{- if and (eq .chezmoi.os "darwin") (hasKey . "brewBin") .brewBin }}
+$env.PATH = ($env.PATH | prepend $"({{ .brewBin }} --prefix sqlite | str trim)/bin")
+{{- end }}
+
 # Development environment variables
 {{- if eq .chezmoi.os "darwin" }}
 # macOS specific development settings

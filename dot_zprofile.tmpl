@@ -33,6 +33,9 @@ PATH="$HOME/.local/share/yabridge:$PATH" # Yabridge for VST plugins
 {{- if stat (joinPath $xdgDataHome "google-cloud-sdk" "bin") }}
 PATH="${XDG_DATA_HOME:-$HOME/.local/share}/google-cloud-sdk/bin:$PATH" # Google Cloud SDK
 {{- end }}
+{{- if stat (joinPath .chezmoi.homeDir "google-cloud-sdk" "bin") }}
+PATH="$HOME/google-cloud-sdk/bin:$PATH"
+{{- end }}
 {{- if eq .chezmoi.os "darwin" }}
 {{-   $brewPrefix := "" }}
 {{-   if and (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
