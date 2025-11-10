@@ -130,7 +130,6 @@ packages:
       - name: 'pkgconfig'
         install_order: 40
       - 'poppler'
-      - 'postgresql@17'
       - 'rsync'
       - 'rust'
       - 'scons'
@@ -144,7 +143,6 @@ packages:
       - 'tmux'
       - 'unixodbc'
       - 'unzip'
-      - 'valkey'
       - 'watch'
       - 'watchman'
       - 'wdiff'
