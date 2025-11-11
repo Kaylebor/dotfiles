@@ -37,7 +37,11 @@ $env.PATH = ($env.PATH | split row (char esep) | prepend ["/usr/local/sbin", "/u
 {{- $fallbackEditor = $editor }}
 {{- end }}
 {{- end }}
-$env.EDITOR = "emacsclient -t{{ if $fallbackEditor }} --alternate-editor='{{ $fallbackEditor }}'{{ end }}"
+{{- if $fallbackEditor }}
+$env.EDITOR = "emacsclient -t --alternate-editor='{{ $fallbackEditor }}'"
+{{- else }}
+$env.EDITOR = "emacsclient -t"
+{{- end }}
 {{- else }}
 {{- $tuiEditors := list "hx" "nvim" "vim" "vi" }}
 {{- range $editor := $tuiEditors }}

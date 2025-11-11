@@ -1,0 +1,30 @@
+function ecc --wraps='emacsclient -c' --description 'alias ecc emacsclient -c'
+    # Use emacsclient with GUI fallback
+    {{- $visualFallback := "" }}
+    {{ if lookPath "zed" }}
+    {{- $visualFallback = "zed -w" }}
+    {{ else }}
+    {{- $visualEditors := list "hx" "nvim" "vim" "vi" }}
+    {{- range $editor := $visualEditors }}
+    {{- if lookPath $editor }}
+    {{- $visualFallback = $editor }}
+    {{- break }}
+    {{- end }}
+    {{- end }}
+    {{ end }}
+    
+    if command -v emacsclient >/dev/null 2>&1
+    {{- if $visualFallback }}
+        emacsclient -c --alternate-editor="{{ $visualFallback }}" $argv
+    {{- else }}
+        emacsclient -c $argv
+    {{- end }}
+    else
+    {{- if $visualFallback }}
+        {{ $visualFallback }} $argv
+    {{- else }}
+        echo "Error: No suitable visual editor found"
+        return 1
+    {{- end }}
+    end
+end

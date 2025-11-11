@@ -42,6 +42,63 @@ tv init fish > ~/.config/fish/conf.d/television.fish
 # Run the fish environment setup
 fish -c "source {{ .chezmoi.sourceDir }}/.fish_env.fish"
 
+# Set EDITOR and VISUAL with proper template-based logic (overriding buggy .fish_env.fish logic)
+{{- if lookPath "emacsclient" }}
+{{- $tuiFallback := "" }}
+{{- $tuiEditors := list "hx" "nvim" "vim" "vi" }}
+{{- range $editor := $tuiEditors }}
+{{- if and (not $tuiFallback) (lookPath $editor) }}
+{{- $tuiFallback = $editor }}
+{{- end }}
+{{- end }}
+{{- if $tuiFallback }}
+fish -c "set -Ux EDITOR 'emacsclient -t --alternate-editor={{ $tuiFallback }}'"
+{{- else }}
+fish -c "set -Ux EDITOR 'emacsclient -t'"
+{{- end }}
+
+{{- $visualFallback := "" }}
+{{- if lookPath "zed" }}
+{{- $visualFallback = "zed -w" }}
+{{- else }}
+{{- $visualEditors := list "hx" "nvim" "vim" "vi" }}
+{{- range $editor := $visualEditors }}
+{{- if and (not $visualFallback) (lookPath $editor) }}
+{{- $visualFallback = $editor }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if $visualFallback }}
+fish -c "set -Ux VISUAL 'emacsclient -c --alternate-editor={{ $visualFallback }}'"
+{{- else }}
+fish -c "set -Ux VISUAL 'emacsclient -c'"
+{{- end }}
+
+{{- else }}
+{{- $tuiEditors := list "hx" "nvim" "vim" "vi" }}
+{{- range $editor := $tuiEditors }}
+{{- if lookPath $editor }}
+fish -c "set -Ux EDITOR '{{ $editor }}'"
+{{- break }}
+{{- end }}
+{{- end }}
+
+{{- if lookPath "zed" }}
+fish -c "set -Ux VISUAL 'zed -w'"
+{{- else }}
+{{- $tuiEditors := list "hx" "nvim" "vim" "vi" }}
+{{- range $editor := $tuiEditors }}
+{{- if lookPath $editor }}
+fish -c "set -Ux VISUAL '{{ $editor }}'"
+{{- break }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+fish -c "set -Ux GIT_EDITOR \$EDITOR"
+fish -c "set -Ux PSQL_EDITOR \$EDITOR"
+
 {{- if and .useLlamaSwap .enableLlamaSwapEnv }}
 # Configure qwen-code for llama-swap (only when explicitly enabled)
 fish -c "set -Ux OPENAI_BASE_URL '{{ .llamaSwapApiBase }}'"

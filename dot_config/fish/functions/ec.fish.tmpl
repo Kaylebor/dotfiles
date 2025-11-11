@@ -1,0 +1,26 @@
+function ec --wraps='TERM=xterm-256color emacsclient -t' --description 'alias ec TERM=xterm-256color emacsclient -t'
+    # Use emacsclient with TUI fallback
+    {{- $tuiEditors := list "hx" "nvim" "vim" "vi" }}
+    {{- $tuiFallback := "" }}
+    {{- range $editor := $tuiEditors }}
+    {{- if lookPath $editor }}
+    {{- $tuiFallback = $editor }}
+    {{- break }}
+    {{- end }}
+    {{- end }}
+    
+    if command -v emacsclient >/dev/null 2>&1
+    {{- if $tuiFallback }}
+        emacsclient -t --alternate-editor="{{ $tuiFallback }}" $argv
+    {{- else }}
+        emacsclient -t $argv
+    {{- end }}
+    else
+    {{- if $tuiFallback }}
+        {{ $tuiFallback }} $argv
+    {{- else }}
+        echo "Error: No suitable editor found"
+        return 1
+    {{- end }}
+    end
+end

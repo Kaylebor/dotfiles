@@ -71,3 +71,60 @@ source {{ .paths.configDir }}/bash/.bashrc.local
 {{- else }}
 # Note: To add local config, create $HOME/.config/bash/.bashrc.local
 {{- end }}
+
+# Set EDITOR and VISUAL with emacsclient preference and fallback
+{{- if lookPath "emacsclient" }}
+{{- $tuiFallback := "" }}
+{{- $tuiEditors := list "hx" "nvim" "vim" "vi" }}
+{{- range $editor := $tuiEditors }}
+{{- if and (not $tuiFallback) (lookPath $editor) }}
+{{- $tuiFallback = $editor }}
+{{- end }}
+{{- end }}
+{{- if $tuiFallback }}
+export EDITOR="emacsclient -t --alternate-editor='{{ $tuiFallback }}'"
+{{- else }}
+export EDITOR="emacsclient -t"
+{{- end }}
+
+{{- $visualFallback := "" }}
+{{- if lookPath "zed" }}
+{{- $visualFallback = "zed -w" }}
+{{- else }}
+{{- $visualEditors := list "hx" "nvim" "vim" "vi" }}
+{{- range $editor := $visualEditors }}
+{{- if and (not $visualFallback) (lookPath $editor) }}
+{{- $visualFallback = $editor }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if $visualFallback }}
+export VISUAL="emacsclient -c --alternate-editor='{{ $visualFallback }}'"
+{{- else }}
+export VISUAL="emacsclient -c"
+{{- end }}
+
+{{- else }}
+{{- $tuiEditors := list "hx" "nvim" "vim" "vi" }}
+{{- range $editor := $tuiEditors }}
+{{- if lookPath $editor }}
+export EDITOR="{{ $editor }}"
+{{- break }}
+{{- end }}
+{{- end }}
+
+{{- if lookPath "zed" }}
+export VISUAL="zed -w"
+{{- else }}
+{{- $tuiEditors := list "hx" "nvim" "vim" "vi" }}
+{{- range $editor := $tuiEditors }}
+{{- if lookPath $editor }}
+export VISUAL="{{ $editor }}"
+{{- break }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+export GIT_EDITOR="$EDITOR"
+export PSQL_EDITOR="$EDITOR"
