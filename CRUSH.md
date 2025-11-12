@@ -170,3 +170,60 @@
 **Content Reading**: `view` (files), `fetch` (web), `sourcegraph` (code)
 **Search**: `grep` (content), `glob` (patterns), `ls` (directories)
 **System**: `bash` (commands), `download` (files), `agent` (specialized)
+
+## Mise-Managed Tools Available via Bash
+
+The following tools are installed via Mise and available in the shell environment:
+
+**Essential Dev Tools**:
+- **jq/yq** - JSON/YAML processors for data manipulation
+- **bat** - Syntax-highlighted file viewer
+- **fd** - Fast, user-friendly file finder
+- **ripgrep (rg)** - Fast recursive search
+- **eza** - Modern `ls` replacement
+- **zoxide** - Smart directory navigation (`z` command)
+- **zellij** - Terminal multiplexer and workspace manager
+- **fzf** - Fuzzy finder for interactive search
+- **hyperfine** - Command-line benchmarking tool
+
+**Language Runtimes**:
+- **node**, **bun**, **deno** - JavaScript/TypeScript runtimes
+- **python** - Python interpreter with pipx/uv package managers
+- **go** - Go toolchain (includes goimports, gopls, gotests)
+- **rust** - Rust toolchain with cargo
+- **java** - GraalVM Java distribution
+- **ruby** - Ruby interpreter
+- **lua** - Lua scripting language
+- **elixir/erlang** - BEAM ecosystem languages
+
+**Data & Media**:
+- **ffmpeg** - Video/audio processing
+- **jc** - Convert command output to JSON
+- **gron** - Transform JSON into grep-friendly format
+- **xan** - CSV toolkit and visualization
+
+**Development Utilities**:
+- **gh** - GitHub CLI
+- **gitu** - Magit-inspired Git TUI
+- **difftastic** - Syntax-aware diff tool
+- **shellcheck** - Shell script linter
+- **prettier** - Code formatter for web languages
+- **biome** - JS/TS formatter and linter
+- **golangci-lint** - Go linters aggregator
+- **staticcheck** - Go static analysis
+- **lefthook** - Git hooks manager
+- **claude/codex** - AI coding assistants
+- **stylua** - Lua code formatter
+- **usage** - CLI specification toolkit
+- **mermaid-cli** - Diagram rendering from CLI
+
+**Network & Security**:
+- **curlie** - HTTP client with HTTPie-style syntax
+- **age** - Modern encryption tool
+- **ctop** - Container metrics monitor
+
+**Documentation & Preview**:
+- **glow** - Markdown pager and renderer
+- **go-grip** - GitHub-style Markdown preview server
+- **mdopen** - Open Markdown in browser
+- **lnav** - Log file navigator
