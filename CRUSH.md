@@ -10,6 +10,10 @@
 
 **Notes Structure**: Track tools used, important context, task progress, and key decisions made throughout the session.
 
+## Development Guidance
+
+**Test-Driven Development**: When working on a repository, prefer TDD. Write tests before implementation. Not required when debugging system issues or exploratory troubleshooting.
+
 ### Notes Template:
 ```markdown
 # CRUSH_{task}_NOTES.md
