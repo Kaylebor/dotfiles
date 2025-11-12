@@ -14,6 +14,8 @@
 
 **Test-Driven Development**: When working on a repository, prefer TDD. Write tests before implementation. Not required when debugging system issues or exploratory troubleshooting.
 
+**Answer Formatting**: When communicating with the user, always answer outside thinking sections for clarity.
+
 ### Notes Template:
 ```markdown
 # CRUSH_{task}_NOTES.md
