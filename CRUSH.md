@@ -12,242 +12,120 @@
 
 ## Development Guidance
 
-**Test-Driven Development**: When working on a repository, prefer TDD. Write tests before implementation. Not required when debugging system issues or exploratory troubleshooting.
+**Priorities**: Prefer TDD on repositories. Answer concisely outside thinking sections.
 
-**Answer Formatting**: When communicating with the user, always answer outside thinking sections for clarity.
+**Documentation Files**: When user references a file (especially `spec/CRUSH.md`, `TESTING.md`):
+- Read it completely first
+- Follow all references recursively  
+- Treat constraints (e.g., "NO REAL TENANT SWITCHING") as hard requirements
+- Apply patterns before implementing
 
-**Documentation Files**: When user explicitly references a file (especially non-code documentation like spec/CRUSH.md, TESTING.md, etc.):
-- **STOP and READ IT COMPLETELY** before proceeding
-- **FOLLOW** any references/links to other files recursively
-- **TREAT** documented constraints (e.g., "NO REAL TENANT SWITCHING") as hard requirements, not suggestions
-- **APPLY** patterns/conventions from documentation before implementing
+**Agent Rules**: Check for `.md` instruction files in current/parent directories and near relevant files:
+`CRUSH.md`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`
 
-**Agent Rule Files**: Repository may contain .md files with agent instructions and constraints, located hierarchically throughout the project. Search for them:
-- In the current directory and parent directories
-- Next to relevant files in subfolders (e.g., `app/services/CLAUDE.md`, `spec/CRUSH.md`)
+**Library Research**: 1) context7 (docs), 2) sourcegraph (implementation), 3) web search (general info)
 
-Common filenames:
-- `CRUSH.md` (task-specific Crush rules)
-- `AGENTS.md` (general agent guidance)  
-- `CLAUDE.md` (Claude-specific instructions)
-- `GEMINI.md` (Gemini-specific instructions)
+**MCP Tools**: Prefixed with `mcp_`. Conditionally available: context7, Brave Search, SonarQube, ZAI.
 
-These files contain critical context about project architecture, testing patterns, and hard constraints (e.g., "NO REAL TENANT SWITCHING"). Always read them when referenced.
-
-### Notes Template:
+### Notes Template
 ```markdown
 # CRUSH_{task}_NOTES.md
+**Date**: [auto-update]
+**Current Task**: [fill in]
 
-## Current Session
-**Date**: [auto-update when opening]
-**Current Task**: [fill in as you work]
+## Tools Used
+[List as you go - helps pattern recognition]
 
-## Available Tools
-[Use `view` tool to list current tools and update this section]
+## Key Context
+[Findings, patterns, critical info]
 
-## Tools Used This Session
-[Document tools as you use them - helps with pattern recognition]
-
-## Key Context & Discoveries
-[Important findings, patterns, or critical information]
-
-## Task Progress
-[Track major milestones and current status]
-
----
-*Last Updated: [auto-update]*
+## Progress
+[Milestones and status]
 ```
 
-## Tool Awareness Reminder
+**Tool Awareness**: Check available tools each session. Don't assume - verify.
 
-**Before proceeding**: Always check what tools are available. Use tools explicitly and reference their capabilities. Don't assume limitations - verify what tools you have access to in each interaction.
+## Tool Usage Preferences
 
-**Use structured note-taking** for long conversations - maintain task notes to preserve critical information across context window limits.
+### General Principles
 
-## Tool Error Recovery
+**Use agents proactively**: They keep global context clean and avoid frequent summarizations that lose information. Delegate complex subtasks to `coder` agent.
 
-**CRITICAL**: If you repeatedly fail to use a tool correctly, stop and read `$HOME/CRUSH.md` to verify exact tool signature and usage patterns before trying again. This documentation provides parameter names, types, and examples to prevent repeated tool-calling errors.
+**Built-in vs bash**: Prefer built-in versions unless bash offers unique capabilities:
+- `fetch/download` instead of curl/wget
+- `glob` instead of find
+- `grep` instead of grep via bash
+- `ls` instead of ls via bash  
+- `edit/multiedit/write` instead of sed
+- `view` instead of cat
 
-## Available Built-in Tools
+**Mise tools in bash**: Many powerful tools available via Mise (jq, yq, fd, rg, bat, etc.). Often easier/better than built-ins for complex operations.
 
-### File Operations
+### Built-in Tools
 
-**`view`** - Read file contents
-- **Parameters**: `file_path` (required), `limit` (optional), `offset` (optional)
-- **Usage**: `view(file_path="src/main.go", limit=100, offset=50)`
-- **Gotchas**: Always provide absolute paths
+**When to use what:**
+- `agentic_fetch` - Complex pages where you need specific data extracted
+- `fetch` - Simple raw content retrieval
+- `glob` → `grep` - Find files first, then search within them
+- `sourcegraph` - Library source code (check local version first, then latest online)
+  - Do NOT use sourcegraph for local repo search
+- `view` → `edit/multiedit` - Always read before editing
+- `bash` with `run_in_background` - Long-running servers, watch tasks, continuous processes
 
-**`edit`** - Find and replace text in files  
-- **Parameters**: `file_path` (required), `old_string` (required), `new_string` (required), `replace_all` (optional)
-- **Usage**: `edit(file_path="src/main.go", old_string="foo", new_string="bar")`
-- **Gotchas**: `old_string` must match exactly including whitespace
+### MCP Tools (when available)
 
-**`write`** - Create or overwrite files
-- **Parameters**: `file_path` (required), `content` (required)  
-- **Usage**: `write(file_path="src/new.go", content="package main")`
-- **Gotchas**: Creates directories if needed
+**context7**: Library documentation - tends to be more useful than web search for established patterns
 
-**`multi_edit`** - Multiple file edits in one call
-- **Parameters**: `file_path` (required), `edits` (required array)
-- **Usage**: `multi_edit(file_path="src/main.go", edits=[{old_string:"foo", new_string:"bar"}])`
-- **Gotchas**: Each edit must match exactly
+**Brave Search**: 
+- Web/news search when research direction is still forming
+- General troubleshooting and community patterns
 
-**`ls`** - List directory contents
-- **Parameters**: `path` (optional), `max_depth` (optional), `max_items` (optional)
-- **Usage**: `ls(path="src", max_depth=2, max_items=50)`
-- **Gotchas**: Depth 0 = current directory only
+**SonarQube**: Code quality/security analysis when available
 
-### System Operations
+**ZAI**: Image/video analysis for understanding visual content
 
-**`bash`** - Execute shell commands
-- **Parameters**: `command` (required)
-- **Usage**: `bash(command="ls -la && echo done")`
-- **Gotchas**: Blocks dangerous commands (package managers, sudo, etc.)
+**LSP**: Use when available - excellent for codebase navigation
 
-**`download`** - Download files from URLs
-- **Parameters**: `url` (required), `file_path` (required), `timeout` (optional)
-- **Usage**: `download(url="https://example.com/file.zip", file_path="downloads/file.zip", timeout=300)`
-- **Gotchas**: 100MB size limit, max 10min timeout
+## Conditionally Available MCP Tools
 
-### Search & Navigation
+Require external MCP servers. Prefixed with `mcp_`. Main categories:
 
-**`grep`** - Search text content
-- **Parameters**: `pattern` (required), `path` (optional), `include` (optional), `exclude` (optional)
-- **Usage**: `grep(pattern="function main", path="src/", include="*.go")`
-- **Gotchas**: Uses regex patterns
+**Context7**: Library documentation lookup
 
-**`glob`** - File pattern matching
-- **Parameters**: `pattern` (required), `path` (optional)
-- **Usage**: `glob(pattern="**/*.go", path="src/")`
-- **Gotchas**: Supports ** wildcards
+**Brave Search**: Web, news, image, video, local search + AI summarizer
 
-**`fetch`** - Get web content
-- **Parameters**: `url` (required)
-- **Usage**: `fetch(url="https://api.example.com/data")`
-- **Gotchas**: Returns raw HTML/text, not binary
+**SonarQube**: Code issues, security hotspots, quality metrics
 
-**`sourcegraph`** - Search code repositories
-- **Parameters**: `query` (required)
-- **Usage**: `sourcegraph(query="function main repo:owner/name")`
-- **Gotchas**: Requires internet access
+**ZAI**: Image/video analysis via AI vision
 
-### Specialized
+## Tool Syntax
 
-**`agent`** - Delegate to specialized agents
-- **Parameters**: `agent` (required), `prompt` (required)
-- **Usage**: `agent(agent="coder", prompt="add error handling")`
-- **Agents available**: `coder` (complex tasks), `task` (Q&A)
-
-## Common Tool Call Mistakes
-
-**JSON Structure Errors**:
+**Correct**:
 ```json
-// WRONG - missing quotes
-{file_path: "foo.go"}
-
-// RIGHT  
-{"file_path": "foo.go"}
+{"file_path": "foo.go", "old_string": "foo", "new_string": "bar"}
+{"edits": [{"old_string": "a", "new_string": "b"}]}
 ```
 
-**Parameter Name Errors**:
-```json
-// WRONG - parameter doesn't exist
-{"filepath": "foo.go"}
+**Common errors**:
+- Missing quotes on keys: `{file_path: "foo.go"}`
+- Wrong parameter names: `filepath` instead of `file_path`
+- Type mismatches: string instead of array for `edits`
 
-// RIGHT - check exact parameter names
-{"file_path": "foo.go"}
-```
+## Tool System
 
-**Type Errors**:
-```json
-// WRONG - array instead of string
-{"edits": "old_string"}
+**Built-in**: Always available (listed above)
 
-// RIGHT
-{"edits": [{"old_string": "old", "new_string": "new"}]}
-```
+**LSP Integration** (when configured): Language server intelligence via `dot_config/crush/crush.json`
 
-## Tool System Architecture
-
-**Built-in Tools** (always available):
-- Core 12 tools listed above
-- Available to all Crush sessions
-
-**LSP Integration** (when configured):
-- Provides language server intelligence
-- Auto-discovered diagnostics, completions
-- File path: `dot_config/crush/crush.json` → `lsp` section
-
-**MCP Integration** (when configured):
-- Dynamic tool loading from external servers
-- Listed as "Connected: X tools" in TUI
-- File path: `dot_config/crush/crush.json` → `mcp` section
-
-**Agent Delegation**:
-- `coder` agent - Complex code tasks with file operations
-- `task` agent - Simple Q&A and context searches
-- Uses different system prompts and tool restrictions
+**MCP Integration** (when configured): External tools loaded dynamically; prefixed with `mcp_`
 
 ## Quick Reference
 
-**File Editing**: `edit` (simple), `multi_edit` (complex), `write` (new)
-**Content Reading**: `view` (files), `fetch` (web), `sourcegraph` (code)
+**Edit**: `edit` (simple), `multiedit` (complex), `write` (new)
+**Read**: `view` (files), `fetch` (web), `sourcegraph` (code)
 **Search**: `grep` (content), `glob` (patterns), `ls` (directories)
 **System**: `bash` (commands), `download` (files), `agent` (specialized)
 
-## Mise-Managed Tools Available via Bash
+## Shell Tools (via Mise)
 
-The following tools are installed via Mise and available in the shell environment:
-
-**Essential Dev Tools**:
-- **jq/yq** - JSON/YAML processors for data manipulation
-- **bat** - Syntax-highlighted file viewer
-- **fd** - Fast, user-friendly file finder
-- **ripgrep (rg)** - Fast recursive search
-- **eza** - Modern `ls` replacement
-- **zoxide** - Smart directory navigation (`z` command)
-- **zellij** - Terminal multiplexer and workspace manager
-- **fzf** - Fuzzy finder for interactive search
-- **hyperfine** - Command-line benchmarking tool
-
-**Language Runtimes**:
-- **node**, **bun**, **deno** - JavaScript/TypeScript runtimes
-- **python** - Python interpreter with pipx/uv package managers
-- **go** - Go toolchain (includes goimports, gopls, gotests)
-- **rust** - Rust toolchain with cargo
-- **java** - GraalVM Java distribution
-- **ruby** - Ruby interpreter
-- **lua** - Lua scripting language
-- **elixir/erlang** - BEAM ecosystem languages
-
-**Data & Media**:
-- **ffmpeg** - Video/audio processing
-- **jc** - Convert command output to JSON
-- **gron** - Transform JSON into grep-friendly format
-- **xan** - CSV toolkit and visualization
-
-**Development Utilities**:
-- **gh** - GitHub CLI
-- **gitu** - Magit-inspired Git TUI
-- **difftastic** - Syntax-aware diff tool
-- **shellcheck** - Shell script linter
-- **prettier** - Code formatter for web languages
-- **biome** - JS/TS formatter and linter
-- **golangci-lint** - Go linters aggregator
-- **staticcheck** - Go static analysis
-- **lefthook** - Git hooks manager
-- **claude/codex** - AI coding assistants
-- **stylua** - Lua code formatter
-- **usage** - CLI specification toolkit
-- **mermaid-cli** - Diagram rendering from CLI
-
-**Network & Security**:
-- **curlie** - HTTP client with HTTPie-style syntax
-- **age** - Modern encryption tool
-- **ctop** - Container metrics monitor
-
-**Documentation & Preview**:
-- **glow** - Markdown pager and renderer
-- **go-grip** - GitHub-style Markdown preview server
-- **mdopen** - Open Markdown in browser
-- **lnav** - Log file navigator
+Available in bash shell: jq/yq, bat, fd, rg, eza, zoxide, fzf, gh, difftastic, shellcheck, node/bun/deno, python, go, rust, java, ruby, ffmpeg, and more.
