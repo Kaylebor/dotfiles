@@ -16,6 +16,24 @@
 
 **Answer Formatting**: When communicating with the user, always answer outside thinking sections for clarity.
 
+**Documentation Files**: When user explicitly references a file (especially non-code documentation like spec/CRUSH.md, TESTING.md, etc.):
+- **STOP and READ IT COMPLETELY** before proceeding
+- **FOLLOW** any references/links to other files recursively
+- **TREAT** documented constraints (e.g., "NO REAL TENANT SWITCHING") as hard requirements, not suggestions
+- **APPLY** patterns/conventions from documentation before implementing
+
+**Agent Rule Files**: Repository may contain .md files with agent instructions and constraints, located hierarchically throughout the project. Search for them:
+- In the current directory and parent directories
+- Next to relevant files in subfolders (e.g., `app/services/CLAUDE.md`, `spec/CRUSH.md`)
+
+Common filenames:
+- `CRUSH.md` (task-specific Crush rules)
+- `AGENTS.md` (general agent guidance)  
+- `CLAUDE.md` (Claude-specific instructions)
+- `GEMINI.md` (Gemini-specific instructions)
+
+These files contain critical context about project architecture, testing patterns, and hard constraints (e.g., "NO REAL TENANT SWITCHING"). Always read them when referenced.
+
 ### Notes Template:
 ```markdown
 # CRUSH_{task}_NOTES.md

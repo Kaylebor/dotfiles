@@ -2,6 +2,7 @@
   "$schema": "https://charm.land/crush.json",
   "options": {
     "context_paths": [
+      "~/CRUSH.md",
       "CHEZMOI_CRUSH.md"
     ]
   },
