@@ -6,6 +6,49 @@ source /usr/share/cachyos-fish-config/cachyos-config.fish
 # Increase file descriptor limit for development work (macOS)
 ulimit -n 65536 2>/dev/null || true
 
+# SSH Agent initialization
+# Check if SSH_AUTH_SOCK points to a valid socket
+set -q SSH_AUTH_SOCK; and test -S $SSH_AUTH_SOCK
+or begin
+    # No valid SSH agent found, set one up
+    
+    # Try 1Password SSH agent first if not skipped
+    {{- if not .skip1Password }}
+    set -g SSH_AUTH_SOCK "$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+    test -S $SSH_AUTH_SOCK
+    and set -g __SSH_AGENT_USING_1PASSWORD 1
+    {{- end }}
+    
+    # If 1Password agent is not available or skipped, start ssh-agent
+    if not test -S $SSH_AUTH_SOCK
+        # Check if we can connect to a running ssh-agent
+        if test -z "$SSH_AUTH_SOCK"
+            # No SSH_AUTH_SOCK set, try to find a running agent
+            set -l ssh_auth_sock_files (ls -t /tmp/ssh-*/agent.* 2>/dev/null)
+            for sock in $ssh_auth_sock_files
+                test -S $sock; and test -O $sock
+                and set -g SSH_AUTH_SOCK $sock
+                and break
+            end
+        end
+        
+        # Still no agent found, start a new one
+        if not test -S $SSH_AUTH_SOCK
+            # Use a persistent socket path to avoid multiple agents
+            set -g SSH_AUTH_SOCK /tmp/ssh-agent-$USER.sock
+            if not test -S $SSH_AUTH_SOCK
+                eval (ssh-agent -c -a $SSH_AUTH_SOCK) >/dev/null 2>&1
+                # Load SSH keys after starting new agent
+                if command -sq ssh-add
+                    ssh-add --apple-load-keychain >/dev/null 2>&1
+                    set -g __SSH_KEYCHAIN_LOADED 1
+                end
+            end
+        end
+    end
+end
+
+# Load SSH keys for login shells
 if status is-login
     if test -z "$__SSH_KEYCHAIN_LOADED"
         if command -sq ssh-add
