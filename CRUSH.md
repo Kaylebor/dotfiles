@@ -23,9 +23,9 @@
 **Agent Rules**: Check for `.md` instruction files in current/parent directories and near relevant files:
 `CRUSH.md`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`
 
-**Library Research**: 1) context7 (docs), 2) sourcegraph (implementation), 3) web search (general info)
+**Library Research**: 1) `mcp_docs_*` (docs), 2) sourcegraph (implementation), 3) `mcp_www_*` (general info)
 
-**MCP Tools**: Prefixed with `mcp_`. Conditionally available: context7, Brave Search, SonarQube, ZAI.
+**MCP Tools**: Prefixed with `mcp_`. Conditionally available: `docs` (context7 MCP server), `www` (Brave Search MCP server), SonarQube, ZAI.
 
 ### Notes Template
 ```markdown
@@ -90,7 +90,7 @@
 
 Require external MCP servers. Prefixed with `mcp_`. Main categories:
 
-**Context7**: Library documentation lookup
+**Context7**: Library documentation lookup. Has two functions: ID search, then docs search with that ID. Cache important library IDs in task notes or here to avoid repeated searches.
 
 **Brave Search**: Web, news, image, video, local search + AI summarizer
 

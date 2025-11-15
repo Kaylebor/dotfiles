@@ -30,7 +30,7 @@
     }
   },
   "mcp": {
-    "context7": {
+    "docs": {
       "type": "http",
       "url": "https://mcp.context7.com/mcp",
       "timeout": 120,
