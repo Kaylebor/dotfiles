@@ -64,6 +64,14 @@ if test (uname) = Darwin; and command -q brew
     end
 end
 
+# Add libpq to PATH if installed (PostgreSQL tools)
+if test (uname) = Darwin; and command -q brew
+    set -l libpq_prefix (brew --prefix libpq)
+    if test -d $libpq_prefix/bin
+        fish_add_path -Upm $libpq_prefix/bin
+    end
+end
+
 # Set EDITOR and VISUAL; EDITOR will have only TUI editors, while VISUAL prefers GUI editors and falls back to TUI editors
 set -l tui_editors hx nvim vim vi
 if not set -q EDITOR

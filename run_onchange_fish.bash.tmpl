@@ -39,8 +39,8 @@ carapace _carapace fish > ~/.config/fish/conf.d/carapace.fish
 tv init fish > ~/.config/fish/conf.d/television.fish
 {{- end }}
 
-# Run the fish environment setup
-fish -c "source {{ .chezmoi.sourceDir }}/.fish_env.fish"
+# Run the fish environment setup in login shell context for universal variable persistence
+fish -l -c "source {{ .chezmoi.sourceDir }}/.fish_env.fish"
 
 # Set EDITOR and VISUAL with proper template-based logic (overriding buggy .fish_env.fish logic)
 {{- if lookPath "emacsclient" }}
