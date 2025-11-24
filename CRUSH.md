@@ -2,7 +2,8 @@
 
 ## Memory Management Strategy
 
-**Per-Task Notes**: Use dedicated `CRUSH_{short_description}_NOTES.md` files for each task to avoid conflicts between multiple Crush instances.
+**Per-Task Notes**: Use dedicated `CRUSH_{short_description}_NOTES.md` files for each task to avoid conflicts between multiple Crush instances; keep track of them in `CRUSH_INDEX.md` in the same folder.
+These files are added to the global `.gitignore` file and should be used for local-only task tracking.
 
 **When to Create**: Start each session by creating a task-specific notes file using format `CRUSH_{task}_NOTES.md` where:
 - `task` = 2-6 word description of your current work
