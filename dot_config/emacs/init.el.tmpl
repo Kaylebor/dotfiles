@@ -466,6 +466,11 @@
   ;; Window management configuration
   (load-file (expand-file-name "window-management.el" user-emacs-directory))
 
+  ;; kkp helps with using terminal-based Emacs within Kitty
+  (use-package kkp :ensure t
+    :config
+    (global-kkp-mode 1))
+
   ;; Modal editing configuration
 {{- if eq .modalEditingMode "meow" }}
   ;; Meow: Modern modal editing with better Emacs integration (no vterm/Magit conflicts)
