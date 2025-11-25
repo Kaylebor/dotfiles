@@ -24,6 +24,12 @@ These files are added to the global `.gitignore` file and should be used for loc
 **Agent Rules**: Check for `.md` instruction files in current/parent directories and near relevant files:
 `CRUSH.md`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`
 
+**Agent Workflow for Task Completion**:
+- First, use an Agent (or agentic_fetch for web content) to handle research, implementation, or complex tasks
+- If the Agent encounters issues, manually execute testing/debug steps (Bash commands, etc.) as needed
+- If reviewable output was generated, use a second Agent for review before finalizing
+- Once all checks pass, proceed with any commits or final actions
+
 **Library Research**: 1) `mcp_docs_*` (docs), 2) sourcegraph (implementation), 3) `mcp_www_*` (general info)
 
 **MCP Tools**: Prefixed with `mcp_`. Conditionally available: `docs` (context7 MCP server), `www` (Brave Search MCP server), SonarQube, ZAI.
