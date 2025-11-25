@@ -3,7 +3,8 @@
   "options": {
     "context_paths": [
       "~/CRUSH.md",
-      "CHEZMOI_CRUSH.md"
+      "CHEZMOI_CRUSH.md",
+      "CRUSH_INDEX.md"
     ]
   },
   "lsp": {
