@@ -52,6 +52,8 @@ These files are added to the global `.gitignore` file and should be used for loc
 
 **Use agents proactively**: They keep global context clean and avoid frequent summarizations that lose information. Delegate complex subtasks to `coder` agent.
 
+**Never ask questions in thinking mode**: All user interactions, questions, and requests for clarification must happen in non-thinking mode. The thinking section is for internal reasoning only.
+
 **Built-in vs bash**: Prefer built-in versions unless bash offers unique capabilities:
 - `fetch/download` instead of curl/wget
 - `glob` instead of find
