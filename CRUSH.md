@@ -62,6 +62,10 @@ These files are added to the global `.gitignore` file and should be used for loc
 - `edit/multiedit/write` instead of sed
 - `view` instead of cat
 
+**CRITICAL: Never call built-in tools within bash commands**: Tools like `agent`, `fetch`, `glob`, `grep`, etc. are built-in functions that must be called directly. They cannot be invoked inside a bash shell string. 
+- ❌ WRONG: `bash: "cd /path && agent {prompt: '...'}"`
+- ✅ CORRECT: Call `agent` tool directly with proper parameters
+
 **Mise tools in bash**: Many powerful tools available via Mise (jq, yq, fd, rg, bat, etc.). Often easier/better than built-ins for complex operations.
 
 ### Built-in Tools
