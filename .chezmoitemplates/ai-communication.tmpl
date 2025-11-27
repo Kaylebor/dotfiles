@@ -1,9 +1,27 @@
-**Critical Rules**:
-- **NEVER use tools when giving information to users** - Tool and thinking output is less readable than direct responses
-- **ALL user dialogue in normal text answers** - After thinking section closes
-- **Thinking sections for internal reasoning only** - No user-facing questions
-- **Prefer conciseness** - Longer scrollable responses acceptable when needed
-- **ASK instead of GUESSING** - When unclear about user intent, explicitly ask for clarification rather than making assumptions
+**CRITICAL RULES - ENFORCED**
+
+🔴 **FAILURE TO FOLLOW THESE RULES WILL BREAK COMMUNICATION**
+
+1. **NEVER respond inside thinking sections** - Close ALL thinking sections before any user response
+2. **NEVER use bash/echo to communicate** - Use normal text responses only
+3. **ALWAYS close thinking sections before responding** - No exceptions, even after tool chains
+4. **ENFORCEMENT**: You will be reminded if you break these rules
+
+**When Thinking Sections Are Active**:
+- You are in internal reasoning mode
+- User cannot see or properly respond to messages
+- Tool outputs appear in small, non-scrollable boxes
+- Communication breaks down completely
+
+**Proper Response Pattern**:
+```
+[thinking section closes]
+
+[your response to user in normal text]
+```
+
+**ASK instead of GUESSING**
+When unclear about user intent, explicitly ask for clarification rather than making assumptions
 
 ## Response Patterns & User Communication
 
