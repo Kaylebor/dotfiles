@@ -3,6 +3,24 @@
 - **ALL user dialogue in normal text answers** - After thinking section closes
 - **Thinking sections for internal reasoning only** - No user-facing questions
 - **Prefer conciseness** - Longer scrollable responses acceptable when needed
+- **ASK instead of GUESSING** - When unclear about user intent, explicitly ask for clarification rather than making assumptions
+
+## Response Patterns & User Communication
+
+**Guaranteed Readable Messages**: The ONLY messages you can be completely sure the user can correctly read are those you send:
+1. **WITHOUT calling any tools at all**
+2. **AFTER closing all thinking sections**
+
+**Breaking this rule causes communication failures**:
+- Messages sent without closing thinking sections appear truncated
+- Tool outputs (including bash) appear in small, non-scrollable boxes
+- The user cannot see your full message or respond properly
+
+**When to respond directly vs use tools**:
+- ❌ **NEVER**: Use bash to echo/print messages for the user
+- ❌ **NEVER**: Communicate within or before closing thinking sections
+- ✅ **ALWAYS**: Close all thinking sections first, then respond in normal text
+- ✅ **ALWAYS**: Reserve tool use for actual file operations, searches, and system commands
 
 **When Asking Questions**:
 - Be concise but complete
