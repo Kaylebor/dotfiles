@@ -1,5 +1,13 @@
 # CRUSH.md - Global Context for All Crush Sessions
 
+{{ template "ai-cli-tools.tmpl" . }}
+
+{{ template "ai-security.tmpl" . }}
+
+{{ template "ai-file-ops.tmpl" . }}
+
+{{ template "ai-communication.tmpl" . }}
+
 ## Memory Management Strategy
 
 **Per-Task Notes**: Use dedicated `CRUSH_{short_description}_NOTES.md` files for each task to avoid conflicts between multiple Crush instances; keep track of them in `CRUSH_INDEX.md` in the same folder.
@@ -57,12 +65,6 @@ These files are added to the global `.gitignore` file and should be used for loc
 ### General Principles
 
 **Use agents proactively**: They keep global context clean and avoid frequent summarizations that lose information. Delegate complex subtasks to `coder` agent.
-
-**Communication Rules (CRITICAL)**:
-- **NEVER use tools when giving information to users** - tool output is unreadable in Crush UI's small non-scrollable windows
-- **ALL user dialogue must be normal text answers** after the thinking section closes
-- **Thinking sections are for internal reasoning only** - no user-facing questions or content
-- **Prefer conciseness** in normal answers, but longer scrollable responses are acceptable when needed
 
 **Built-in vs bash**: Prefer built-in versions unless bash offers unique capabilities:
 - `fetch/download` instead of curl/wget

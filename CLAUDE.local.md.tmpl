@@ -2,28 +2,18 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this development environment.
 
-## Preferred CLI Tools
+{{ template "ai-cli-tools.tmpl" . }}
 
-Modern alternatives to traditional Unix tools. When searching, processing files, or performing system tasks, prefer these:
+{{ template "ai-security.tmpl" . }}
 
-### Core Tools
-- **Search**: `fd` (find), `rg` (grep), `fzf` (fuzzy finder)
-- **View/Edit**: `bat` (cat), `difftastic` (diff), `nvim`/`emacs`
-- **File ops**: `eza` (ls), `tree`, `jq`/`yq` (JSON/YAML), `jc` (cmd→JSON)
-- **System**: `btop` (htop), `dysk` (disk usage), `curlie` (curl)
-- **Dev**: `mise` (runtime manager), `gh` (GitHub CLI), `shellcheck`, `shfmt`
-{{- if eq .chezmoi.os "darwin" }}
-- **Linting**: `golangci-lint`, `biome` (JS/TS)
-{{- end }}
-{{- if eq .chezmoi.os "linux" }}
-- **Network**: `nmap`
-{{- end }}
-- **VCS**: `difftastic`, `gitu`
+{{ template "ai-file-ops.tmpl" . }}
 
-### Shell Environment
-- **Shell**: Fish (primary) + Starship prompt
-- **Multiplexer**: tmux
-- **Completion**: carapace
+{{ template "ai-communication.tmpl" . }}
+
+## Configuration
+- **Dotfiles**: Managed via chezmoi
+- **Aliases**: `cat`→`bat`, `diff`→`difftastic`, git shortcuts
+- **Search integration**: FZF+fd, previews with bat/tree/jq/yq
 
 ## Configuration
 - **Dotfiles**: Managed via chezmoi

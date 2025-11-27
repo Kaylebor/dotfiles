@@ -1,0 +1,4 @@
+- **Never display password or secret values** - Check for existence/length only, not actual values
+- **Avoid exposing sensitive data** - Use methods like `(if password "<password exists>" "<no password>")`
+- **Use secure retrieval** - Prefer keychain/env vars over hardcoded secrets
+- **Mask in output** - Replace secrets with `[REDACTED]` in logs

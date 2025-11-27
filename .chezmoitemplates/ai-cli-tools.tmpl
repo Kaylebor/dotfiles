@@ -1,0 +1,20 @@
+Modern alternatives to traditional Unix tools:
+
+**Search**: `fd` (find), `rg` (grep), `fzf` (fuzzy finder)
+**View/Edit**: `bat` (cat), `difftastic` (diff), `nvim`/`emacs`
+**File ops**: `eza` (ls), `tree`, `jq`/`yq` (JSON/YAML), `jc` (cmd→JSON)
+**System**: `btop` (htop), `dysk` (disk usage), `curlie` (curl)
+**Dev**: `mise` (runtime manager), `gh` (GitHub CLI), `shellcheck`, `shfmt`
+{{- if eq .chezmoi.os "darwin" }}
+**Linting**: `golangci-lint`, `biome` (JS/TS)
+{{- end }}
+{{- if eq .chezmoi.os "linux" }}
+**Network**: `nmap`
+{{- end }}
+**VCS**: `difftastic`, `gitu`
+
+**Shell Environment**:
+- **User Shell**: Fish (primary)
+- **AI Default Shell**: Bash (for AI tool execution)
+- **Multiplexer**: tmux
+- **Completion**: carapace
