@@ -5,8 +5,12 @@
       "~/.config/crush/CRUSH.md",
       "CRUSH.md",
       "CRUSH_INDEX.md"
-    ],
-    "system_prompt_prefix": "🔴 CRITICAL: You MUST close ALL thinking sections before responding to the user. DO NOT communicate inside thinking sections or use bash for messages."
+    ]
+  },
+  "providers": {
+    "synthetic": {
+      "system_prompt_prefix": "🔴 CRITICAL: You MUST close ALL thinking sections before responding to the user. DO NOT communicate inside thinking sections or use bash for messages."
+    }
   },
   "lsp": {
     "go": {
