@@ -43,6 +43,14 @@ Document all important repository learnings here for persistence across sessions
 ### Working with AI Tools
 When using AI-assisted editing capabilities in this chezmoi repository.
 
+### Repo-Specific Learnings
+
+**Git Config Restructuring (Nov 2025)**
+- Discovered: Git automatically reads `~/.config/git/config` via XDG Base Directory specification
+- Problem: Placing managed config there + explicit `[include]` in `~/.gitconfig` caused duplicate entries
+- Solution: Use `~/.config/git/config` for managed settings (auto-read), `~/.gitconfig` for auto-generated settings (unmanaged)
+- Pattern: When splitting config files, verify tool's default search paths to avoid redundancy
+
 ## Essential Commands
 
 **Chezmoi Core**:

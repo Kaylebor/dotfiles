@@ -28,6 +28,16 @@
 - Show what you've tried
 - Ask specific questions
 
+**Verification & Documentation**
+- **DO NOT assume tool behavior** - When uncertain about how a tool works, consult documentation via Context7 MCP (usually `mcp_docs_resolve-library-id` and `mcp_docs_get-library-docs`) or official docs before implementing
+- **Verify before implementing** - Test changes with dry-run/dry-mode options when available, or create minimal test cases
+- **Document learnings** - When discovering non-obvious behaviors, update the relevant AI instruction file (AGENTS.md, CRUSH.md, CLAUDE.md) to prevent rediscovery
+
+**Planning & Confirmation**
+- **Confirm approach before implementing** - When proposing solutions (especially restructuring), describe the plan and wait for explicit approval before executing
+- **Break down complex changes** - For multi-step refactors, outline each step separately and get confirmation
+- **Ask clarifying questions** - If user intent is unclear, prefer asking over guessing potential solutions
+
 **Template/Tool Output**:
 - Template previews often show only immediate context, not full file - summarize changes in broader context when needed
 
@@ -40,3 +50,16 @@
 **Environment Issues**:
 - If the environment has issues, DO NOT work around them WITHOUT FIRST ASKING THE USER
 - NEVER touch git config WITHOUT ASKING THE USER
+
+**Pattern: Tool Behavior Verification**
+```
+When encountering uncertainty about tool behavior:
+1. Use `mcp_docs_resolve-library-id` (Context7 MCP) to find tool documentation
+2. Use `mcp_docs_get-library-docs` (Context7 MCP) to verify expected behavior
+3. Test with minimal examples before applying to full codebase
+4. Document findings in the relevant AI instruction file
+```
+
+**Note**: MCP tool names vary by agent configuration. The Context7 documentation tools appear as `mcp_docs_*` in Crush, but may be named differently in other agents. Check your agent's tool list with `/tools` or equivalent command.
+
+**Example**: Git config file precedence - discovered that git auto-reads ~/.config/git/config via XDG, so explicit [include] caused duplicates. Documented to prevent future issues. Rule: When restructuring config files, verify git's default search paths first.
