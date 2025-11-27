@@ -2,9 +2,27 @@
 
 Guidance for automated coding agents working inside this chezmoi-managed dotfiles repo.
 
-## Repository Overview
+## CRITICAL: Chezmoi is a TOOL, NOT this repository
 
-Chezmoi-managed dotfiles for cross-platform development (macOS/Arch Linux) using Go templating. This is a sophisticated configuration management system with automated package installation, runtime management, and cross-platform support.
+**Chezmoi** is the configuration management tool we USE to manage dotfiles. This repository CONTAINS chezmoi-managed configuration files (templates, scripts, data). 
+
+- **Chezmoi** = External Go-based dotfile manager (https://github.com/twpayne/chezmoi)
+- **This repo** = Dotfiles and templates managed BY chezmoi
+
+Always distinguish between:
+- The chezmoi tool/CLI (external dependency)
+- This chezmoi repository (the dotfiles being managed)
+
+## Long-Term Memory & Precedence
+
+**AGENTS.md** is this project's primary long-term memory. **CRUSH.md** documents local Crush CLI preferences and global patterns, but **AGENTS.md takes precedence** for repository-specific decisions and patterns.
+
+When guidance conflicts:
+1. **AGENTS.md** (this file) - Repository-specific rules WIN
+2. **CRUSH.md** - Global Crush patterns and preferences
+3. **CLAUDE.md** - General Claude guidance
+
+Document all important repository learnings here for persistence across sessions.
 
 ## Core Workflows
 
