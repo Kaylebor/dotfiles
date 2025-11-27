@@ -1,6 +1,7 @@
 # Documentation and meta files
 README.md
 AGENTS.md
+CRUSH.md
 chezmoi.toml
 CLAUDE.md
 PACKAGE_MANAGEMENT.md

@@ -1,144 +1,107 @@
-# CRUSH.md - Global Context for All Crush Sessions
+# CRUSH.md - Crush-Specific Enhancements
 
-## Memory Management Strategy
+This file supplements `AGENTS.md` with Crush CLI-specific configurations and optimizations for this chezmoi repository.
 
-**Per-Task Notes**: Use dedicated `CRUSH_{short_description}_NOTES.md` files for each task to avoid conflicts between multiple Crush instances; keep track of them in `CRUSH_INDEX.md` in the same folder.
-These files are added to the global `.gitignore` file and should be used for local-only task tracking.
+## Crush Configuration
 
-**When to Create**: Start each session by creating a task-specific notes file using format `CRUSH_{task}_NOTES.md` where:
-- `task` = 2-6 word description of your current work
-- Examples: `CRUSH_refactor_backend_NOTES.md`, `CRUSH_debug_api_NOTES.md`, `CRUSH_docs_update_NOTES.md`
+**Context Files Loaded** (via `dot_config/crush/crush.json`):
+- `~/.config/crush/CRUSH.md` - Global Crush preferences for all repos
+- `AGENTS.md` - Universal repo fundamentals (read by Crush by default)
+- `CRUSH.md` - This file (repo-specific Crush enhancements)
+- `CRUSH_INDEX.md` - Task tracking index
 
-**Notes Structure**: Track tools used, important context, task progress, and key decisions made throughout the session.
+## Crush-Specific Workflows
 
-## Development Guidance
+### Preferred Tool Usage
+- Use `agent` tool for complex research/implementation tasks
+- Use `apply_patch` for surgical file edits
+- Use `chezmoi execute-template` before applying to verify templates
+- Always read files before editing (respects "ALWAYS READ BEFORE EDITING" rule)
 
-**Priorities**: Prefer TDD on repositories. Answer concisely outside thinking sections.
+### Cross-Platform Testing
+When modifying OS-specific templates:
+```bash
+# Test macOS rendering
+chezmoi execute-template --init --var "chezmoi.os=darwin" <file>
 
-**Documentation Files**: When user references a file (especially `spec/CRUSH.md`, `TESTING.md`):
-- Read it completely first
-- Follow all references recursively  
-- Treat constraints (e.g., "NO REAL TENANT SWITCHING") as hard requirements
-- Apply patterns before implementing
-
-**Agent Rules**: Check for `.md` instruction files in current/parent directories and near relevant files:
-`CRUSH.md`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`
-
-**Agent Workflow for Task Completion**:
-- First, use an Agent (or agentic_fetch for web content) to handle research, implementation, or complex tasks
-- If the Agent encounters issues, manually execute testing/debug steps (Bash commands, etc.) as needed
-- If reviewable output was generated, use a second Agent for review before finalizing
-- Once all checks pass, proceed with any commits or final actions
-
-**Library Research**: 1) `mcp_docs_*` (docs), 2) sourcegraph (implementation), 3) `mcp_www_*` (general info)
-
-**MCP Tools**: Prefixed with `mcp_`. Conditionally available: `docs` (context7 MCP server), `www` (Brave Search MCP server), SonarQube, ZAI.
-
-### Notes Template
-```markdown
-# CRUSH_{task}_NOTES.md
-**Date**: [auto-update]
-**Current Task**: [fill in]
-
-## Tools Used
-[List as you go - helps pattern recognition]
-
-## Key Context
-[Findings, patterns, critical info]
-
-## Progress
-[Milestones and status]
+# Test Linux rendering  
+chezmoi execute-template --init --var "chezmoi.os=linux" <file>
 ```
 
-**Tool Awareness**: Check available tools each session. Don't assume - verify.
+## Advanced Chezmoi Patterns
 
-## Tool Usage Preferences
+### Template Debugging
+```bash
+# Inspect all available variables
+chezmoi data | jq .
 
-### General Principles
+# Check specific variable
+chezmoi data | jq '.chezmoi.os'
 
-**Use agents proactively**: They keep global context clean and avoid frequent summarizations that lose information. Delegate complex subtasks to `coder` agent.
-
-**Never ask questions in thinking mode**: All user interactions, questions, and requests for clarification must happen in non-thinking mode. The thinking section is for internal reasoning only.
-
-**Built-in vs bash**: Prefer built-in versions unless bash offers unique capabilities:
-- `fetch/download` instead of curl/wget
-- `glob` instead of find
-- `grep` instead of grep via bash
-- `ls` instead of ls via bash  
-- `edit/multiedit/write` instead of sed
-- `view` instead of cat
-
-**CRITICAL: Never call built-in tools within bash commands**: Tools like `agent`, `fetch`, `glob`, `grep`, etc. are built-in functions that must be called directly. They cannot be invoked inside a bash shell string. 
-- ❌ WRONG: `bash: "cd /path && agent {prompt: '...'}"`
-- ✅ CORRECT: Call `agent` tool directly with proper parameters
-
-**Mise tools in bash**: Many powerful tools available via Mise (jq, yq, fd, rg, bat, etc.). Often easier/better than built-ins for complex operations.
-
-### Built-in Tools
-
-**When to use what:**
-- `agentic_fetch` - Complex pages where you need specific data extracted
-- `fetch` - Simple raw content retrieval
-- `glob` → `grep` - Find files first, then search within them
-- `sourcegraph` - Library source code (check local version first, then latest online)
-  - Do NOT use sourcegraph for local repo search
-- `view` → `edit/multiedit` - Always read before editing
-- `bash` with `run_in_background` - Long-running servers, watch tasks, continuous processes
-
-### MCP Tools (when available)
-
-**context7**: Library documentation - tends to be more useful than web search for established patterns
-
-**Brave Search**: 
-- Web/news search when research direction is still forming
-- General troubleshooting and community patterns
-
-**SonarQube**: Code quality/security analysis when available
-
-**ZAI**: Image/video analysis for understanding visual content
-
-**LSP**: Use when available - excellent for codebase navigation
-
-## Conditionally Available MCP Tools
-
-Require external MCP servers. Prefixed with `mcp_`. Main categories:
-
-**Context7**: Library documentation lookup. Has two functions: ID search, then docs search with that ID. Cache important library IDs in task notes or here to avoid repeated searches.
-
-**Brave Search**: Web, news, image, video, local search + AI summarizer
-
-**SonarQube**: Code issues, security hotspots, quality metrics
-
-**ZAI**: Image/video analysis via AI vision
-
-## Tool Syntax
-
-**Correct**:
-```json
-{"file_path": "foo.go", "old_string": "foo", "new_string": "bar"}
-{"edits": [{"old_string": "a", "new_string": "b"}]}
+# Render with custom variables
+chezmoi execute-template --var "custom=value" file.tmpl
 ```
 
-**Common errors**:
-- Missing quotes on keys: `{file_path: "foo.go"}`
-- Wrong parameter names: `filepath` instead of `file_path`
-- Type mismatches: string instead of array for `edits`
+### Package Management Tricks
+```bash
+# Quick reinstall (preserves install options)
+CHEZMOI_REINSTALL_PACKAGES="pkg1,pkg2" chezmoi apply
 
-## Tool System
+# Clean reinstall (removes options)
+CHEZMOI_FORCE_REINSTALL_PACKAGES="pkg1" chezmoi apply
 
-**Built-in**: Always available (listed above)
+# Rebuild all outdated packages after Homebrew path migration
+CHEZMOI_FORCE_REINSTALL_PACKAGES="$(chezmoi execute-template < '.chezmoidata/packages.yml' | yq '.darwin.brews | join(",")')" chezmoi apply
+```
 
-**LSP Integration** (when configured): Language server intelligence via `dot_config/crush/crush.json`
+## Repository-Specific Notes
 
-**MCP Integration** (when configured): External tools loaded dynamically; prefixed with `mcp_`
+### Large Files
+- `dot_local/bin/chezmoi-homebrew-manager` - Auto-generated, replace wholesale if updating
+- `.chezmoidata/packages.yml` - Hand-edited, use apply_patch for changes
+- Template files (`.tmpl`) - Use apply_patch, verify with execute-template
 
-## Quick Reference
+### Complex Templates
+- `.chezmoi.yaml.tmpl` - Central configuration with extensive logic
+- `dot_config/fish/config.fish.tmpl` - Complex shell configuration
+- `run_once_*.tmpl` - First-run scripts with conditional logic
 
-**Edit**: `edit` (simple), `multiedit` (complex), `write` (new)
-**Read**: `view` (files), `fetch` (web), `sourcegraph` (code)
-**Search**: `grep` (content), `glob` (patterns), `ls` (directories)
-**System**: `bash` (commands), `download` (files), `agent` (specialized)
+When modifying these, always test both macOS and Linux paths.
 
-## Shell Tools (via Mise)
+## Performance Optimizations
 
-Available in bash shell: jq/yq, bat, fd, rg, eza, zoxide, fzf, gh, difftastic, shellcheck, node/bun/deno, python, go, rust, java, ruby, ffmpeg, and more.
+### Faster Chezmoi Operations
+```bash
+# Skip 1Password prompts when testing
+chezmoi --ignore=onepassword <command>
+
+# Parallelize package installs (when safe)
+CHEZMOI_PARALLEL_PACKAGES=4 chezmoi apply
+
+# Skip scripts during testing
+chezmoi --ignore=scripts <command>
+```
+
+## Troubleshooting Crush-Specific Issues
+
+### Template Rendering Failures
+If `chezmoi execute-template` fails:
+1. Check for missing variables: `chezmoi data | jq 'keys'`
+2. Verify template syntax: `chezmoi execute-template --debug <file>`
+3. Check 1Password connectivity if using `onepasswordRead`
+
+### Path Migration Issues
+When Homebrew path changes (e.g., `/usr/local` → `/opt/homebrew`):
+1. Update `.chezmoi.yaml.tmpl` with new paths
+2. Rebuild affected packages: `CHEZMOI_FORCE_REINSTALL_PACKAGES="gcc,emacs-plus" chezmoi apply`
+3. Verify with `brew doctor` or `{{ .brewBin }} doctor`
+
+### Package Installation Failures
+- Check build logs in `~/.local/share/chezmoi/.work`
+- Verify architecture: `chezmoi data | jq '.chezmoi.arch'`
+- Check for conflicting formulas: `brew list | grep -E "(emacs|gcc)"`
+
+## References
+- **Primary Guide**: `AGENTS.md` - Universal repo fundamentals
+- **User Config**: `~/GLOBAL_CRUSH.md` - Personal preferences
+- **Task Index**: `CRUSH_INDEX.md` - Active task tracking
