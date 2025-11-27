@@ -10,6 +10,13 @@ This file supplements `AGENTS.md` with Crush CLI-specific configurations and opt
 - `CRUSH.md` - This file (repo-specific Crush enhancements)
 - `CRUSH_INDEX.md` - Task tracking index
 
+**System Prompt Configuration**:
+- `system_prompt_prefix` - Prepended to every model invocation (set in `dot_config/crush/crush.json`)
+- Used to enforce critical rules that degrade with long context windows
+- Example: "🔴 CRITICAL: You MUST close ALL thinking sections before responding"
+
+The system prompt prefix is particularly important for thinking models like Kimi K2 Thinking, where system prompts can get pushed out after many tool calls. This configuration ensures critical communication rules stay near the model's immediate context.
+
 ## Crush-Specific Workflows
 
 ### Preferred Tool Usage
