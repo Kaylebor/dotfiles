@@ -8,6 +8,8 @@
 
 {{ template "ai-communication.tmpl" . }}
 
+{{ template "ai-problem-solving.tmpl" . }}
+
 ## Codex-Specific Notes
 - Prefer using `apply_patch` for file edits to keep changes safe and reviewable.
   - `apply_patch` provides an easier to review output to the user than any other tool, and is also fully capable of creating files.
