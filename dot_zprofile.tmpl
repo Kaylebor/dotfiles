@@ -69,9 +69,6 @@ fpath=(
 )
 
 {{- if eq .chezmoi.os "darwin" }}
-# Increase file descriptor limit for development work (macOS)
-ulimit -n 65536 2>/dev/null || true
-
 # Reload SSH identities from macOS Keychain when shells start
 if [ -z "${__SSH_KEYCHAIN_LOADED:-}" ]; then
 {{-   if lookPath "ssh-add" }}
