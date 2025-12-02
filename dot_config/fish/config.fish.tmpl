@@ -3,8 +3,8 @@ source /usr/share/cachyos-fish-config/cachyos-config.fish
 
 {{ end -}}
 {{- if eq .chezmoi.os "darwin" }}
-# Increase file descriptor limit for development work (macOS)
-ulimit -n 65536 2>/dev/null || true
+# Common environment variables (locale, docker, man pager, ulimit)
+{{ template "common_env.tmpl" (dict "shell" "fish" "chezmoi" .chezmoi) }}
 
 # SSH Agent initialization
 # Check if SSH_AUTH_SOCK points to a valid socket

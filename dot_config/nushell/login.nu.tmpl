@@ -14,9 +14,8 @@ if (path exists $mise_shim_file) {
 # Login shell specific environment variables
 # These will be inherited by all subprocesses
 
-# Language and locale settings
-$env.LANG = "en_US.UTF-8"
-$env.LC_ALL = "en_US.UTF-8"
+# Common environment variables (locale, docker, man pager, ulimit)
+{{ template "common_env.tmpl" (dict "shell" "nushell" "chezmoi" .chezmoi) }}
 
 {{- if eq .chezmoi.os "darwin" }}
 # Homebrew environment variables (pkg-config, LDFLAGS, etc.)

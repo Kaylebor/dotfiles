@@ -1,0 +1,62 @@
+{{- /*
+  Common Environment Variables Template
+  
+  Usage: {{ template "common_env" (dict "shell" "zsh" "chezmoi" .chezmoi ) }}
+  
+  Supported shells: zsh, bash, fish, nushell, posix
+  
+  Sets common environment variables that should be consistent across all shells:
+  - Locale settings (LC_ALL, LANG)
+  - Docker settings (DOCKER_BUILDKIT)
+  - Man pager (MANPAGER with bat if available)
+  - macOS file descriptor limit (ulimit)
+*/ -}}
+
+{{- $shell := .shell -}}
+{{- $chezmoi := .chezmoi -}}
+
+# Common environment variables for {{ $shell }}
+
+# Locale settings
+{{- if or (eq $shell "zsh") (eq $shell "bash") (eq $shell "posix") }}
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+{{- else if eq $shell "fish" }}
+set -Ux LC_ALL en_US.UTF-8
+set -Ux LANG en_US.UTF-8
+{{- else if eq $shell "nushell" }}
+$env.LC_ALL = "en_US.UTF-8"
+$env.LANG = "en_US.UTF-8"
+{{- end }}
+
+# Docker BuildKit
+{{- if or (eq $shell "zsh") (eq $shell "bash") (eq $shell "posix") }}
+export DOCKER_BUILDKIT=1
+{{- else if eq $shell "fish" }}
+set -Ux DOCKER_BUILDKIT 1
+{{- else if eq $shell "nushell" }}
+$env.DOCKER_BUILDKIT = "1"
+{{- end }}
+
+# Man pager with bat if available
+{{- if lookPath "bat" }}
+  {{- if or (eq $shell "zsh") (eq $shell "bash") (eq $shell "posix") }}
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+  {{- else if eq $shell "fish" }}
+set -Ux MANPAGER "sh -c 'sed -u -e \"s/\\x1B\\[[0-9;]*m//g; s/.\\x08//g\" | bat -p -lman'"
+  {{- else if eq $shell "nushell" }}
+$env.MANPAGER = "sh -c 'col -bx | bat -l man -p'"
+  {{- end }}
+{{- end }}
+
+{{- if eq .chezmoi.os "darwin" }}
+# Increase file descriptor limit for development work (macOS)
+  {{- if or (eq $shell "zsh") (eq $shell "bash") (eq $shell "posix") }}
+ulimit -n 65536 2>/dev/null || true
+  {{- else if eq $shell "fish" }}
+ulimit -n 65536 2>/dev/null || true
+  {{- else if eq $shell "nushell" }}
+# Nushell doesn't support ulimit in the same way - use a process spawn with ignore
+bash { ulimit -n 65536 2>/dev/null || true } | ignore
+  {{- end }}
+{{- end }}

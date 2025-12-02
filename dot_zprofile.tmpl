@@ -58,9 +58,8 @@ PATH="$({{ .brewBin }} --prefix sqlite)/bin:$PATH" # Sqlite from Homebrew instea
 {{- end }}
 export PATH
 
-# Force en_US.UTF-8 locale
-export LC_ALL=en_US.UTF-8
-export DOCKER_BUILDKIT=1
+# Common environment variables (locale, docker, man pager, ulimit)
+{{ template "common_env.tmpl" (dict "shell" "zsh" "chezmoi" .chezmoi) }}
 
 # Add XDG-compliant completion directory to fpath for all zsh instances
 # This ensures tools like carapace and aider completions are found
