@@ -1,0 +1,67 @@
+{{- /*
+  Homebrew GCC Environment Variables Template
+  
+  Usage: {{ template "homebrew_gcc_env" (dict "shell" "zsh" "brewPrefix" $brewPrefix) }}
+  
+  Supported shells: zsh, bash, fish, nushell, posix
+  
+  This template sets up GCC environment variables for alternative Homebrew installations.
+  It checks for gcc in the brew prefix and sets paths conditionally.
+*/ -}}
+
+{{- $shell := .shell -}}
+{{- $brewPrefix := .brewPrefix -}}
+
+{{- /* Only set GCC variables if gcc is installed in the brew prefix */ -}}
+{{- if stat (joinPath $brewPrefix "opt" "gcc") }}
+
+# Homebrew GCC environment setup for {{ $shell }}
+
+{{- /* LIBRARY_PATH */ -}}
+{{- if stat (joinPath $brewPrefix "opt" "gcc" "lib" "gcc" "current") }}
+  {{- if or (eq $shell "zsh") (eq $shell "bash") (eq $shell "posix") }}
+export LIBRARY_PATH="{{ $brewPrefix }}/opt/gcc/lib/gcc/current:$LIBRARY_PATH"
+  {{- else if eq $shell "fish" }}
+set -Ux LIBRARY_PATH "{{ $brewPrefix }}/opt/gcc/lib/gcc/current:$LIBRARY_PATH"
+  {{- else if eq $shell "nushell" }}
+$env.LIBRARY_PATH = "{{ $brewPrefix }}/opt/gcc/lib/gcc/current:($env.LIBRARY_PATH? | default '')"
+  {{- end }}
+{{- end }}
+
+{{- /* C_INCLUDE_PATH */ -}}
+{{- if stat (joinPath $brewPrefix "opt" "gcc" "include") }}
+  {{- if or (eq $shell "zsh") (eq $shell "bash") (eq $shell "posix") }}
+export C_INCLUDE_PATH="{{ $brewPrefix }}/opt/gcc/include:$C_INCLUDE_PATH"
+  {{- else if eq $shell "fish" }}
+set -Ux C_INCLUDE_PATH "{{ $brewPrefix }}/opt/gcc/include:$C_INCLUDE_PATH"
+  {{- else if eq $shell "nushell" }}
+$env.C_INCLUDE_PATH = "{{ $brewPrefix }}/opt/gcc/include:($env.C_INCLUDE_PATH? | default '')"
+  {{- end }}
+{{- end }}
+
+{{- /* CPLUS_INCLUDE_PATH */ -}}
+{{- if stat (joinPath $brewPrefix "opt" "gcc" "include" "c++" "15") }}
+  {{- if or (eq $shell "zsh") (eq $shell "bash") (eq $shell "posix") }}
+export CPLUS_INCLUDE_PATH="{{ $brewPrefix }}/opt/gcc/include/c++/15:$CPLUS_INCLUDE_PATH"
+  {{- else if eq $shell "fish" }}
+set -Ux CPLUS_INCLUDE_PATH "{{ $brewPrefix }}/opt/gcc/include/c++/15:$CPLUS_INCLUDE_PATH"
+  {{- else if eq $shell "nushell" }}
+$env.CPLUS_INCLUDE_PATH = "{{ $brewPrefix }}/opt/gcc/include/c++/15:($env.CPLUS_INCLUDE_PATH? | default '')"
+  {{- end }}
+{{- end }}
+
+{{- /* CC and CXX */ -}}
+{{- if stat (joinPath $brewPrefix "bin" "gcc-15") }}
+  {{- if or (eq $shell "zsh") (eq $shell "bash") (eq $shell "posix") }}
+export CC="gcc-15"
+export CXX="g++-15"
+  {{- else if eq $shell "fish" }}
+set -Ux CC gcc-15
+set -Ux CXX g++-15
+  {{- else if eq $shell "nushell" }}
+$env.CC = "gcc-15"
+$env.CXX = "g++-15"
+  {{- end }}
+{{- end }}
+
+{{- end }}

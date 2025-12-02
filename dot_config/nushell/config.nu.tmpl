@@ -140,26 +140,17 @@ $env.PSQL_EDITOR = $env.EDITOR
 $env.MANPAGER = "sh -c 'col -bx | bat -l man -p'"
 {{- end }}
 
-{{- if and (eq .chezmoi.os "darwin") (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
+{{- if and (eq .chezmoi.os "darwin") (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") (hasKey .homebrewPaths "applicationsPath") }}
 # Homebrew Cask installation directory for MDM-restricted systems
-$env.HOMEBREW_CASK_OPTS = "--appdir={{ .chezmoi.homeDir }}/Applications"
+$env.HOMEBREW_CASK_OPTS = "--appdir={{ .homebrewPaths.applicationsPath }}"
+{{- else if and (eq .chezmoi.os "darwin") (hasKey .homebrewPaths "applicationsPath") }}
+# Homebrew Cask options (standard Homebrew)
+$env.HOMEBREW_CASK_OPTS = "--appdir={{ .homebrewPaths.applicationsPath }}"
+{{- end }}
 
-# GCC environment variables for alternative Homebrew installations
-{{- if and (hasKey . "homebrewPaths") (stat .homebrewPaths.gccBase) }}
-{{- if stat .homebrewPaths.gccLib }}
-$env.LIBRARY_PATH = "{{ .homebrewPaths.gccLib }}:($env.LIBRARY_PATH? | default '')"
-{{- end }}
-{{- if stat .homebrewPaths.gccInclude }}
-$env.C_INCLUDE_PATH = "{{ .homebrewPaths.gccInclude }}:($env.C_INCLUDE_PATH? | default '')"
-{{- end }}
-{{- if stat .homebrewPaths.gccCppInclude }}
-$env.CPLUS_INCLUDE_PATH = "{{ .homebrewPaths.gccCppInclude }}:($env.CPLUS_INCLUDE_PATH? | default '')"
-{{- end }}
-{{- if stat .homebrewPaths.gccBin }}
-$env.CC = "gcc-15"
-$env.CXX = "g++-15"
-{{- end }}
-{{- end }}
+{{- if and (hasKey .homebrewPaths "base") (stat (joinPath .homebrewPaths.base "opt" "gcc")) }}
+# Homebrew GCC environment variables (conditionally set if gcc is installed)
+{{ template "homebrew_gcc_env.tmpl" (dict "shell" "nushell" "brewPrefix" .homebrewPaths.base) }}
 {{- end }}
 
 # Carapace bridges for additional shell completions

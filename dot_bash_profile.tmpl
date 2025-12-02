@@ -69,7 +69,7 @@ ulimit -n 65536 2>/dev/null || true
 # Set up gcc paths for alternative Homebrew installations
 export LANG=en_US.UTF-8
 
-# Erlang/ODBC settings
+# Homebrew environment variables (pkg-config, LDFLAGS, etc.)
 {{- $brewPrefix := "" }}
 {{- if and (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
 {{-   if and (hasKey . "homebrewPaths") (stat .homebrewPaths.base) }}
@@ -83,31 +83,8 @@ export LANG=en_US.UTF-8
 {{-   end }}
 {{- end }}
 {{- if $brewPrefix }}
-UNIXODBCHOME="{{ joinPath $brewPrefix "opt" "unixodbc" }}"
-export CPPFLAGS="${CPPFLAGS+"$CPPFLAGS "}-I${UNIXODBCHOME}/include"
-export LDFLAGS="${LDFLAGS+"$LDFLAGS "}-L${UNIXODBCHOME}/lib"
-export KERL_CONFIGURE_OPTIONS="--with-odbc=${UNIXODBCHOME}"
+{{ template "homebrew_env.tmpl" (dict "shell" "bash" "brewPrefix" $brewPrefix) }}
 {{- end }}
-{{- if and (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
-{{- if and (hasKey . "homebrewPaths") (stat .homebrewPaths.gccBase) }}
-# Library paths
-{{- if stat .homebrewPaths.gccLib }}
-export LIBRARY_PATH="$HOME/{{ .homebrewPath }}/opt/gcc/lib/gcc/current:$LIBRARY_PATH"
-{{- end }}
-
-# C/C++ include paths
-{{- if stat .homebrewPaths.gccInclude }}
-export C_INCLUDE_PATH="$HOME/{{ .homebrewPath }}/opt/gcc/include:$C_INCLUDE_PATH"
-{{- end }}
-{{- if stat .homebrewPaths.gccCppInclude }}
-export CPLUS_INCLUDE_PATH="$HOME/{{ .homebrewPath }}/opt/gcc/include/c++/15:$CPLUS_INCLUDE_PATH"
-{{- end }}
-
-# Set CC and CXX to use the Homebrew gcc
-{{- if stat .homebrewPaths.gccBin }}
-export CC=gcc-15
-export CXX=g++-15
-{{- end }}
-{{- end }}
-{{- end }}
+# Homebrew GCC environment variables
+{{ template "homebrew_gcc_env.tmpl" (dict "shell" "bash" "brewPrefix" $brewPrefix) }}
 {{- end }}

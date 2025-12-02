@@ -1,0 +1,51 @@
+{{- /*
+  Homebrew Environment Variables Template
+  
+  Usage: {{ template "homebrew_env" (dict "shell" "zsh" "brewPrefix" $brewPrefix) }}
+  
+  Supported shells: zsh, bash, fish, nushell, posix
+  
+  This template sets up environment variables needed for Homebrew packages
+  to be found by build tools like pkg-config, gcc, etc.
+*/ -}}
+
+{{- $shell := .shell -}}
+{{- $brewPrefix := .brewPrefix -}}
+
+# Homebrew environment setup for {{ $shell }}
+
+# PKG_CONFIG_PATH - for pkg-config to find Homebrew libraries
+{{- if or (eq $shell "zsh") (eq $shell "bash") (eq $shell "posix") }}
+export PKG_CONFIG_PATH="{{ $brewPrefix }}/lib/pkgconfig:{{ $brewPrefix }}/opt/libpq/lib/pkgconfig:{{ $brewPrefix }}/opt/imagemagick@6/lib/pkgconfig:{{ $brewPrefix }}/opt/gettext/lib/pkgconfig:$PKG_CONFIG_PATH"
+{{- else if eq $shell "fish" }}
+set -Ux PKG_CONFIG_PATH "{{ $brewPrefix }}/lib/pkgconfig:{{ $brewPrefix }}/opt/libpq/lib/pkgconfig:{{ $brewPrefix }}/opt/imagemagick@6/lib/pkgconfig:{{ $brewPrefix }}/opt/gettext/lib/pkgconfig:$PKG_CONFIG_PATH"
+{{- else if eq $shell "nushell" }}
+$env.PKG_CONFIG_PATH = "{{ $brewPrefix }}/lib/pkgconfig:{{ $brewPrefix }}/opt/libpq/lib/pkgconfig:{{ $brewPrefix }}/opt/imagemagick@6/lib/pkgconfig:{{ $brewPrefix }}/opt/gettext/lib/pkgconfig:($env.PKG_CONFIG_PATH? | default '')"
+{{- end }}
+
+# LDFLAGS - for linker to find Homebrew libraries
+{{- if or (eq $shell "zsh") (eq $shell "bash") (eq $shell "posix") }}
+export LDFLAGS="${LDFLAGS:+${LDFLAGS} }-L{{ $brewPrefix }}/opt/llvm/lib -L{{ $brewPrefix }}/opt/libpq/lib"
+{{- else if eq $shell "fish" }}
+set -Ux LDFLAGS "$LDFLAGS -L{{ $brewPrefix }}/opt/llvm/lib -L{{ $brewPrefix }}/opt/libpq/lib"
+{{- else if eq $shell "nushell" }}
+$env.LDFLAGS = "-L{{ $brewPrefix }}/opt/llvm/lib -L{{ $brewPrefix }}/opt/libpq/lib:($env.LDFLAGS? | default '')"
+{{- end }}
+
+# CPPFLAGS - for C preprocessor to find Homebrew headers (ODBC)
+{{- if or (eq $shell "zsh") (eq $shell "bash") (eq $shell "posix") }}
+export CPPFLAGS="${CPPFLAGS:+${CPPFLAGS} }-I{{ $brewPrefix }}/opt/unixodbc/include"
+{{- else if eq $shell "fish" }}
+set -Ux CPPFLAGS "$CPPFLAGS -I{{ $brewPrefix }}/opt/unixodbc/include"
+{{- else if eq $shell "nushell" }}
+$env.CPPFLAGS = "-I{{ $brewPrefix }}/opt/unixodbc/include:($env.CPPFLAGS? | default '')"
+{{- end }}
+
+# KERL_CONFIGURE_OPTIONS - for Erlang/ODBC integration
+{{- if or (eq $shell "zsh") (eq $shell "bash") (eq $shell "posix") }}
+export KERL_CONFIGURE_OPTIONS="--with-odbc={{ $brewPrefix }}/opt/unixodbc"
+{{- else if eq $shell "fish" }}
+set -Ux KERL_CONFIGURE_OPTIONS "--with-odbc={{ $brewPrefix }}/opt/unixodbc"
+{{- else if eq $shell "nushell" }}
+$env.KERL_CONFIGURE_OPTIONS = "--with-odbc={{ $brewPrefix }}/opt/unixodbc"
+{{- end }}

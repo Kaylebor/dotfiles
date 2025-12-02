@@ -18,6 +18,23 @@ if (path exists $mise_shim_file) {
 $env.LANG = "en_US.UTF-8"
 $env.LC_ALL = "en_US.UTF-8"
 
+{{- if eq .chezmoi.os "darwin" }}
+# Homebrew environment variables (pkg-config, LDFLAGS, etc.)
+{{- $brewPrefix := "" }}
+{{- range $path := (list "/opt/homebrew" "/usr/local") }}
+{{- if stat $path }}
+{{- $brewPrefix = $path }}
+{{- end }}
+{{- end }}
+{{- if and (hasKey . "homebrewPaths") (hasKey .homebrewPaths "base") (stat .homebrewPaths.base) }}
+{{- $brewPrefix = .homebrewPaths.base }}
+{{- end }}
+{{- if $brewPrefix }}
+{{ template "homebrew_env.tmpl" (dict "shell" "nushell" "brewPrefix" $brewPrefix) }}
+{{ template "homebrew_gcc_env.tmpl" (dict "shell" "nushell" "brewPrefix" $brewPrefix) }}
+{{- end }}
+{{- end }}
+
 # SSH Agent
 {{- if eq .chezmoi.os "linux" }}
 # Start SSH agent if not already running on Linux
@@ -123,6 +140,25 @@ $env.MACOSX_DEPLOYMENT_TARGET = "11.0"
 if ($env.TERM? | is-empty) or ($env.TERM == "dumb") {
     $env.TERM = "xterm-256color"
 }
+
+# Homebrew environment variables (pkg-config, LDFLAGS, etc.)
+{{- if eq .chezmoi.os "darwin" }}
+{{-   $brewPrefix := "" }}
+{{-   if and (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
+{{-     if and (hasKey . "homebrewPaths") (stat .homebrewPaths.base) }}
+{{-       $brewPrefix = .homebrewPaths.base }}
+{{-     end }}
+{{-   else }}
+{{-     if stat "/opt/homebrew" }}
+{{-       $brewPrefix = "/opt/homebrew" }}
+{{-     else if stat "/usr/local/Homebrew" }}
+{{-       $brewPrefix = "/usr/local" }}
+{{-     end }}
+{{-   end }}
+{{-   if $brewPrefix }}
+{{ template "homebrew_env.tmpl" (dict "shell" "nushell" "brewPrefix" $brewPrefix) }}
+{{-   end }}
+{{- end }}
 
 # Machine-specific login configuration
 {{- $localLogin := joinPath .paths.configDir "nushell/login.local.nu" }}

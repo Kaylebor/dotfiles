@@ -100,8 +100,9 @@ KERL_CONFIGURE_OPTIONS="--with-odbc=/var/lib/pacman/local/unixodbc-{{ output "pa
 {{-   end }}
 {{- end }}
 {{- if $brewPrefix }}
-LDFLAGS="{{ "{{get_env(name='LDFLAGS', default='')}}" }} -L{{ joinPath $brewPrefix "opt" "llvm" "lib" }} -L{{ joinPath $brewPrefix "opt" "libpq" "lib" }}"
-PKG_CONFIG_PATH="{{ "{{get_env(name='PKG_CONFIG_PATH', default='')}}" }}:{{ joinPath $brewPrefix "opt" "libpq" "lib" "pkgconfig" }}:{{ joinPath $brewPrefix "opt" "imagemagick@6" "lib" "pkgconfig" }}:{{ joinPath $brewPrefix "opt" "gettext" "lib" "pkgconfig" }}"
+# Package paths now handled in shell environment (.zprofile, .bash_profile, fish, nushell)
+# LDFLAGS moved to shell environment for consistency
+# PKG_CONFIG_PATH moved to shell environment (includes $brewPrefix/lib/pkgconfig for all packages)
 {{- end }}
 ## tell compiler not to error out for implicit function declarations
 CFLAGS="-Wno-error=implicit-function-declaration"

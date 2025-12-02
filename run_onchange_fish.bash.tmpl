@@ -122,6 +122,23 @@ fish -c "set -Ux HOMEBREW_CASK_OPTS '--appdir={{ .homebrewPaths.applicationsPath
 {{- if and (hasKey . "brewBin") .brewBin }}
 fish -l -c "fish_add_path -Uam ({{ .brewBin }} --prefix sqlite)/bin"
 {{- end }}
+
+# Homebrew environment variables (pkg-config, LDFLAGS, etc.) for fish
+{{- $brewPrefix := "" }}
+{{- if and (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
+{{-   if and (hasKey . "homebrewPaths") (stat .homebrewPaths.base) }}
+{{-     $brewPrefix = .homebrewPaths.base }}
+{{-   end }}
+{{- else }}
+{{-   if stat "/opt/homebrew" }}
+{{-     $brewPrefix = "/opt/homebrew" }}
+{{-   else if stat "/usr/local/Homebrew" }}
+{{-     $brewPrefix = "/usr/local" }}
+{{-   end }}
+{{- end }}
+{{- if $brewPrefix }}
+fish -l -c '{{ template "homebrew_env.tmpl" (dict "shell" "fish" "brewPrefix" $brewPrefix) }}'
+{{- end }}
 {{- end }}
 
 {{- if and (lookPath "lima") (not (lookPath "nerdctl")) }}
