@@ -108,13 +108,21 @@ $env.PATH = ($env.PATH | split row (char esep) | prepend [
 ] | uniq)
 
 {{- if eq .chezmoi.os "darwin" }}
-# Add GNU utils to PATH on macOS
-{{- $gnuUtils := list "coreutils" "findutils" "gnu-sed" "gawk" "grep" }}
-{{- range $util := $gnuUtils }}
-{{- $gnuBinPath := printf "%s/opt/%s/libexec/gnubin" (or (and (stat (joinPath $.chezmoi.homeDir ".homebrew")) (joinPath $.chezmoi.homeDir ".homebrew")) (and (stat (joinPath $.chezmoi.homeDir "homebrew")) (joinPath $.chezmoi.homeDir "homebrew")) (and (stat "/opt/homebrew") "/opt/homebrew") "/usr/local") $util }}
-{{- if stat $gnuBinPath }}
-$env.PATH = ($env.PATH | split row (char esep) | prepend "{{ $gnuBinPath }}" | uniq)
+# GNU utilities for macOS (replacing BSD equivalents)
+{{- $brewPrefix := "" }}
+{{- if and (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
+{{-   if and (hasKey . "homebrewPaths") (stat .homebrewPaths.base) }}
+{{-     $brewPrefix = .homebrewPaths.base }}
+{{-   end }}
+{{- else }}
+{{-   if stat "/opt/homebrew" }}
+{{-     $brewPrefix = "/opt/homebrew" }}
+{{-   else if stat "/usr/local/Homebrew" }}
+{{-     $brewPrefix = "/usr/local" }}
+{{-   end }}
 {{- end }}
+{{- if $brewPrefix }}
+{{ template "gnu_utils.tmpl" (dict "shell" "nushell" "brewPrefix" $brewPrefix "chezmoi" .chezmoi) }}
 {{- end }}
 {{- end }}
 

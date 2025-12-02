@@ -1,0 +1,39 @@
+{{- /*
+  GNU Utilities Environment Template
+  
+  Usage: {{ template "gnu_utils" (dict "shell" "zsh" "brewPrefix" $brewPrefix "chezmoi" .chezmoi) }}
+  
+  Supported shells: zsh, bash, fish, nushell, posix
+  
+  Adds GNU utilities (coreutils, findutils, gnu-sed, gawk, grep) to PATH
+  on macOS, along with their man pages to MANPATH if available.
+*/ -}}
+
+{{- $shell := .shell -}}
+{{- $brewPrefix := .brewPrefix -}}
+{{- $chezmoi := .chezmoi -}}
+{{- $gnuTools := list "coreutils" "findutils" "gnu-sed" "gawk" "grep" -}}
+
+{{- if eq $chezmoi.os "darwin" -}}
+# GNU utilities for macOS (replacing BSD equivalents)
+
+{{- range $tool := $gnuTools -}}
+{{- $gnuBin := printf "%s/opt/%s/libexec/gnubin" $brewPrefix $tool -}}
+{{- if stat $gnuBin -}}
+  {{- /* Add to PATH */ -}}
+  {{- if or (eq $shell "zsh") (eq $shell "bash") (eq $shell "posix") -}}
+PATH="{{ $gnuBin }}:$PATH"
+  {{- else if eq $shell "fish" -}}
+fish_add_path -Upm "{{ $gnuBin }}"
+  {{- else if eq $shell "nushell" -}}
+$env.PATH = ($env.PATH | split row (char esep) | prepend "{{ $gnuBin }}" | uniq)
+  {{- end -}}
+{{ end -}}
+{{- end -}}
+
+{{- /* Export PATH for shells that need it */ -}}
+{{- if or (eq $shell "zsh") (eq $shell "bash") (eq $shell "posix") -}}
+export PATH
+{{- end -}}
+
+{{- end -}}

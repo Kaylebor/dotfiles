@@ -104,3 +104,22 @@ export LANG=en_US.UTF-8
 # Homebrew GCC environment variables
 {{ template "homebrew_gcc_env.tmpl" (dict "shell" "zsh" "brewPrefix" $brewPrefix) }}
 {{- end }}
+
+{{- if eq .chezmoi.os "darwin" }}
+# GNU utilities for macOS (replacing BSD equivalents)
+{{- $brewPrefix := "" }}
+{{- if and (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
+{{-   if and (hasKey . "homebrewPaths") (stat .homebrewPaths.base) }}
+{{-     $brewPrefix = .homebrewPaths.base }}
+{{-   end }}
+{{- else }}
+{{-   if stat "/opt/homebrew" }}
+{{-     $brewPrefix = "/opt/homebrew" }}
+{{-   else if stat "/usr/local/Homebrew" }}
+{{-     $brewPrefix = "/usr/local" }}
+{{-   end }}
+{{- end }}
+{{- if $brewPrefix }}
+{{ template "gnu_utils.tmpl" (dict "shell" "zsh" "brewPrefix" $brewPrefix "chezmoi" .chezmoi) }}
+{{- end }}
+{{- end }}
