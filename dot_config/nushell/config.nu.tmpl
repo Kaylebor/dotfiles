@@ -156,7 +156,7 @@ $env.HOMEBREW_CASK_OPTS = "--appdir={{ .homebrewPaths.applicationsPath }}"
 $env.HOMEBREW_CASK_OPTS = "--appdir={{ .homebrewPaths.applicationsPath }}"
 {{- end }}
 
-{{- if and (hasKey .homebrewPaths "base") (stat (joinPath .homebrewPaths.base "opt" "gcc")) }}
+{{- if and (hasKey . "homebrewPaths") (hasKey .homebrewPaths "base") (stat (joinPath .homebrewPaths.base "opt" "gcc")) }}
 # Homebrew GCC environment variables (conditionally set if gcc is installed)
 {{ template "homebrew_gcc_env.tmpl" (dict "shell" "nushell" "brewPrefix" .homebrewPaths.base) }}
 {{- end }}
