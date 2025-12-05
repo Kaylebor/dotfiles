@@ -28,11 +28,28 @@
         "root_markers": ["Cargo.toml", "Cargo.lock", ".git"],
         "filetypes": ["rs"]
     },
-    "typescript": {
-      "command": "typescript-language-server",
+    "javascript": {
+      "command": "biome",
+      "args": ["lsp-proxy"],
+      "root_markers": ["biome.json", "package.json", ".git"],
+      "filetypes": ["ts", "tsx", "js", "jsx", "json", "jsonc", "css"]
+    },
+    "lua": {
+      "command": "lua-language-server",
       "args": ["--stdio"],
-      "root_markers": ["package.json", "tsconfig.json", "jsconfig.json", ".git"],
-      "filetypes": ["ts", "tsx", "js", "jsx"]
+      "root_markers": [".luacheckrc", "lua", ".git"],
+      "filetypes": ["lua"]
+    },
+    "sql": {
+      "command": "sqls",
+      "args": ["-stdio"],
+      "root_markers": [".sqls.yml", ".git"],
+      "filetypes": ["sql", "mysql", "pgsql"]
+    },
+    "elixir": {
+      "command": "elixir-ls",
+      "root_markers": ["mix.exs", ".git"],
+      "filetypes": ["ex", "exs", "heex", "eex", "leex"]
     }
   },
   "mcp": {
