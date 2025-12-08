@@ -1,5 +1,4 @@
 {{- template "brew_eval" . }}
-eval "$(mise activate zsh --shims)" # Mise shims for early PATH access
 
 {{- if and (hasKey . "homebrewPaths") (hasKey . "brewBin") .brewBin (stat .brewBin) }}
 # Install Homebrew Casks to specified directory

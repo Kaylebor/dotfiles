@@ -9,14 +9,8 @@
 
 {{/* Version management */}}
 {{- if lookPath "mise" }}
-# Ensure mise shims are always on PATH for fish
-mkdir -p ~/.config/fish/conf.d
-mise activate fish --shims > ~/.config/fish/conf.d/mise-path.fish
-
-# Activate full mise integration for interactive fish sessions
-echo 'if status --is-interactive' > ~/.config/fish/conf.d/mise.fish
-mise activate fish >> ~/.config/fish/conf.d/mise.fish
-echo 'end' >> ~/.config/fish/conf.d/mise.fish
+# Ensure mise shims and activation only for interactive fish shells
+# (Prevents GUI apps from inheriting mise PATH modifications)
 
 {{- if lookPath "nu" }}
 # Generate Nushell mise integration

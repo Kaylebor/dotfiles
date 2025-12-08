@@ -1,5 +1,4 @@
 {{- template "brew_eval" . }}
-eval "$(mise activate bash --shims)" # Mise shims for early PATH access
 
 {{- if and (eq .chezmoi.os "darwin") (eq .homebrewInstallType "alternative") }}
 # Install Homebrew Casks to home directory (MDM-restricted systems use alternative installation)

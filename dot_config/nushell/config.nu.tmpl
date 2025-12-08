@@ -2,15 +2,19 @@
 # See https://www.nushell.sh/book/configuration.html
 
 {{- if lookPath "mise" }}
-# Load mise shims and activation generated via mise activate nu
+# Load mise shims (always available for GUI apps and tools)
 let mise_config_dir = $nu.default-config-dir
 let mise_shim_file = ($mise_config_dir | path join "mise-path.nu")
 if (path exists $mise_shim_file) {
     source-env $mise_shim_file
 }
-let mise_module = ($mise_config_dir | path join "mise.nu")
-if (path exists $mise_module) {
-    use $mise_module *
+
+# Load full mise activation only for interactive shells
+if $nu.is-interactive {
+    let mise_module = ($mise_config_dir | path join "mise.nu")
+    if (path exists $mise_module) {
+        use $mise_module *
+    }
 }
 {{- end }}
 
