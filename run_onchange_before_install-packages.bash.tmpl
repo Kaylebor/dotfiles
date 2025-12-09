@@ -76,7 +76,7 @@ fi
 if [ -n "$CHEZMOI_REINSTALL_PACKAGES" ]; then
   echo "Reinstalling packages (brew reinstall): $CHEZMOI_REINSTALL_PACKAGES"
   IFS=',' read -ra PACKAGES <<< "$CHEZMOI_REINSTALL_PACKAGES"
-  "{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-homebrew-manager" simple-reinstall "${PACKAGES[@]}"
+  uv run --script "{{ .chezmoi.sourceDir }}/scripts/homebrew/manager.py" rebuild --packages ${PACKAGES[@]}
 fi
 
 {{- if eq .homebrewInstallType "alternative" }}
@@ -104,14 +104,14 @@ fi
 # Environment variable present: running package installation
 echo "Using Python package installer for complex installation logic..."
 IFS=',' read -ra PACKAGES <<< "$CHEZMOI_FORCE_REINSTALL_PACKAGES"
-"{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-homebrew-manager" force-reinstall "${PACKAGES[@]}"
+python3 "{{ .chezmoi.sourceDir }}/scripts/homebrew/cli.py" rebuild --packages ${PACKAGES[@]}
 {{- end }}
 {{- else }}
 {{- if env "CHEZMOI_FORCE_REINSTALL_PACKAGES" }}
 # Standard Homebrew - use Python script for consistency
 echo "Force reinstalling packages: $CHEZMOI_FORCE_REINSTALL_PACKAGES"
 IFS=',' read -ra PACKAGES <<< "$CHEZMOI_FORCE_REINSTALL_PACKAGES"
-"{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-homebrew-manager" force-reinstall "${PACKAGES[@]}"
+python3 "{{ .chezmoi.sourceDir }}/scripts/homebrew/cli.py" rebuild --packages ${PACKAGES[@]}
 {{- end }}
 {{- end }}
 
@@ -160,7 +160,7 @@ EOF
 # This script only runs on changes (not first run), so we handle:
 # 1. Rebuilding outdated source-built packages
 # 2. Installing newly added packages
-"{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-homebrew-manager" full-install --config "$RUNTIME_CONFIG"
+uv run --script "{{ .chezmoi.sourceDir }}/scripts/homebrew/manager.py" full-install
 
 {{ end -}}
 

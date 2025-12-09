@@ -79,6 +79,6 @@ EOF
 )
 
 # Call Python Homebrew manager for initial installation
-"{{ .chezmoi.sourceDir }}/dot_local/bin/executable_chezmoi-homebrew-manager" full-install --first-run --config "$RUNTIME_CONFIG"
+uv run --script "{{ .chezmoi.sourceDir }}/scripts/homebrew/manager.py" full-install
 
 {{ end -}}

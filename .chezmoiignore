@@ -12,11 +12,10 @@ scripts/
 docs/
 
 # Repo-local helper scripts (invoked via sourceDir, not copied to $HOME)
-.local/bin/chezmoi-homebrew-manager
-.local/bin/brew-check-outdated
+scripts/homebrew/**
+.dot_local/bin/homebrew_manager/**
 .local/bin/chezmoi-sqlite
 .local/bin/managed-configs-status
-.local/bin/homebrew_manager/**
 .local/bin/__pycache__/**
 *.pyc
 *.pyo

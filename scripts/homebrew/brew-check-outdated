@@ -25,7 +25,7 @@ fi
 
 # Determine chezmoi source directory
 CHEZMOI_SOURCE_DIR="${CHEZMOI_SOURCE_DIR:-$HOME/.local/share/chezmoi}"
-HOMEBREW_MANAGER="$CHEZMOI_SOURCE_DIR/dot_local/bin/executable_chezmoi-homebrew-manager"
+HOMEBREW_MANAGER="$CHEZMOI_SOURCE_DIR/scripts/homebrew/manager.py"
 
 # Check if the homebrew manager exists
 if [[ ! -f "$HOMEBREW_MANAGER" ]]; then
@@ -37,23 +37,23 @@ fi
 echo -e "${GREEN}Checking for outdated source-built packages...${NC}\n"
 
 # Check for outdated packages
-if "$HOMEBREW_MANAGER" check-outdated; then
+if uv run --script "$HOMEBREW_MANAGER" check-outdated; then
     # No outdated packages found (exit code 0)
     exit 0
 else
     # Outdated packages found (exit code 1)
     echo -e "\n${YELLOW}These packages were built from source and have dependencies that were updated.${NC}"
     echo -e "${YELLOW}They should be rebuilt to ensure compatibility.${NC}\n"
-    
+
     # Ask if user wants to rebuild
     read -p "Do you want to rebuild these packages now? (y/N) " -n 1 -r
     echo
-    
+
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo -e "\n${GREEN}Starting rebuild process...${NC}\n"
-        
+
         # Run the rebuild command
-        if "$HOMEBREW_MANAGER" rebuild-outdated; then
+        if uv run --script "$HOMEBREW_MANAGER" rebuild-outdated; then
             echo -e "\n${GREEN}✅ All packages rebuilt successfully!${NC}"
             exit 0
         else
@@ -63,7 +63,7 @@ else
         fi
     else
         echo -e "\n${YELLOW}Skipping rebuild. You can run this script again later or use:${NC}"
-        echo "  $HOMEBREW_MANAGER rebuild-outdated"
+        echo "  uv run --script $HOMEBREW_MANAGER rebuild-outdated"
         exit 0
     fi
 fi
