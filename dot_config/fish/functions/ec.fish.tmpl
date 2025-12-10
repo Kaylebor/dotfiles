@@ -1,4 +1,4 @@
-function ec --wraps='TERM=xterm-256color emacsclient -t' --description 'alias ec TERM=xterm-256color emacsclient -t'
+function ec --wraps='emacsclient -t' --description 'alias ec emacsclient -t'
     # Use emacsclient with TUI fallback
     {{- $tuiEditors := list "hx" "nvim" "vim" "vi" }}
     {{- $tuiFallback := "" }}
