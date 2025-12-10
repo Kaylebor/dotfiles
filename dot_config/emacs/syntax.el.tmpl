@@ -1,78 +1,23 @@
 ;; -*- lexical-binding: t; -*-
 
-(use-package emacs :ensure nil
-  :init
-  ;; Add treesitter grammars so Emacs knows where to find them
-  (setopt treesit-language-source-alist '((bash "https://github.com/tree-sitter/tree-sitter-bash" "v0.23.3")
-                                         (cmake "https://github.com/uyha/tree-sitter-cmake" "v0.5.0")
-                                         (css "https://github.com/tree-sitter/tree-sitter-css" "v0.23.2")
-                                         (elixir "https://github.com/elixir-lang/tree-sitter-elixir" "v0.3.4")
-                                         (elisp "https://github.com/Wilfred/tree-sitter-elisp" "main")
-                                         (lua "https://github.com/Azganoth/tree-sitter-lua" "master")
-                                         (go "https://github.com/tree-sitter/tree-sitter-go" "v0.23.4")
-                                         (gomod "https://github.com/camdencheek/tree-sitter-go-mod" "v1.1.0")
-                                         (gosum "https://github.com/tree-sitter-grammars/tree-sitter-go-sum" "v1.0.0")
-                                         (gdscript "https://github.com/PrestonKnopp/tree-sitter-gdscript" "v6.0.0")
-                                         (ruby "https://github.com/tree-sitter/tree-sitter-ruby" "v0.23.1")
-                                         (sql "https://github.com/DerekStride/tree-sitter-sql" "gh-pages")
-                                         (html "https://github.com/tree-sitter/tree-sitter-html" "v0.23.2")
-                                         (jsx "https://github.com/tree-sitter/tree-sitter-javascript" "v0.23.1" "src")
-                                         (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "v0.23.1" "src")
-                                         (json "https://github.com/tree-sitter/tree-sitter-json" "v0.24.8")
-                                         (make "https://github.com/alemuller/tree-sitter-make" "main")
-                                         (markdown "https://github.com/ikatyang/tree-sitter-markdown" "v0.7.1")
-                                         (python "https://github.com/tree-sitter/tree-sitter-python" "v0.23.6")
-                                         (rust "https://github.com/tree-sitter/tree-sitter-rust" "v0.24.0")
-                                         (toml "https://github.com/tree-sitter/tree-sitter-toml" "v0.5.1")
-                                         (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "v0.23.2" "tsx/src")
-                                         (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "v0.23.2" "typescript/src")
-                                         (yaml "https://github.com/ikatyang/tree-sitter-yaml" "v0.5.0")
-                                         (hcl "https://github.com/tree-sitter-grammars/tree-sitter-hcl" "v1.1.0")
-                                         (gotmpl "https://github.com/ngalaiko/tree-sitter-go-template" "master")
-                                         (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile" "v0.2.0")))
-  ;; Map built-in modes to their tree-sitter equivalents
-  (setq major-mode-remap-alist
-        '((ruby-mode . ruby-ts-mode)
-          (python-mode . python-ts-mode)
-          (js-mode . javascript-ts-mode)
-          (css-mode . css-ts-mode)
-          (html-mode . html-ts-mode)
-          (json-mode . json-ts-mode)
-          (sh-mode . bash-ts-mode)
-          (lua-mode . lua-ts-mode)
-          (yaml-mode . yaml-ts-mode))))
-
-(use-package ruby-ts-mode
-  :ensure nil
-  :defer t
-  :delight)
+;; Automatic tree-sitter mode management
+(use-package treesit-auto
+  :ensure t
+  :custom
+  (treesit-auto-install 'prompt)  ; Prompt before installing missing grammars
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
 
 (use-package emacs-lisp-mode
   :ensure nil
   :delight
   :mode ("\\.el\\'" . emacs-lisp-mode))
 
-(use-package bash-ts-mode
-  :ensure nil
-  :defer t
-  :delight)
 (use-package sh-mode
   :ensure nil
   :delight
   :mode ("\\.fish\\(rc\\)?\\'" . sh-mode))
-
-(use-package json-ts-mode
-  :ensure nil
-  :defer t
-  :delight)
-(use-package yaml-ts-mode
-  :ensure nil
-  :delight
-  :mode ("\\.\\(ya?ml\\)\\'" . yaml-ts-mode))
-(use-package toml-ts-mode
-  :ensure nil
-  :delight
-  :mode ("\\.toml\\'" . toml-ts-mode))
 
 (use-package sql-mode
   :ensure nil
@@ -91,8 +36,8 @@
 ;; PostgreSQL execution mode with auth-source integration
 (use-package pgx-mode
   :ensure (:host github 
-           :repo "Kaylebor/pgx-mode"
-           :files ("*.el"))  ; Include all .el files
+                 :repo "Kaylebor/pgx-mode"
+                 :files ("*.el"))  ; Include all .el files
   :after (sql pg)  ; Let elpaca handle dependencies from Package-Requires
   :hook (sql-mode . pgx-mode)
   :config
@@ -112,63 +57,16 @@
   :delight
   :mode ("\\.dbml\\'" . dbml-mode))
 
-(use-package hcl-ts-mode
-  :ensure nil
-  :delight
-  :mode ("\\.hcl[2-4]?\\'" . hcl-ts-mode))
 
-(use-package markdown-ts-mode
-  :ensure nil
-  :delight
-  :mode ("\\.md\\'" . markdown-ts-mode))
-
-(use-package html-ts-mode
-  :ensure nil
-  :defer t
-  :delight)
-(use-package css-ts-mode
-  :ensure nil
-  :defer t
-  :delight)
 (use-package javascript-ts-mode
   :ensure nil
   :delight
   :mode (("\\.jsx\\'" . js-jsx-mode)))  ; jsx still needs explicit mode
 
-(use-package typescript-ts-mode
-  :ensure nil
-  :delight
-  :mode (("\\.ts\\'" . typescript-ts-mode)
-         ("\\.tsx\\'" . tsx-ts-mode)))
-
 (use-package elixir-ts-mode
   :ensure nil
   :delight
   :mode ("\\.\\(ex\\|exs\\|eex\\|leex\\|heex\\)\\'" . elixir-ts-mode))
-(use-package python-ts-mode
-  :ensure nil
-  :defer t
-  :delight)
-(use-package rust-ts-mode
-  :ensure nil
-  :delight
-  :mode ("\\.rs\\'" . rust-ts-mode))
-(use-package go-ts-mode
-  :ensure nil
-  :delight
-  :mode ("\\(\\.go\\|/go\\.mod\\|/go\\.sum\\)\\'" . go-ts-mode))
-
-;; Lua
-(use-package lua-ts-mode
-  :ensure nil
-  :delight
-  :mode ("\\.lua\\'" . lua-ts-mode))
-
-;; Dockerfile
-(use-package dockerfile-ts-mode
-  :ensure nil
-  :delight
-  :mode ("Dockerfile\\(?:\\..*\\)?\\'" . dockerfile-ts-mode))
 
 (use-package gdscript-mode :ensure (:host github :repo "godotengine/emacs-gdscript-mode") :delight :mode ("\\.gd\\'" . gdscript-ts-mode))
 
@@ -298,8 +196,8 @@
       :async-request-handlers (ht ("html/customDataContent" #'lsp-html--get-content))
       :initialized-fn (lambda (w)
                         (with-lsp-workspace w
-                          (lsp--set-configuration
-                           (lsp-configuration-section "html")))))))
+                                            (lsp--set-configuration
+                                             (lsp-configuration-section "html")))))))
   
   (with-eval-after-load 'lsp-css
     (lsp-register-client
@@ -325,10 +223,10 @@
       :async-request-handlers (ht ("vscode/content" #'lsp-json--get-content))
       :initialized-fn (lambda (w)
                         (with-lsp-workspace w
-                          (lsp--set-configuration
-                           (ht-merge (lsp-configuration-section "json")
-                                     (lsp-configuration-section "http")))
-                          (lsp-notify "json/schemaAssociations" lsp-json--schema-associations))))))
+                                            (lsp--set-configuration
+                                             (ht-merge (lsp-configuration-section "json")
+                                                       (lsp-configuration-section "http")))
+                                            (lsp-notify "json/schemaAssociations" lsp-json--schema-associations))))))
 
   ;; Lua language server via mise
   (lsp-register-client
@@ -348,11 +246,11 @@
                      (lambda () 
                        ;; Find the actual Rails root directory for monorepos
                        (let* ((file-dir (if buffer-file-name 
-                                          (file-name-directory buffer-file-name)
-                                        default-directory))
+                                            (file-name-directory buffer-file-name)
+                                          default-directory))
                               (rails-root (or (locate-dominating-file file-dir "Gemfile")
-                                            (locate-dominating-file file-dir "config/application.rb")
-                                            file-dir)))
+                                              (locate-dominating-file file-dir "config/application.rb")
+                                              file-dir)))
                          (let ((default-directory rails-root))
                            (list (my-mise-which "ruby-lsp") "--use-launcher")))))
     :activation-fn (lsp-activate-on "ruby")
