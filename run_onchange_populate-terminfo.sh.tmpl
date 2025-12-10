@@ -1,0 +1,64 @@
+#!/bin/bash
+{{- if eq .chezmoi.os "darwin" }}
+# Populate ~/.terminfo with ALL available terminal entries for Emacs daemon compatibility
+# Runs on script changes to keep terminfo up to date
+
+set -euo pipefail
+
+# Ensure brew is initialized (for finding ncurses and other brew paths)
+{{- template "brew_eval" . }}
+
+TERMINFO_DIR="$HOME/.terminfo"
+mkdir -p "$TERMINFO_DIR"
+
+# Find the best tic command (prefer Homebrew ncurses)
+TIC_CMD="tic"
+if command -v "$(brew --prefix ncurses 2>/dev/null)/bin/tic" >/dev/null 2>&1; then
+    TIC_CMD="$(brew --prefix ncurses)/bin/tic"
+fi
+
+# Get all terminfo search paths from the system
+INFO_PATHS=()
+while IFS= read -r path; do
+    if [[ -d "$path" ]]; then
+        INFO_PATHS+=("$path")
+    fi
+done < <(infocmp -D 2>/dev/null)
+
+# Function to compile terminfo if needed
+compile_term() {
+    local term="$1"
+    local first_char
+    first_char=$(printf '%s' "$term" | cut -c1)
+    
+    # Check if already in ~/.terminfo
+    if [[ -f "$TERMINFO_DIR/${first_char}/$term" ]] || [[ -f "$TERMINFO_DIR/78/$term" ]]; then
+        return 0
+    fi
+    
+    # Try to compile if available on system
+    if infocmp "$term" >/dev/null 2>&1; then
+        echo "Compiling terminfo: $term"
+        if infocmp "$term" 2>/dev/null | "$TIC_CMD" -x -o "$TERMINFO_DIR" - 2>/dev/null; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
+# Compile ALL terminals found in system paths
+# (not just common patterns - ensures maximum compatibility)
+for info_path in "${INFO_PATHS[@]}"; do
+    # Find all terminfo entries in this path
+    while IFS= read -r termfile; do
+        term=$(basename "$termfile")
+        compile_term "$term" 2>/dev/null || true
+    done < <(find "$info_path" -type f 2>/dev/null)
+done
+
+echo "~/.terminfo populated successfully"
+echo "Entries: $(find "$TERMINFO_DIR" -type f 2>/dev/null | wc -l)"
+{{- else }}
+# No-op on non-macOS systems (terminfo compilation not needed)
+exit 0
+{{- end }}

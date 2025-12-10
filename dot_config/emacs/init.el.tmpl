@@ -511,6 +511,11 @@
 
   ;; Faster frame switching
   (setq frame-title-format nil)
+
+  ;; Launchd-managed Emacs daemon doesn't inherit environment variables.
+  ;; Set TERMINFO explicitly so terminfo entries in ~/.terminfo are found.
+  (when (daemonp)
+    (setenv "TERMINFO" (expand-file-name "~/.terminfo")))
   {{- end }}
 
   ;; Hide some Emacs-native modes from modeline
