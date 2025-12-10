@@ -215,13 +215,38 @@ ulimit -n 65536
 
 **Problem**: Build tools can't find libraries installed with alternative Homebrew.
 
-**Solution**: Add to your shell profile (~/.zshrc):
+**Solution**: Add the following to your shell profile (`.zshrc`, `.bashrc`, `config.fish`, etc.). This setup covers the main pkgconfig directory where most packages create symlinks, plus commonly-needed keg-only packages:
 
 ```bash
-export PKG_CONFIG_PATH="$(brew --prefix)/opt/imagemagick@6/lib/pkgconfig:$(brew --prefix)/opt/openblas/lib/pkgconfig:$(brew --prefix)/opt/lapack/lib/pkgconfig:$(brew --prefix)/opt/libpq/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
-export LDFLAGS="-L$(brew --prefix)/opt/llvm/lib -L$(brew --prefix)/opt/openblas/lib -L$(brew --prefix)/opt/lapack/lib -L$(brew --prefix)/opt/libpq/lib"
-export LAPACK="$(ls $(brew --prefix)/opt/lapack/lib/liblapack*.dylib | head -1)"
-export BLAS="$(ls $(brew --prefix)/opt/openblas/lib/libopenblasp-r*.dylib | head -1)"
+# PKG_CONFIG_PATH for alternative Homebrew (cleaner version)
+# Main pkgconfig directory + essential keg-only packages
+export PKG_CONFIG_PATH="$(brew --prefix)/lib/pkgconfig:$(brew --prefix)/opt/libpq/lib/pkgconfig:$(brew --prefix)/opt/imagemagick@6/lib/pkgconfig:$(brew --prefix)/opt/gettext/lib/pkgconfig"
+
+# LDFLAGS - for linker to find libraries
+export LDFLAGS="-L$(brew --prefix)/opt/llvm/lib -L$(brew --prefix)/opt/libpq/lib"
+
+# CPPFLAGS - for C preprocessor to find headers (ODBC)
+export CPPFLAGS="-I$(brew --prefix)/opt/unixodbc/include"
+
+# KERL_CONFIGURE_OPTIONS - for Erlang/ODBC integration (if using Erlang)
+export KERL_CONFIGURE_OPTIONS=\"--with-odbc=$(brew --prefix)/opt/unixodbc\"
+```
+
+**Why this works**:
+- `$(brew --prefix)/lib/pkgconfig` - Main directory where most packages automatically create symlinks
+- `$(brew --prefix)/opt/libpq/lib/pkgconfig` - PostgreSQL libraries (keg-only, no symlink)
+- `$(brew --prefix)/opt/imagemagick@6/lib/pkgconfig` - ImageMagick 6 (keg-only, no symlink)
+- `$(brew --prefix)/opt/gettext/lib/pkgconfig` - Gettext libraries (keg-only, no symlink)
+
+This covers the most commonly-needed keg-only packages while letting the main pkgconfig directory handle everything else.
+
+**Verification**:
+```bash
+# Check PKG_CONFIG_PATH
+pkg-config --exists <library-name> && echo "Found" || echo "Not found"
+
+# List all available packages
+pkg-config --list-all | grep <library-name>
 ```
 
 **Troubleshooting**: If you encounter "package not found" errors for other libraries:
@@ -247,21 +272,7 @@ export BLAS="$(ls $(brew --prefix)/opt/openblas/lib/libopenblasp-r*.dylib | head
    pkg-config --list-all | grep <library-name>
    ```
 
-**Advanced: Dynamic Configuration with [mise](https://mise.jdx.dev) templating**:
-
-For [mise](https://mise.jdx.dev) users, you can use templating to dynamically generate these paths:
-
-```toml
-# In ~/.config/mise/config.toml or .mise.toml
-{% set brew_prefix = exec(command='brew --prefix') %}
-[env]
-LDFLAGS = "{{ get_env(name='LDFLAGS', default='') }} -L{{ brew_prefix }}/opt/llvm/lib -L{{ brew_prefix }}/opt/openblas/lib -L{{ brew_prefix }}/opt/lapack/lib -L{{ brew_prefix }}/opt/libpq/lib"
-PKG_CONFIG_PATH = "{{ get_env(name='PKG_CONFIG_PATH', default='') }}:{{ brew_prefix }}/opt/imagemagick@6/lib/pkgconfig:{{ brew_prefix }}/opt/openblas/lib/pkgconfig:{{ brew_prefix }}/opt/lapack/lib/pkgconfig:{{ brew_prefix }}/opt/libpq/lib/pkgconfig:{{ brew_prefix }}/lib/pkgconfig"
-LAPACK = "{{ exec(command='ls ' + brew_prefix + '/opt/lapack/lib/liblapack*.dylib | head -1') }}"
-BLAS = "{{ exec(command='ls ' + brew_prefix + '/opt/openblas/lib/libopenblasp-r*.dylib | head -1') }}"
-```
-
-This approach uses `{% set %}` to store the Homebrew prefix once, then reuses it throughout the configuration. The `exec()` function runs shell commands and returns their output. See the [mise templating documentation](https://mise.jdx.dev/templates.html) for more details.
+**Note**: If you're using **the chezmoi repository that contains this document**, PKG_CONFIG_PATH is automatically configured via templates (`.chezmoitemplates/homebrew_env.tmpl`) and applied to Fish/Zsh/Bash consistently. Manual configuration is only needed if you're NOT using that repository.
 
 ### 7. Advanced: Homebrew Formula Patching
 
@@ -330,13 +341,18 @@ export C_INCLUDE_PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/Xco
 export USE_IMAGEMAGICK_6="1"
 export CFLAGS="-Wno-error=implicit-function-declaration"
 
+# PKG_CONFIG_PATH for alternative Homebrew (simplified version)
+# Main pkgconfig directory + essential keg-only packages
+export PKG_CONFIG_PATH="$(brew --prefix)/lib/pkgconfig:$(brew --prefix)/opt/libpq/lib/pkgconfig:$(brew --prefix)/opt/imagemagick@6/lib/pkgconfig:$(brew --prefix)/opt/gettext/lib/pkgconfig"
 
-# PKG_CONFIG_PATH for alternative Homebrew
-export PKG_CONFIG_PATH="$(brew --prefix)/opt/imagemagick@6/lib/pkgconfig:$(brew --prefix)/opt/openblas/lib/pkgconfig:$(brew --prefix)/opt/lapack/lib/pkgconfig:$(brew --prefix)/opt/libpq/lib/pkgconfig:$(brew --prefix)/lib/pkgconfig"
-export LDFLAGS="-L$(brew --prefix)/opt/llvm/lib -L$(brew --prefix)/opt/openblas/lib -L$(brew --prefix)/opt/lapack/lib -L$(brew --prefix)/opt/libpq/lib"
-export LAPACK="$(ls $(brew --prefix)/opt/lapack/lib/liblapack*.dylib | head -1)"
-export BLAS="$(ls $(brew --prefix)/opt/openblas/lib/libopenblasp-r*.dylib | head -1)"
+# LDFLAGS - for linker  
+export LDFLAGS="-L$(brew --prefix)/opt/llvm/lib -L$(brew --prefix)/opt/libpq/lib"
 
+# CPPFLAGS - for C preprocessor (ODBC)
+export CPPFLAGS="-I$(brew --prefix)/opt/unixodbc/include"
+
+# KERL_CONFIGURE_OPTIONS - for Erlang/ODBC (if using Erlang)
+export KERL_CONFIGURE_OPTIONS="--with-odbc=$(brew --prefix)/opt/unixodbc"
 
 # File descriptor limits
 ulimit -n 65536
@@ -345,3 +361,5 @@ ulimit -n 65536
 export USE_IMAGEMAGICK_6="1"
 export CFLAGS="-Wno-error=implicit-function-declaration"
 ```
+
+**Note**: If you're using the chezmoi repository that contains this document, PKG_CONFIG_PATH and related build variables are automatically managed through templates. The manual configuration above is for standalone use only.

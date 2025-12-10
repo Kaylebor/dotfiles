@@ -175,10 +175,21 @@ sudo launchctl limit maxfiles 65536 200000
 
 **Problem**: Build tools can't find libraries installed with alternative Homebrew.
 
-**Solution**: Ensure PKG_CONFIG_PATH includes alternative Homebrew paths:
+**Solution**: This repository provides automated PKG_CONFIG_PATH configuration via templates that handle common keg-only packages and the main Homebrew pkgconfig directory.
 
+**Automated Configuration**:
+- Template: `.chezmoitemplates/homebrew_env.tmpl` - Shared template for Fish, Zsh, Bash, and Nushell
+- Application: Automatically applied via `run_onchange_fish.bash.tmpl` (Fish) and shell profiles (Zsh/Bash)
+- Coverage: Main pkgconfig directory + keg-only packages (libpq, imagemagick@6, gettext)
+
+**Manual Override** (if needed):
 ```toml
-PKG_CONFIG_PATH="/alternative/homebrew/opt/imagemagick@6/lib/pkgconfig:/alternative/homebrew/opt/openblas/lib/pkgconfig:..."
+PKG_CONFIG_PATH="~/.homebrew/opt/imagemagick@6/lib/pkgconfig:~/.homebrew/lib/pkgconfig"
+```
+
+**Verification**:
+```bash
+pkg-config --exists <library-name> && echo "Found" || echo "Missing"
 ```
 
 ## Architecture-Specific Considerations
@@ -208,22 +219,32 @@ PKG_CONFIG_PATH="/alternative/homebrew/opt/imagemagick@6/lib/pkgconfig:/alternat
 3. **Service Management**: Ensure system services start properly
 4. **Package Compatibility**: Test common development packages
 
-## Example Complete Configuration
+## Example Implementation
 
-```toml
-# mise/config.toml.tmpl
-{{- if eq .homebrewInstallType "alternative" }}
-## Compiler configuration for alternative Homebrew
-CC="/usr/bin/clang"
-CXX="/usr/bin/clang++"
-CPLUS_INCLUDE_PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1"
-C_INCLUDE_PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"
-USE_IMAGEMAGICK_6="1"
-CFLAGS="-Wno-error=implicit-function-declaration"
+This chezmoi repository handles PKG_CONFIG_PATH and related variables via templates:
 
-## PKG_CONFIG_PATH with alternative Homebrew packages
-PKG_CONFIG_PATH="~/.homebrew/opt/imagemagick@6/lib/pkgconfig:~/.homebrew/opt/openblas/lib/pkgconfig:..."
-{{- end }}
+**Template Structure**:
+```
+.chezmoitemplates/
+  homebrew_env.tmpl      # PKG_CONFIG_PATH, LDFLAGS, CPPFLAGS for all shells
+  homebrew_gcc_env.tmpl  # GCC-specific paths (if using gcc)
+  
+run_onchange_fish.bash.tmpl  # Applies to Fish universal environment
+dot_zprofile.tmpl            # Applies to Zsh
+dot_bash_profile.tmpl        # Applies to Bash
+dot_config/nushell/*.tmpl    # Applies to Nushell
 ```
 
-This comprehensive approach ensures a robust development environment on MDM-managed ARM Macs while maintaining compatibility with standard installations.
+**Example in homebrew_env.tmpl**:
+```bash
+# PKG_CONFIG_PATH - main directory + essential keg-only packages
+set -Ux PKG_CONFIG_PATH "$brewPrefix/lib/pkgconfig:$brewPrefix/opt/libpq/lib/pkgconfig:$brewPrefix/opt/imagemagick@6/lib/pkgconfig:$brewPrefix/opt/gettext/lib/pkgconfig:$PKG_CONFIG_PATH"
+
+# LDFLAGS - for linker
+set -Ux LDFLAGS "$LDFLAGS -L$brewPrefix/opt/llvm/lib -L$brewPrefix/opt/libpq/lib"
+
+# CPPFLAGS - for C preprocessor
+set -Ux CPPFLAGS "$CPPFLAGS -I$brewPrefix/opt/unixodbc/include"
+```
+
+If not using this repository, implement similar patterns in your shell configuration.
