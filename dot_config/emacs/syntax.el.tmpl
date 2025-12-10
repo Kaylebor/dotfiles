@@ -9,6 +9,29 @@
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
 
+;; Helper functions for grammar management
+(defun treesit-delete-grammar (lang)
+  "Delete grammar for LANG (symbol, e.g., 'python)."
+  (interactive
+   (list (intern (completing-read "Grammar to delete: "
+                                  (mapcar #'treesit-auto-recipe-lang
+                                          treesit-auto-recipe-list)))))
+  (let ((grammar-dir (expand-file-name (symbol-name lang)
+                                      (expand-file-name "tree-sitter" user-emacs-directory))))
+    (when (file-directory-p grammar-dir)
+      (delete-directory grammar-dir 'recursive)
+      (message "Deleted grammar: %s" lang))))
+
+(defun treesit-delete-all-grammars ()
+  "Delete all installed tree-sitter grammars."
+  (interactive)
+  (when (y-or-n-p "Delete ALL tree-sitter grammars? ")
+    (let ((grammar-root (expand-file-name "tree-sitter" user-emacs-directory)))
+      (when (file-directory-p grammar-root)
+        (delete-directory grammar-root 'recursive)
+        (make-directory grammar-root)
+        (message "All grammars deleted. Run treesit-auto-install-all to reinstall.")))))
+
 (use-package emacs-lisp-mode
   :ensure nil
   :delight
