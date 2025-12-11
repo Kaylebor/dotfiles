@@ -1,160 +1,20 @@
 ;; -*- lexical-binding: t; -*-
-{{- $ollamaModels := (fromYaml (include ".chezmoidata/ollama-models.yml")) }}
 (use-package gptel :ensure t
   :custom
-  {{- if ne .ollamaHost "" }}
-  ;; Default to the best general-purpose local model
-  (gptel-model '{{ $ollamaModels.defaults.gptel }})
-  {{- else }}
-  ;; Cloud model when Ollama not configured
-  (gptel-model 'deepseek/deepseek-chat-v3-0324:free)
-  {{- end }}
+  (gptel-backend (gptel-make-openai "Synthetic"
+                   :host "api.synthetic.new"
+                   :endpoint "/openai/v1/chat/completions"
+                   :stream t
+                   :key {{- if .skip1Password }} "{{ env "SYNTHETIC_API_KEY" }}"
+                   {{- else }} (lambda (auth-source-pick-first-password :host "Synthetic" :user "API Token"))
+                   {{- end }}
+                   :models '(hf:moonshotai/Kimi-K2-Thinking
+                             hf:zai-org/GLM-4.6
+                             hf:deepseek-ai/DeepSeek-V3.2
+                             hf:meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8)))
+  (gptel-model 'hf:moonshotai/Kimi-K2-Thinking)
   (gptel-use-tools t)
-  (gptel-confirm-tool-calls 'always)
-  :config
-  {{- if ne .ollamaHost "" }}
-  ;; Primary Ollama backend (local-first approach)
-  (setq gptel-backend
-        (gptel-make-ollama "Ollama"
-          :host "{{ .ollamaHost }}"
-          :stream t
-          :models '({{- range $index, $model := $ollamaModels.models }}{{ if $index }}
-                    {{ end }}"{{ $model.name }}"{{- end }})))
-  {{- end }}
-  
-  ;; Fallback OpenRouter backend for specialized tasks
-  (setq gptel-openrouter-backend
-        (gptel-make-openai "OpenRouter"
-          :host "openrouter.ai"
-          :endpoint "/api/v1/chat/completions"
-          :stream t
-          ;; Authentication: Use environment variable when skipping 1Password, otherwise use 1Password auth-source
-          :key {{- if .skip1Password }} "{{ env "CHEZMOI_OPENROUTER_API_KEY" }}"  ; Environment variable fallback
-               {{- else }} (lambda () (auth-source-pick-first-password :host "OpenRouter" :user "API Token"))  ; 1Password integration
-               {{- end }}
-          :models '(deepseek/deepseek-r1:free
-                    deepseek/deepseek-r1
-                    microsoft/mai-ds-r1:free
-                    perplexity/r1-1776
-                    deepseek/deepseek-v3-base:free
-                    deepseek/deepseek-chat-v3-0324:free
-                    google/gemini-2.0-flash-exp:free
-                    google/gemini-2.0-flash-thinking-exp:free
-                    google/gemini-2.0-flash-001
-                    google/gemini-2.0-flash-lite-001
-                    google/gemini-2.5-flash-preview
-                    google/gemini-2.5-flash-preview:thinking
-                    google/gemini-2.5-pro-exp-03-25
-                    google/gemini-2.5-pro-preview-03-25)))
-  
-  {{- if ne .ollamaHost "" }}
-  ;; Specialized presets optimized for your models
-  (gptel-make-preset "general-chat"
-    :backend gptel-backend
-    :model '{{ $ollamaModels.defaults.gptel }}
-    :system-message "You are a helpful AI assistant. Provide clear, accurate responses.")
-  
-  (gptel-make-preset "code-analysis"
-    :backend gptel-backend
-    :model 'qwen3-coder:30b
-    :system-message "You are an expert code analyst. Review code for bugs, improvements, and best practices.")
-  
-  (gptel-make-preset "agentic-coding"
-    :backend gptel-backend
-    :model 'devstral:latest
-    :system-message "You are an agentic coding assistant. Help with complex programming tasks and system integration.")
-  
-  (gptel-make-preset "reasoning-tasks"
-    :backend gptel-backend
-    :model 'qwen3:30b-a3b
-    :system-message "You are a reasoning expert. Break down complex problems step by step.")
-  
-  (gptel-make-preset "openai-local"
-    :backend gptel-backend
-    :model 'gpt-oss:20b
-    :system-message "You are GPT-OSS, OpenAI's open model. Provide helpful and accurate responses.")
-  {{- end }}
-  
-  ;; Cloud fallback presets for specialized tasks
-  (gptel-make-preset "deep-reasoning"
-    :backend gptel-openrouter-backend
-    :model 'deepseek/deepseek-r1:free
-    :system-message "You are a deep reasoning model. Think step by step through complex problems.")
-  
-  (gptel-make-preset "vision-analysis"
-    :backend gptel-openrouter-backend
-    :model 'google/gemini-2.0-flash-exp:free  ;; Multimodal capable
-    :system-message "Analyze images and visual content with technical precision."))
+  (gptel-confirm-tool-calls 'always))
 
-{{- if ne .ollamaHost "" }}
-;; Enhanced multimodal debugging function
-(defun gptel-multimodal-debug (image-path issue-description)
-  "Analyze image with vision model, then debug with local reasoning model"
-  (interactive "fScreenshot path: \nsDescribe the issue: ")
-  (let ((vision-prompt (format "%s\nAnalyze this screenshot: %s" 
-                               issue-description image-path)))
-    (gptel-request vision-prompt
-      :preset "vision-analysis"
-      :callback (lambda (vision-output)
-        (let ((debug-prompt (format "Vision Analysis:\n%s\n\nNow analyze this UI issue using local reasoning:" 
-                                   vision-output)))
-          (gptel-request debug-prompt
-            :preset "code-analysis"))))))
-
-;; Smart preset switcher with descriptions
-(defun gptel-quick-preset (preset-name)
-  "Quickly switch to a preset and open gptel"
-  (interactive 
-   (list (completing-read "Choose preset: " 
-                         '(("general-chat" . "General conversation (Qwen3 Instruct)")
-                           ("code-analysis" . "Code review and analysis (Qwen3-Coder)")
-                           ("agentic-coding" . "Complex programming tasks (Devstral)")
-                           ("reasoning-tasks" . "Step-by-step problem solving (Qwen3 Base)")
-                           ("openai-local" . "OpenAI-style responses (GPT-OSS)")
-                           ("deep-reasoning" . "Complex reasoning (DeepSeek-R1 Cloud)")
-                           ("vision-analysis" . "Image analysis (Gemini Cloud)"))
-                         nil t)))
-  (gptel-apply-preset preset-name)
-  (gptel)
-  (message "Switched to %s preset" preset-name))
-
-;; Model-specific shortcuts
-(defun gptel-switch-to-coder ()
-  "Quick switch to coding model"
-  (interactive)
-  (gptel-apply-preset "code-analysis")
-  (message "Switched to Qwen3-Coder for code analysis"))
-
-(defun gptel-switch-to-agentic ()
-  "Quick switch to agentic coding model"
-  (interactive)
-  (gptel-apply-preset "agentic-coding")
-  (message "Switched to Devstral for agentic coding"))
-{{- end }}
-
-;; Enhanced aidermacs integration
-(use-package aidermacs :ensure t
-  ;; All bindings moved to AI keymap for better organization
-  :custom
-  (aidermacs-use-architect-mode t)
-  {{- if ne .ollamaHost "" }}
-  ;; Use local Devstral for completely local workflow
-  (aidermacs-default-model "ollama/{{ $ollamaModels.defaults.aidermacs }}")
-  {{- else }}
-  (aidermacs-default-model "deepseek/deepseek-chat-v3-0324:free")
-  {{- end }}
-  {{- if not .ollamaHost }}{{- if not .skip1Password }}
-  ;; When using cloud models without 1Password skip: dynamically get API key from 1Password
-  :hook
-  (aidermacs-before-run-backend . (lambda () 
-    (setenv "OPENROUTER_API_KEY" 
-      (auth-source-pick-first-password :host "OpenRouter" :user "API Token"))))
-  {{- end }}{{- end }}
-  :config
-  {{- if ne .ollamaHost "" }}
-  ;; Configuration for local Ollama setup
-  (setenv "OLLAMA_API_BASE" "{{ .ollamaApiBase }}")
-  {{- else if .skip1Password }}
-  ;; Configuration for cloud models with 1Password skip: use environment variable
-  (setenv "OPENROUTER_API_KEY" "{{ env "CHEZMOI_OPENROUTER_API_KEY" }}")
-  {{- end }})
+(elpaca (gptel-agent :host github :repo "karthink/gptel-agent" :branch "master" :files (:defaults "agents/*"))
+  (gptel-agent-update))
