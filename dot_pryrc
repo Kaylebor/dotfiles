@@ -8,14 +8,3 @@ rescue LoadError => e
   # Optional: Print why it failed if you are curious, or just stay silent.
   # puts "Global .irbrc info: Could not load extra gems (#{e.message})"
 end
-
-# --- The Logic to Load Local Config ---
-
-# Prevent infinite recursion if running from home dir
-current_file = File.expand_path('.irbrc')
-home_file    = File.expand_path('~/.irbrc')
-
-if File.exist?('.irbrc') && current_file != home_file
-  puts "Loading project-specific .irbrc..."
-  load '.irbrc'
-end
