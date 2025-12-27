@@ -93,6 +93,10 @@ fish -c "set -Ux VISUAL '{{ $editor }}'"
 fish -c "set -Ux GIT_EDITOR \$EDITOR"
 fish -c "set -Ux PSQL_EDITOR \$EDITOR"
 
+# MCP API keys from 1Password
+fish -c "set -Ux BRAVE_API_KEY '{{ template "onepassword_safe" dict "opPath" "op://Private/Brave API Token - Personal/password" "envVar" "BRAVE_API_KEY" "context" . }}'"
+fish -c "set -Ux Z_AI_API_KEY '{{ template "onepassword_safe" dict "opPath" "op://Private/Z.AI API Token - Personal/API Token" "envVar" "Z_AI_API_KEY" "context" . }}'"
+
 {{- if and .useLlamaSwap .enableLlamaSwapEnv }}
 # Configure qwen-code for llama-swap (only when explicitly enabled)
 fish -c "set -Ux OPENAI_BASE_URL '{{ .llamaSwapApiBase }}'"

@@ -1,4 +1,4 @@
-# Mise integration for Fish shell
+# Mise and Fnox integration for Fish shell
 # Only activate for interactive shells to avoid affecting GUI applications
 
 if status --is-interactive
@@ -8,5 +8,11 @@ if status --is-interactive
 
 # Load full mise integration (dynamic PATH/env updates on prompt)
 {{ output "mise" "activate" "fish" }}
+
+# Load fnox integration for automatic secret loading on cd
+# Must come after mise so fnox is in PATH
+{{- if lookPath "fnox" }}
+fnox activate fish | source
+{{- end }}
 {{- end }}
 end

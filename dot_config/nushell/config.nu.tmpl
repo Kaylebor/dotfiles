@@ -80,6 +80,10 @@ $env.LANG = "en_US.UTF-8"
 $env.LC_ALL = "en_US.UTF-8"
 $env.DOCKER_BUILDKIT = "1"
 
+# MCP API keys from 1Password
+$env.BRAVE_API_KEY = "{{ template "onepassword_safe" dict "opPath" "op://Private/Brave API Token - Personal/password" "envVar" "BRAVE_API_KEY" "context" . }}"
+$env.Z_AI_API_KEY = "{{ template "onepassword_safe" dict "opPath" "op://Private/Z.AI API Token - Personal/API Token" "envVar" "Z_AI_API_KEY" "context" . }}"
+
 # Path configuration
 $env.PATH = ($env.PATH | split row (char esep) | prepend [
     {{- if stat .paths.localBin }}

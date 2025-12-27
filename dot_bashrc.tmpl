@@ -2,22 +2,28 @@
 
 # Claude Code Detection and Environment Setup
 # Claude Code sets CLAUDECODE=1 but doesn't source .profile
-# We need to ensure mise is properly initialized for Claude Code's Bash tool
+# We need to ensure mise and fnox are properly initialized for Claude Code's Bash tool
 if [[ -n "$CLAUDECODE" ]]; then
     # Running in Claude Code - ensure mise is fully activated
-    # Source .profile functionality since Claude Code doesn't source it
-    if [[ -z "$__MISE_ACTIVATED" ]]; then
-        eval "$(mise activate bash)"
-        export __MISE_ACTIVATED=1
-    fi
+    # Source .zprofile functionality since Claude Code doesn't source it
+    eval "$(mise activate bash)"
+{{- if lookPath "fnox" }}
+    # Ensure fnox is activated for Claude Code sessions
+    eval "$(fnox activate bash)"
+{{- end }}
 fi
 
 # Ensure mise is activated for interactive shells
-if [[ -z "$__MISE_ACTIVATED" ]]; then
-    eval "$(mise activate bash)"
-    export __MISE_ACTIVATED=1
-fi
+eval "$(mise activate bash)"
 
+# Ensure fnox is activated for interactive shells
+{{- if lookPath "fnox" }}
+eval "$(fnox activate bash)"
+{{- end }}
+
+# MCP API keys from 1Password
+export BRAVE_API_KEY='{{ template "onepassword_safe" dict "opPath" "op://Private/Brave API Token - Personal/password" "envVar" "BRAVE_API_KEY" "context" . }}'
+export Z_AI_API_KEY='{{ template "onepassword_safe" dict "opPath" "op://Private/Z.AI API Token - Personal/API Token" "envVar" "Z_AI_API_KEY" "context" . }}'
 
 {{- if lookPath "tv" }}
 # Integrate Television
