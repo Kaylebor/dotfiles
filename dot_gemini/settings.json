@@ -1,0 +1,49 @@
+{
+    "context": {
+        "fileName": "AGENTS.md"
+    },
+    "security": {
+        "auth": {
+            "selectedType": "oauth-personal"
+        }
+    },
+    "ui": {
+        "theme": "Default",
+        "showStatusInTitle": true,
+        "showMemoryUsage": true,
+        "showLineNumbers": true,
+        "showCitations": true,
+        "accessibility": {
+            "screenReader": false
+        },
+        "showModelInfoInChat": true
+    },
+    "tools": {
+        "enableMessageBusIntegration": true,
+        "shell": {
+            "showColor": true
+        }
+    },
+    "general": {
+        "previewFeatures": true,
+        "disableAutoUpdate": true,
+        "enablePromptCompletion": true
+    },
+    "mcpServers": {
+        "context7": {
+            "url": "https://mcp.context7.com/mcp"
+        },
+        "zai-read": {
+            "url": "https://api.z.ai/api/mcp/web_reader/mcp",
+            "headers": {
+                "Authorization": "Bearer $Z_AI_API_KEY"
+            }
+        },
+        "zai-zread": {
+            "url": "https://api.z.ai/api/mcp/zread/mcp",
+            "headers": {
+                "Authorization": "Bearer $Z_AI_API_KEY"
+            }
+        }
+    }
+}
