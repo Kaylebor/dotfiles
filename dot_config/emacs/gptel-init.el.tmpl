@@ -15,7 +15,7 @@
      :host "api.z.ai"
      :endpoint "/api/paas/v4/chat/completions"
      :stream t
-     :key {{- if .skip1Password }} "{{ env "ZAI_API_KEY" }}"
+     :key {{- if .skip1Password }} "{{ env "Z_AI_API_KEY" }}"
      {{- else }} (lambda (auth-source-pick-first-password :host "Z.AI" :user "API Token"))
      {{- end }}
      :models '(glm-4.6
