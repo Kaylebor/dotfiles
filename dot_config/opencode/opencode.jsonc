@@ -2,6 +2,11 @@
   "$schema": "https://opencode.ai/config.json",
   "theme": "catppuccin-macchiato",
   "formatter": false,
+  "lsp": {
+    "biome": {
+      "disabled": true
+    }
+  },
   "mcp": {
     "context7": {
       "type": "remote",
