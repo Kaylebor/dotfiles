@@ -86,6 +86,11 @@
   :delight
   :mode (("\\.jsx\\'" . js-jsx-mode)))  ; jsx still needs explicit mode
 
+(use-package json-mode
+  :ensure t
+  :delight
+  :mode (("\\.jsonc\\'" . jsonc-mode)))  ; JSON with comments
+
 (use-package elixir-ts-mode
   :ensure nil
   :delight
