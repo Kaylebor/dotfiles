@@ -1,11 +1,10 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "theme": "catppuccin-macchiato",
+  "enabled_providers": ["synthetic", "zai-coding-plan"],
   "formatter": false,
   "lsp": {
-    "biome": {
-      "disabled": true
-    }
+    "biome": { "disabled": true }
   },
   "mcp": {
     "context7": {
@@ -15,9 +14,7 @@
     "brave-search": {
       "type": "local",
       "command": ["bunx", "-y", "@brave/brave-search-mcp-server", "--transport", "stdio"],
-      "environment": {
-        "BRAVE_API_KEY": "{env:BRAVE_API_KEY}"
-      }
+      "environment": { "BRAVE_API_KEY": "{env:BRAVE_API_KEY}" }
     },
     "zai-vision": {
       "type": "local",
@@ -30,23 +27,17 @@
     "zai-search": {
       "type": "remote",
       "url": "https://api.z.ai/api/mcp/web_search_prime/mcp",
-      "headers": {
-        "Authorization": "Bearer {env:Z_AI_API_KEY}"
-      }
+      "headers": { "Authorization": "Bearer {env:Z_AI_API_KEY}" }
     },
     "zai-read": {
       "type": "remote",
       "url": "https://api.z.ai/api/mcp/web_reader/mcp",
-      "headers": {
-        "Authorization": "Bearer {env:Z_AI_API_KEY}"
-      }
+      "headers": { "Authorization": "Bearer {env:Z_AI_API_KEY}" }
     },
     "zai-zread": {
       "type": "remote",
       "url": "https://api.z.ai/api/mcp/zread/mcp",
-      "headers": {
-        "Authorization": "Bearer {env:Z_AI_API_KEY}"
-      }
+      "headers": { "Authorization": "Bearer {env:Z_AI_API_KEY}" }
     }
   }
 }
