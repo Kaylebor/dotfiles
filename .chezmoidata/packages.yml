@@ -62,8 +62,15 @@ packages:
       - 'zsh'
       - 'zsh-antidote'
   darwin:
+    taps:
+      - 'd12frosted/emacs-plus'
     brews:
-      - 'emacs'
+      - name: 'emacs-plus@31'
+        args:
+          - 'with-mailutils'
+          - 'with-xwidgets'
+          - 'with-dbus'
+          - 'with-compress-install'
       - 'antidote'
       - name: 'aspell'
         watch_versions: true
@@ -160,7 +167,6 @@ packages:
           - '~/Applications/1Password.app'
           - '~/Applications/1Password 7 - Password Manager.app'
       - '1password-cli'
-      - 'emacs-app'
       - 'font-maple-mono'
       - 'font-maple-mono-nf'
       - 'kitty'

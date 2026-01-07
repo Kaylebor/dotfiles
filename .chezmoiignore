@@ -35,6 +35,9 @@ flycheck_*.tmpl
 
 # macOS-specific files to ignore on non-macOS systems
 {{ if ne .chezmoi.os "darwin" -}}
+# Emacs Plus configuration (macOS-only)
+.config/emacs-plus/**
+
 # Alternative Homebrew installation files (only ignore if not alternative install)
 {{- if and (hasKey . "homebrewInstallType") (ne .homebrewInstallType "alternative") }}
 .local/share/chezmoi-homebrew-state.db
