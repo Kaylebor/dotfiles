@@ -17,7 +17,7 @@
                                   (mapcar #'treesit-auto-recipe-lang
                                           treesit-auto-recipe-list)))))
   (let ((grammar-dir (expand-file-name (symbol-name lang)
-                                      (expand-file-name "tree-sitter" user-emacs-directory))))
+                                       (expand-file-name "tree-sitter" user-emacs-directory))))
     (when (file-directory-p grammar-dir)
       (delete-directory grammar-dir 'recursive)
       (message "Deleted grammar: %s" lang))))
@@ -148,7 +148,7 @@
   :defer t  ; Don't load until a supported mode activates
   :custom
   (setopt lsp-keymap-prefix "C-c l")
-  (lsp-keep-workspace-alive nil) ;; close LSP servers after last buffer is closed
+  (lsp-keep-workspace-alive t) ;; Keep LSP servers alive in daemon mode
   (lsp-ruby-lsp-use-bundler nil) ;; use global ruby-lsp with composed bundle
   (lsp-completion-provider :none) ;; Use corfu instead of company-mode
   ;; Monorepo support: disable auto-guessing to get prompts for correct project roots
@@ -291,6 +291,8 @@
                            (list (my-mise-which "ruby-lsp") "--use-launcher")))))
     :activation-fn (lsp-activate-on "ruby")
     :priority 10
+    :initialization-options (lambda ()
+                              (or lsp-ruby-lsp-initialization-options nil))
     :server-id 'ruby-lsp-mise))
   
   
@@ -319,6 +321,20 @@
                 (append '("emacs-lsp-booster" "--disable-bytecode" "--") orig-result))))
         orig-result)))
   (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command))
+
+;; Ruby LSP per-project initialization options via .dir-locals.el
+(defcustom lsp-ruby-lsp-initialization-options nil
+  "Ruby LSP initialization options (plist format).
+Set this in your project's .dir-locals.el to control Ruby LSP behavior.
+Example .dir-locals.el:
+  ((ruby-mode .
+    ((lsp-ruby-lsp-initialization-options
+      . (:indexing (:excludedGems [\"gem1\" \"gem2\"]))))))"
+  :safe #'listp
+  :type '(or null plist)
+  :group 'lsp-ruby-lsp)
+
+(make-variable-buffer-local 'lsp-ruby-lsp-initialization-options)
 
 ;; Use Stylua for Lua formatting if available (managed by mise)
 (with-eval-after-load 'apheleia
