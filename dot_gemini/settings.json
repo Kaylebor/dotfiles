@@ -27,7 +27,7 @@
     "general": {
         "previewFeatures": true,
         "disableAutoUpdate": true,
-        "enablePromptCompletion": true
+        "enablePromptCompletion": false
     },
     "mcpServers": {
         "context7": {
