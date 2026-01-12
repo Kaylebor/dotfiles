@@ -94,7 +94,8 @@ and sets `gptel-backend' and `gptel-model' buffer-locally."
                    gptel-model))))))
 
 (elpaca (gptel-agent :host github :repo "karthink/gptel-agent" :branch "master" :files (:defaults "agents"))
-  ;; Add custom agents directory for user-defined agent variants
-  (add-to-list 'gptel-agent-dirs
-               (expand-file-name "~/.config/emacs/gptel-agents"))
-  (gptel-agent-update))
+  ;; Safely configure agents directory after package loads
+  (with-eval-after-load 'gptel-agent
+    (add-to-list 'gptel-agent-dirs
+                 (expand-file-name "~/.config/emacs/gptel-agents"))
+    (gptel-agent-update)))

@@ -397,9 +397,10 @@
   (define-key corfu-map (kbd "M-n") #'corfu-popupinfo-scroll-up)
   (define-key corfu-map (kbd "M-p") #'corfu-popupinfo-scroll-down))
 
-;; Corfu terminal support
+;; Corfu terminal support - only needed for Emacs < 31
 (use-package corfu-terminal :ensure t
-  :if (not (display-graphic-p))
+  :if (and (not (display-graphic-p))
+           (< emacs-major-version 31))
   :config
   (corfu-terminal-mode +1))
 
