@@ -96,6 +96,14 @@
   :delight
   :mode ("\\.\\(ex\\|exs\\|eex\\|leex\\|heex\\)\\'" . elixir-ts-mode))
 
+;; Zig programming language
+(use-package zig-mode
+  :ensure t
+  :delight
+  :mode ("\\.\\(zig\\|zon\\)\\'" . zig-mode)
+  :custom
+  (zig-format-on-save nil))     ; Disable built-in formatter (apheleia handles it)
+
 (use-package gdscript-mode :ensure (:host github :repo "godotengine/emacs-gdscript-mode") :delight :mode ("\\.gd\\'" . gdscript-ts-mode))
 
 ;; Linting - only activate in programming modes
