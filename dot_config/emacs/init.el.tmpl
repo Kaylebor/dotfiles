@@ -160,7 +160,30 @@
                       (add-hook 'after-change-functions 
                                 (lambda (&rest _)
                                   (ansi-color-apply-on-region (point-min) (point-max)))
-                                nil t)))))))
+                                 nil t)))))))
+
+;; detached.el - Detached process management
+;; Processes survive Emacs shutdown, unlimited scrollback, TRAMP support
+;; Enables: compile, shell, eshell, vterm, dired, org, projectile integration
+(use-package detached :ensure t
+  :custom
+  ;; ANSI color handling (detached.el manages this internally)
+  (detached-filter-ansi-sequences t)
+  ;; Show context when attaching to sessions
+  (detached-show-session-context t)
+  (detached-session-context-lines 20)
+  ;; Terminal-data mode for full ANSI/color support (auto-detected per OS)
+  (detached-terminal-data-command system-type)
+  :config
+  ;; Initialize all integrations (compile, shell, eshell, etc.)
+  (detached-init)
+  :bind
+  ;; Remap compile globally - affects zig-compile, projectile-compile, etc.
+  ([remap compile] . detached-compile)
+  ([remap recompile] . detached-compile-recompile)
+  ;; Session management - main benefit of detached.el
+  ("C-c d o" . detached-open-session)
+  ("C-c d d" . detached-detach-session))
 
 ;; icons - using nerd-icons for consistency
 (use-package nerd-icons :ensure t
