@@ -1,0 +1,48 @@
+{
+  yourName: 'Ender',
+  mcpServers: {
+    search: {
+      command: "npx",
+      args: ["-y", "@brave/brave-search-mcp-server", "--transport", "stdio"]
+    },
+    context7: {
+      command: "npx",
+      args: ["-y", "@upstash/context7-mcp"]
+    }
+  },
+  models: [
+    {
+      model: 'hf:zai-org/GLM-4.7',
+      nickname: 'GLM-4.7 (Synthetic)',
+      context: 131072,
+      baseUrl: 'https://api.synthetic.new/v1',
+    },
+    {
+      baseUrl: 'https://api.synthetic.new/v1',
+      model: 'hf:moonshotai/Kimi-K2-Thinking',
+      nickname: 'Kimi K2 Thinking (Synthetic)',
+      context: 262144,
+    },
+    {
+      model: 'hf:MiniMaxAI/MiniMax-M2.1',
+      nickname: 'MiniMax M2.1 (Synthetic)',
+      context: 98304,
+      baseUrl: 'https://api.synthetic.new/v1',
+    },
+    {
+      baseUrl: 'https://api.synthetic.new/v1',
+      model: 'hf:deepseek-ai/DeepSeek-V3.2',
+      nickname: 'DeepSeek V3.2 (Synthetic)',
+      context: 162816,
+    },
+  ],
+  diffApply: {
+    baseUrl: 'https://api.synthetic.new/v1',
+    model: 'hf:syntheticlab/diff-apply',
+  },
+  fixJson: {
+    baseUrl: 'https://api.synthetic.new/v1',
+    model: 'hf:syntheticlab/fix-json',
+  },
+  defaultApiKeyOverrides: {},
+}
