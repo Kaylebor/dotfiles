@@ -1,7 +1,11 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "theme": "catppuccin-macchiato",
-  "enabled_providers": ["synthetic", "zai-coding-plan"],
+  "theme": "catppuccin-frappe",
+  "enabled_providers": [
+    "google",
+    "synthetic",
+    "zai-coding-plan"
+  ],
   "formatter": false,
   "lsp": {
     "biome": { "disabled": true }
@@ -39,5 +43,9 @@
       "url": "https://api.z.ai/api/mcp/zread/mcp",
       "headers": { "Authorization": "Bearer {env:Z_AI_API_KEY}" }
     }
-  }
+  },
+  "plugin": [
+    "opencode-antigravity-auth@beta",
+    "opencode-antigravity-quota@0.1.2"
+  ]
 }
