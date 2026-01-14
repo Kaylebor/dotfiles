@@ -3,6 +3,7 @@
   "theme": "catppuccin-frappe",
   "enabled_providers": [
     "google",
+    "opencode",
     "synthetic",
     "zai-coding-plan"
   ],
