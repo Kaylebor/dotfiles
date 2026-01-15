@@ -48,5 +48,10 @@
   "plugin": [
     "opencode-antigravity-auth@beta",
     "opencode-antigravity-quota@0.1.2"
-  ]
+  ],
+  "tui": {
+    "scroll_acceleration": {
+      "enabled": true
+    }
+  }
 }
