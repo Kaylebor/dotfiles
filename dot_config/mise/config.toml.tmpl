@@ -80,8 +80,11 @@ zoxide = "latest" # Smarter cd command with frecency-based navigation
 "npm:nx" = "latest" # Nx monorepo build and task runner
 "npm:opencode-ai" = "latest" # Fully open OpenAI Codex fork
 "npm:octofriend" = "latest"
+"npm:@angular/language-server" = "latest" # Angular Language Server
 "npm:typescript-language-server" = "latest" # Language Server Protocol support for TypeScript
+"npm:typescript" = "latest" # TypeScript itself
 "npm:vscode-langservers-extracted" = "latest" # VS Code HTML/CSS/JSON language servers
+"pipx:rassumfrassum" = { version = "latest", uvx_args = "--python 3.12" } # Multi-LSP Proxy by Eglot's main dev
 "pipx:aider-chat" = { version = "latest", uvx_args = "--force --python python3.12" } # Aider AI pair-programming assistant
 
 [settings]
@@ -89,7 +92,7 @@ experimental = true
 idiomatic_version_file_enable_tools = ["ruby"]
 
 [settings.npm]
-bun = true
+package_manager = "bun"
 
 [env]
 MISE_NODE_COREPACK=true
