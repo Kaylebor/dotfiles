@@ -96,6 +96,11 @@
 ;; transient
 (use-package transient :ensure t)
 
+;; project.el - Built-in project management (enhanced via ELPA)
+(use-package project :ensure t
+  :custom
+  (project-vc-extra-root-markers '(".project" ".git" "Cargo.toml" "package.json" "mix.exs")))
+
 ;; Compatibility shims required by some completion packages (Vertico, etc.)
 (use-package compat :ensure t :demand t)
 
@@ -106,49 +111,6 @@
 (use-package rg :ensure t
   :init
   (rg-enable-menu))
-
-;; projectile
-(use-package projectile :ensure t
-  :delight
-  :custom
-  (projectile-keymap-prefix (kbd "C-x p"))
-  (projectile-use-git-grep t)  ; Use git grep when in git repos
-  (projectile-project-search-path '(("~/projects/" . 1) ("~/work/" . 1) ("~/playground" . 2)))
-  (projectile-known-projects-file (expand-file-name "projectile-bookmarks.eld" user-emacs-directory))
-  (projectile-cache-file (expand-file-name "projectile.cache" user-emacs-directory))
-  (projectile-enable-caching t)  ; Enable caching for better performance
-  (projectile-auto-discover t)  ; Automatically discover projects in search path
-  (projectile-auto-cleanup-known-projects nil)  ; Don't auto-cleanup, it's too aggressive
-  (projectile-indexing-method 'alien)  ; Use external tools (fd/rg) for better performance
-  (projectile-sort-order 'recently-active)  ; Sort projects by recent activity
-  :init
-  ;; Enable projectile-mode and set up keymap before other packages can use it
-  (projectile-mode +1)
-  ;; Use default Emacs completion system (works with vertico/consult)
-  (setq projectile-completion-system 'default)
-  (with-eval-after-load 'projectile
-    (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map))
-  :config
-  ;; Discover projects after initialization
-  (add-hook 'elpaca-after-init-hook
-            (lambda ()
-              (projectile-discover-projects-in-search-path)
-              (message "Discovered %d projects" (length projectile-known-projects))))
-  ;; Save known projects on exit
-  (add-hook 'kill-emacs-hook #'projectile-save-known-projects)
-  ;; Add manual refresh command (without cleanup)
-  (define-key projectile-command-map "r" 
-              (lambda ()
-                (interactive)
-                (projectile-discover-projects-in-search-path)
-                (message "Discovered projects. Total: %d projects" (length projectile-known-projects))))
-  ;; Add manual cleanup + refresh command  
-  (define-key projectile-command-map "R" 
-              (lambda ()
-                (interactive)
-                (projectile-cleanup-known-projects)
-                (projectile-discover-projects-in-search-path)
-                (message "Cleaned and refreshed project list: %d projects" (length projectile-known-projects)))))
 
 ;; ANSI color support for various buffers
 (use-package ansi-color :ensure nil  ; Built-in package
@@ -220,7 +182,6 @@
 
 ;; treemacs for visual navigation
 (use-package treemacs :ensure t)
-(use-package treemacs-projectile :ensure t)
 (use-package treemacs-magit :ensure t)
 (use-package treemacs-nerd-icons :ensure t
   :config
@@ -244,12 +205,9 @@
   (setq xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref)
   :config
-  ;; Configure project buffer support - consult-buffer will automatically include project buffers
+  ;; Configure project buffer support
   ;; Add project buffer switching with C-x p b
-  (define-key global-map (kbd "C-x p b") 
-              (lambda () (interactive) 
-                (let ((consult-buffer-sources '(consult--source-project-buffer)))
-                  (consult-buffer)))))
+  (global-set-key (kbd "C-x p b") #'consult-project-buffer))
 
 (use-package marginalia :ensure t
   :init

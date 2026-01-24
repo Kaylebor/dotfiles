@@ -14,7 +14,7 @@
 (global-set-key (kbd "M-s f") 'consult-find)
 (global-set-key (kbd "M-s r") 'consult-ripgrep)
 (global-set-key (kbd "M-y") 'consult-yank-pop)
-(global-set-key (kbd "M-g f") 'consult-flycheck)
+(global-set-key (kbd "M-g f") 'consult-flymake)
 
 ;; Avy - Jump navigation
 (global-set-key (kbd "M-j") 'avy-goto-char-timer)

@@ -55,15 +55,19 @@
 
   ;;; Package-specific prefixes
 
-  ;; Project.el / Projectile
+  ;; Project.el
   (which-key-add-key-based-replacements "C-x p" "project")
-  (which-key-add-key-based-replacements "C-x p 4" "project-other-window")
-  (which-key-add-key-based-replacements "C-x p 5" "project-other-frame")
-  (which-key-add-key-based-replacements "C-x p c" "project-compile")
-  (which-key-add-key-based-replacements "C-x p s" "project-search")
-  (which-key-add-key-based-replacements "C-x p x" "project-shell")
-  (which-key-add-key-based-replacements "C-x p C-x" "project-save")
-  (which-key-add-key-based-replacements "C-x p x 4" "project-shell-other-window")
+  (which-key-add-key-based-replacements "C-x p f" "find-file")
+  (which-key-add-key-based-replacements "C-x p b" "switch-buffer")
+  (which-key-add-key-based-replacements "C-x p d" "dired")
+  (which-key-add-key-based-replacements "C-x p g" "find-regexp")
+  (which-key-add-key-based-replacements "C-x p r" "query-replace")
+  (which-key-add-key-based-replacements "C-x p s" "shell")
+  (which-key-add-key-based-replacements "C-x p e" "eshell")
+  (which-key-add-key-based-replacements "C-x p c" "compile")
+  (which-key-add-key-based-replacements "C-x p !" "run-cmd")
+  (which-key-add-key-based-replacements "C-x p &" "async-cmd")
+  (which-key-add-key-based-replacements "C-x p k" "kill-buffers")
 
   ;; Magit & Forge
   (which-key-add-key-based-replacements "C-x g" "magit")
@@ -73,8 +77,8 @@
   ;; Treemacs
   (which-key-add-key-based-replacements "C-x t" "treemacs")
 
-  ;; Flycheck
-  (which-key-add-key-based-replacements "C-c !" "flycheck")
+  ;; Flymake
+  (which-key-add-key-based-replacements "C-c !" "flymake")
 
   ;; Yasnippet
   (which-key-add-key-based-replacements "C-c &" "yasnippet")

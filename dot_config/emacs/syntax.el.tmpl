@@ -54,7 +54,8 @@
 
 ;; PostgreSQL database browser and editor
 (use-package pgmacs
-  :ensure (:host github :repo "emarsden/pgmacs"))
+  :ensure (:host github :repo "emarsden/pgmacs")
+  :defer t)
 
 ;; PostgreSQL execution mode with auth-source integration
 (use-package pgx-mode
@@ -106,22 +107,17 @@
 
 (use-package gdscript-mode :ensure (:host github :repo "godotengine/emacs-gdscript-mode") :delight :mode ("\\.gd\\'" . gdscript-ts-mode))
 
-;; Linting - only activate in programming modes
-(use-package flycheck :ensure t
-  :delight
-  :hook (prog-mode . flycheck-mode)  ; Lazy load for programming modes only
-  :config
-  ;; Disable Ruby checkers that overlap with Ruby LSP
-  (setq-default flycheck-disabled-checkers '(ruby-rubocop ruby-standard)))
+;; Linting - using built-in Flymake (enhanced via ELPA)
+(use-package flymake
+  :ensure t
+  :bind ("C-c ! n" . flymake-goto-next-error)
+  :bind ("C-c ! p" . flymake-goto-prev-error)
+  :bind ("C-c ! l" . flymake-show-buffer-diagnostics))
 
-;; Show flycheck errors inline in the buffer
-(use-package flycheck-inline :ensure t
-  :after flycheck
-  :hook (flycheck-mode . flycheck-inline-mode))
-
-;; Navigate flycheck errors with consult
-(use-package consult-flycheck :ensure t
-  :after (consult flycheck))
+;; Collection of checkers for non-LSP modes
+(use-package flymake-collection
+  :ensure t
+  :hook (after-init . flymake-collection-hook-setup))
 
 ;; Automatic code formatting on save
 (use-package apheleia :ensure t
@@ -148,7 +144,8 @@
 (defun user-eglot-framework-aware-contact (mise-contact &optional _interactive project)
   "Return 'rass angular' if in Angular project, else MISE-CONTACT."
   (let* ((root (if project (project-root project)
-                 (and (fboundp 'projectile-project-root) (projectile-project-root))))
+                 (let ((proj (project-current)))
+                   (and proj (project-root proj)))))
          (root (or root default-directory))
          (is-angular (and root (file-exists-p (expand-file-name "angular.json" root)))))
     (if is-angular '("rass" "angular") mise-contact)))
@@ -292,15 +289,9 @@
   :custom
   (dape-breakpoint-global-mode +1)
   (dape-buffer-window-arrangement 'right)
-  (dape-cwd-function #'projectile-project-root)
+  (dape-cwd-function (lambda () (let ((p (project-current))) (if p (project-root p) default-directory))))
   :config
   (add-hook 'dape-start-hook (lambda () (save-some-buffers t t))))
-
-;; Better projectile integration for Rails - only in Rails projects
-(use-package projectile-rails :ensure t
-  :defer t
-  :after projectile
-  :hook (projectile-mode . projectile-rails-on))
 
 ;; Load chezmoi template support (composite grammars for .tmpl files)
 (load-file (expand-file-name "chezmoi-templates.el" user-emacs-directory))

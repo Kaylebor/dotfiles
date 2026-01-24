@@ -76,7 +76,8 @@
   ;; Shave seconds off startup time by starting the scratch buffer in
   ;; `fundamental-mode'
   (setq initial-major-mode 'fundamental-mode
-        initial-scratch-message nil)
+        initial-scratch-message nil
+        inhibit-startup-screen t)
   ;; Unset command line options irrelevant to the current OS. These options
   ;; are still processed by `command-line-1` but have no effect.
   (unless (eq system-type 'darwin)
