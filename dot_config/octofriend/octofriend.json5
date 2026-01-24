@@ -1,10 +1,6 @@
 {
   yourName: 'Ender',
   mcpServers: {
-    search: {
-      command: "npx",
-      args: ["-y", "@brave/brave-search-mcp-server", "--transport", "stdio"]
-    },
     context7: {
       command: "npx",
       args: ["-y", "@upstash/context7-mcp"]
