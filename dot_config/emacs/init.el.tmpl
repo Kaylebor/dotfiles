@@ -209,6 +209,88 @@
   ;; Add project buffer switching with C-x p b
   (global-set-key (kbd "C-x p b") #'consult-project-buffer))
 
+(use-package consult-project-extra :ensure t
+  :custom
+  (consult-project-function #'consult-project-extra-project-fn))
+
+;; Custom VC-fd backend for fast file listing using fd
+(defun project-try-vc-fd (dir)
+  "Try to detect a VC project for DIR, but return vc-fd instance."
+  (when (vc-file-getprop dir 'project-vc)
+    (vc-file-setprop dir 'project-vc nil))
+  (let ((res (project-try-vc-fd--search dir)))
+    (and res (vc-file-setprop dir 'project-vc res) res)))
+
+(defun project-try-vc-fd--search (dir)
+  "Search for VC project root, returning vc-fd instance."
+  (let* ((backend-markers
+          (delete
+           nil
+           (mapcar
+            (lambda (b) (assoc-default b project-vc-backend-markers-alist))
+            vc-handled-backends)))
+         (marker-re
+          (concat
+           "\\`"
+           (mapconcat
+            (lambda (m) (format "\\(%s\\)" (wildcard-to-regexp m)))
+            (append backend-markers
+                    (project--value-in-dir 'project-vc-extra-root-markers dir))
+            "\\|")
+           "\\'"))
+         (locate-dominating-stop-dir-regexp
+          (or vc-ignore-dir-regexp locate-dominating-stop-dir-regexp))
+         last-matches
+         (root
+          (locate-dominating-file
+           dir
+           (lambda (d)
+             (setq last-matches
+                   (condition-case nil
+                       (directory-files d nil marker-re t)
+                     (file-missing nil))))))
+         (backend
+          (cl-find-if
+           (lambda (b)
+             (member (assoc-default b project-vc-backend-markers-alist)
+                     last-matches))
+           vc-handled-backends))
+         project)
+    (while (and
+            (eq backend 'Git)
+            (project--vc-merge-submodules-p root)
+            (project--submodule-p root))
+      (let* ((parent (file-name-directory (directory-file-name root))))
+        (setq root (vc-call-backend 'Git 'root parent))))
+    (when root
+      (when backend
+        (require (intern (concat "vc-" (downcase (symbol-name backend))))))
+      (when (not backend)
+        (let* ((project-vc-extra-root-markers nil)
+               (enable-dir-local-variables nil)
+               (parent (project-try-vc-fd--search root)))
+          (and parent (setq backend (nth 1 parent)))))
+      (setq project (list 'vc-fd backend root))
+      project)))
+
+(cl-defmethod project-root ((project (head vc-fd)))
+  "Return project root for vc-fd backend."
+  (nth 2 project))
+
+(cl-defmethod project-files ((project (head vc-fd)) &optional dirs)
+  "Use fd for fast file listing in vc-fd projects."
+  (mapcan
+   (lambda (dir)
+     (let ((default-directory (expand-file-name (file-name-as-directory dir))))
+       (split-string (shell-command-to-string "fd . -0") "\0" t)))
+   (or dirs (list (project-root project)))))
+
+(cl-defmethod project-external-roots ((project (head vc-fd)))
+  "Return external roots for vc-fd projects."
+  nil)
+
+(add-hook 'project-find-functions #'project-try-vc-fd -90)
+
 (use-package marginalia :ensure t
   :init
   (marginalia-mode))
