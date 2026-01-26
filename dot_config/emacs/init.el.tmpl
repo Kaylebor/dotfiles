@@ -634,5 +634,9 @@
             99)) ; Priority 99 to run after keybindings - close with-eval-after-load
 
 ;; Customization
+;; Load vars.el (defaults set by templates)
+(load-file (expand-file-name "vars.el" user-emacs-directory))
+
+;; Load custom.el (local-only overrides)
 (setopt custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file 'noerror)
