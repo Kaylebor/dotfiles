@@ -177,8 +177,7 @@
   (simple-modeline-mode))
 
 ;; Pixel-perfect inertial scrolling with hardware deltas
-(use-package ultra-scroll :ensure t
-  :demand t)
+(use-package ultra-scroll :ensure t)
 
 ;; treemacs for visual navigation
 (use-package treemacs :ensure t)
@@ -435,7 +434,6 @@
 
 ;; Structural diff with difftastic
 (use-package difftastic :ensure t
-  :demand t
   :config
   (eval-after-load 'magit-diff
     '(transient-append-suffix 'magit-diff '(-1 -1)
@@ -536,7 +534,7 @@
 
 ;; Theme
 (use-package dracula-theme :ensure t) ;; Needed, as catppuccin-theme depends on it
-(use-package catppuccin-theme :ensure (:wait t)
+(use-package catppuccin-theme :ensure t
   :custom
   (catppuccin-flavor 'frappe)
   :init
