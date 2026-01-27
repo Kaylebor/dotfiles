@@ -168,6 +168,9 @@
         help-enable-symbol-autoload nil
         help-window-select t)  ;; Focus new help windows when opened
 
+;; Use ripgrep for all xref searches (much faster than grep)
+(setopt xref-search-program 'ripgrep)
+
 ;; Enable minibuffer history
 (savehist-mode 1)
 
