@@ -1,57 +1,56 @@
 ;; -*- lexical-binding: t; -*-
 
 ;; Optional named variables for backends (filled lazily).
-(defvar gptel-zai-backend nil
-  "Z.AI OpenAI-compatible backend for gptel.")
-
 (defvar gptel-synthetic-backend nil
   "Synthetic OpenAI-compatible backend for gptel.")
 
+(defvar gptel-zai-backend nil
+  "Z.AI OpenAI-compatible backend for gptel.")
+
 (use-package gptel :ensure t
   :custom
-  ;; Default backend/model: Z.AI GLM-4.6 (reliable tool calling).
+  ;; Default backend/model: Synthetic Kimi K2 Thinking (excellent reasoning).
   (gptel-backend
-   (gptel-make-openai "Z.AI"
-     :host "api.z.ai"
-     :endpoint "/api/paas/v4/chat/completions"
+   (gptel-make-openai "Synthetic"
+     :host "api.synthetic.new"
+     :endpoint "/openai/v1/chat/completions"
      :stream t
-     :key {{- if .skip1Password }} "{{ env "Z_AI_API_KEY" }}"
-     {{- else }} (lambda (auth-source-pick-first-password :host "Z.AI" :user "API Token"))
+     :key {{- if .skip1Password }} "{{ env "SYNTHETIC_API_KEY" }}"
+     {{- else }} (lambda (auth-source-pick-first-password :host "Synthetic" :user "API Token"))
      {{- end }}
-     :models '(glm-4.6
-               ;; GLM-4.6V supports multimodal input (images)
-               (glm-4.6v
-                :description "Multimodal model with vision and reasoning"
-                :capabilities (media tool json)
-                :mime-types ("image/jpeg" "image/png" "image/gif" "image/webp"))
-               glm-4.6v-flash
-               glm-4.5-air
-               glm-4.5-flash)))
-  (gptel-model 'glm-4.6)
+     :models '((hf:moonshotai/Kimi-K2-Thinking
+                :description "Kimi K2 Thinking - Excellent reasoning and long context"
+                :capabilities (tool-use json reasoning))
+               (hf:zai-org/GLM-4.7
+                :description "GLM-4.7 - Strong tool use and structured outputs"
+                :capabilities (tool-use json reasoning))
+               hf:deepseek-ai/DeepSeek-V3.2
+               hf:meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8)))
+  (gptel-model 'hf:moonshotai/Kimi-K2-Thinking)
   (gptel-use-tools t)
   (gptel-confirm-tool-calls 'always)
   :config
   ;; Keep a named alias for the current default backend.
-  (setq gptel-zai-backend gptel-backend)
+  (setq gptel-synthetic-backend gptel-backend)
 
-  ;; Secondary backend: Synthetic (for additional models like Kimi K2).
-  (defun my/gptel--ensure-synthetic-backend ()
-    "Return Synthetic backend, creating it if necessary."
-    (unless gptel-synthetic-backend
+  ;; Secondary backend: Z.AI (fallback option).
+  (defun my/gptel--ensure-zai-backend ()
+    "Return Z.AI backend, creating it if necessary."
+    (unless gptel-zai-backend
       (when (fboundp 'gptel-make-openai)
-        (setq gptel-synthetic-backend
-              (gptel-make-openai "Synthetic"
-                :host "api.synthetic.new"
-                :endpoint "/openai/v1/chat/completions"
+        (setq gptel-zai-backend
+              (gptel-make-openai "Z.AI"
+                :host "api.z.ai"
+                :endpoint "/api/paas/v4/chat/completions"
                 :stream t
-                :key {{- if .skip1Password }} "{{ env "SYNTHETIC_API_KEY" }}"
-                {{- else }} (lambda (auth-source-pick-first-password :host "Synthetic" :user "API Token"))
+                :key {{- if .skip1Password }} "{{ env "Z_AI_API_KEY" }}"
+                {{- else }} (lambda (auth-source-pick-first-password :host "Z.AI" :user "API Token"))
                 {{- end }}
-                :models '(hf:moonshotai/Kimi-K2-Thinking
-                          hf:zai-org/GLM-4.6
-                          hf:deepseek-ai/DeepSeek-V3.2
-                          hf:meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8)))))
-    gptel-synthetic-backend)
+                :models '(glm-4.6
+                          glm-4.6v-flash
+                          glm-4.5-air
+                          glm-4.5-flash)))))
+    gptel-zai-backend)
 
   ;; Interactive helper: switch backend + model for current buffer.
   (defun my/gptel-switch-backend-and-model ()
