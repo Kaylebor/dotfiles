@@ -215,10 +215,11 @@
 ;; Custom VC-fd backend for fast file listing using fd
 (defun project-try-vc-fd (dir)
   "Try to detect a VC project for DIR, but return vc-fd instance."
-  (when (vc-file-getprop dir 'project-vc)
-    (vc-file-setprop dir 'project-vc nil))
-  (let ((res (project-try-vc-fd--search dir)))
-    (and res (vc-file-setprop dir 'project-vc res) res)))
+  (when (executable-find "fd")  ; Return nil if fd not available, fall back to built-in vc
+    (when (vc-file-getprop dir 'project-vc)
+      (vc-file-setprop dir 'project-vc nil)
+      (let ((res (project-try-vc-fd--search dir)))
+        (and res (vc-file-setprop dir 'project-vc res) res)))))
 
 (defun project-try-vc-fd--search (dir)
   "Search for VC project root, returning vc-fd instance."

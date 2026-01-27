@@ -168,8 +168,12 @@
         help-enable-symbol-autoload nil
         help-window-select t)  ;; Focus new help windows when opened
 
-;; Use ripgrep for all xref searches (much faster than grep)
-(setopt xref-search-program 'ripgrep)
+;; Use ripgrep for xref searches if available, otherwise use grep
+(condition-case err
+    (when (executable-find "rg")
+      (setopt xref-search-program 'ripgrep)
+      (message "Configured xref to use ripgrep"))
+  (error (message "Failed to configure ripgrep for xref (using grep): %s" err)))
 
 ;; Enable grep match highlighting in xref results
 (setopt grep-highlight-matches 'always)
