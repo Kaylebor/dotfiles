@@ -364,49 +364,6 @@
 ;;                                   vterm-environment)))))
 
 
-;; Claude Code IDE integration
-(elpaca (claude-code-ide 
-         :host github 
-         :repo "manzaltu/claude-code-ide.el")
-  (use-package claude-code-ide
-    :custom
-    ;; Use eat as terminal backend (pure elisp, no compilation needed)
-    (claude-code-ide-terminal-backend 'eat)
-    ;; Claude CLI is available via mise - use executable-find to locate it
-    (claude-code-ide-cli-executable (executable-find "claude"))
-    ;; Optional: Enable debug mode initially to verify setup
-    (claude-code-ide-debug-mode t)
-    :config
-    ;; Enable Emacs tools integration for advanced features
-    (claude-code-ide-emacs-tools-setup)
-    
-    ;; Optional: Customize window placement
-    (setq claude-code-ide-window-placement 'right)
-    
-    ;; Ensure mise environment is properly inherited by Claude's bash shells
-    (defun my/claude-code-terminal-setup (orig-fun &rest args)
-      "Wrap terminal creation to ensure mise environment is available."
-      ;; Refresh mise environment for current project before launching
-      (when (and (boundp 'mise-mode) mise-mode)
-        (mise-refresh-environment))
-      ;; Make sure bash sources the rc file for non-interactive shells
-      ;; This ensures mise is activated when Claude runs bash commands
-      (let ((process-environment 
-             (cons "BASH_ENV=~/.bashrc" process-environment)))
-        (apply orig-fun args)))
-    
-    ;; Wrap the terminal creation function
-    (advice-add 'claude-code-ide--create-terminal :around #'my/claude-code-terminal-setup)))
-
-;; Claude Code IDE MCP Tools - Comprehensive development tools (40+ tools)
-(elpaca (claude-code-ide-mcp-tools
-         :host github
-         :repo "Kaylebor/claude-code-ide-mcp-tools")
-  (use-package claude-code-ide-mcp-tools
-    :after claude-code-ide
-    :config
-    ;; Enable all 40+ MCP tools for comprehensive development workflow
-    (claude-code-ide-mcp-tools-setup)))
 
 ;; magit
 (use-package magit :ensure t
