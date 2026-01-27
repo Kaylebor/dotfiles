@@ -204,7 +204,16 @@
           scss-mode
           json-mode
           jsonc-mode
-          json-ts-mode) . eglot-ensure))
+           json-ts-mode) . eglot-ensure)
+
+  ;; Enable LSP semantic highlighting (context-aware highlighting)
+  ;; Provides semantic understanding: types, scopes, declarations, etc.
+  ;; Works alongside tree-sitter for enhanced accuracy
+  (eglot-managed-mode . eglot-semantic-tokens-mode)
+  
+  ;; Enable inlay hints (parameter names and types shown inline)
+  ;; Example: function foo(param1, param2) shows parameter names inline
+  (eglot-managed-mode . eglot-inlay-hints-mode))
 
 ;; Use Stylua for Lua formatting if available (managed by mise)
 (with-eval-after-load 'apheleia
