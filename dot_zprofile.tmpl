@@ -67,6 +67,12 @@ fpath=(
     $fpath
 )
 
+# Add custom functions directory for autoload
+fpath=(${ZDOTDIR:-$HOME/.config/zsh}/functions $fpath)
+
+# Autoload custom functions
+autoload -Uz ec ecc
+
 {{- if eq .chezmoi.os "darwin" }}
 # Reload SSH identities from macOS Keychain when shells start
 if [ -z "${__SSH_KEYCHAIN_LOADED:-}" ]; then

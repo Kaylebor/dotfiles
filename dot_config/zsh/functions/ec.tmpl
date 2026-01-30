@@ -1,0 +1,25 @@
+#!/usr/bin/env zsh
+# TUI emacsclient with fallback editor
+{{- $tuiFallback := "" }}
+{{- $tuiEditors := list "hx" "nvim" "vim" "vi" }}
+{{- range $editor := $tuiEditors }}
+{{- if lookPath $editor }}
+{{- $tuiFallback = $editor }}
+{{- break }}
+{{- end }}
+{{- end }}
+
+if command -v emacsclient >/dev/null 2>&1; then
+{{- if $tuiFallback }}
+    emacsclient -t --alternate-editor="{{ $tuiFallback }}" "$@"
+{{- else }}
+    emacsclient -t "$@"
+{{- end }}
+else
+{{- if $tuiFallback }}
+    {{ $tuiFallback }} "$@"
+{{- else }}
+    echo "Error: No suitable editor found"
+    return 1
+{{- end }}
+fi
