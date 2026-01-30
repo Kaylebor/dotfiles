@@ -12,46 +12,6 @@
       "system_prompt_prefix": "🔴 CRITICAL: You MUST close ALL thinking sections before responding to the user. DO NOT communicate inside thinking sections or use bash for messages."
     }
   },
-  "lsp": {
-    "go": {
-      "command": "gopls",
-      "root_markers": ["go.mod", "go.sum", ".git"],
-      "filetypes": ["go", "mod"]
-    },
-    "ruby": {
-        "command": "ruby-lsp",
-        "root_markers": ["Gemfile", "Rakefile", "ruby.gemspec", ".git"],
-        "filetypes": ["rb", "rbw", "gemspec", "rake"]
-    },
-    "rust": {
-        "command": "rust-analyzer",
-        "root_markers": ["Cargo.toml", "Cargo.lock", ".git"],
-        "filetypes": ["rs"]
-    },
-    "javascript": {
-      "command": "biome",
-      "args": ["lsp-proxy"],
-      "root_markers": ["biome.json", "package.json", ".git"],
-      "filetypes": ["ts", "tsx", "js", "jsx", "json", "jsonc", "css"]
-    },
-    "lua": {
-      "command": "lua-language-server",
-      "args": ["--stdio"],
-      "root_markers": [".luacheckrc", "lua", ".git"],
-      "filetypes": ["lua"]
-    },
-    "sql": {
-      "command": "sqls",
-      "args": ["-stdio"],
-      "root_markers": [".sqls.yml", ".git"],
-      "filetypes": ["sql", "mysql", "pgsql"]
-    },
-    "elixir": {
-      "command": "elixir-ls",
-      "root_markers": ["mix.exs", ".git"],
-      "filetypes": ["ex", "exs", "heex", "eex", "leex"]
-    }
-  },
   "mcp": {
     "docs": {
       "type": "http",
