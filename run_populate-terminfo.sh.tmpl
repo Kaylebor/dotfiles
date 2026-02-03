@@ -13,10 +13,11 @@ mkdir -p "$TERMINFO_DIR"
 
 # Find the best tic command (prefer Homebrew ncurses)
 TIC_CMD="tic"
-NCURSES_PREFIX=$(brew --prefix ncurses 2>/dev/null || true)
-if [[ -n "$NCURSES_PREFIX" && -x "$NCURSES_PREFIX/bin/tic" ]]; then
-    TIC_CMD="$NCURSES_PREFIX/bin/tic"
+{{- if and (hasKey . "homebrewPaths") (stat (joinPath .homebrewPaths.base "opt" "ncurses" "bin" "tic")) }}
+if [[ -x "{{ .homebrewPaths.base }}/opt/ncurses/bin/tic" ]]; then
+    TIC_CMD="{{ .homebrewPaths.base }}/opt/ncurses/bin/tic"
 fi
+{{- end }}
 
 # Get all terminfo search paths from the system (excluding ~/.terminfo itself)
 INFO_PATHS=()

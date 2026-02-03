@@ -13,7 +13,11 @@ mkdir -p "$HOME/{{ $.homebrewPath }}"
 curl -L {{ .urls.homebrew.tarball }} | tar xz --strip-components 1 -C "$HOME/{{ $.homebrewPath }}"
 eval "$($HOME/{{ $.homebrewPath }}/bin/brew shellenv)"
 brew update --force --quiet
-chmod -R go-w "$(brew --prefix)/share/zsh" 2>/dev/null || true
+{{- if hasKey . "homebrewPaths" }}
+chmod -R go-w "{{ .homebrewPaths.base }}/share/zsh" 2>/dev/null || true
+{{- else }}
+chmod -R go-w "/opt/homebrew/share/zsh" 2>/dev/null || true
+{{- end }}
 {{- else }}
 # Standard installation
 /bin/bash -c "$(curl -fsSL {{ .urls.homebrew.install }})"
