@@ -1,79 +1,28 @@
 ;; -*- lexical-binding: t; -*-
 
-;; Suppress warnings
-(setopt warning-minimum-level :error)
-
 ;; Setup elpaca package manager https://github.com/progfolio/elpaca/blob/master/doc/manual.md#usage
 (load-file (expand-file-name "elpaca-init.el" user-emacs-directory))
 
 ;; Personal functions; some may be used in configurations
 (load-file (expand-file-name "functions.el" user-emacs-directory))
 
-{{- if eq .chezmoi.os "darwin" }}
+;; Load vars.el (defaults set by templates)
+(load-file (expand-file-name "vars.el" user-emacs-directory))
+
 ;; macOS Keychain auth-source configuration (must be set before packages that use auth)
 ;; This enables Emacs to read credentials from macOS Keychain
-(setq auth-sources '(macos-keychain-internet macos-keychain-generic "~/.authinfo.gpg"))
-{{- end }}
+(when (eq system-type 'darwin)
+  (setq auth-sources '(macos-keychain-internet macos-keychain-generic "~/.authinfo.gpg")))
 
 ;; PACKAGES
-{{- if eq .chezmoi.os "darwin" }}
-;; macOS: PATH is set by LaunchAgent (daemon) or Emacs.sh wrapper (GUI)
-;; No need for exec-path-from-shell or hardcoded paths
 
-;; Prepend mise shims to PATH before parsing to ensure they're preferred over system/Homebrew versions
-(let* ((mise-shims "{{ joinPath .chezmoi.homeDir ".local" "share" "mise" "shims" }}")
-       (current-path (getenv "PATH")))
-  (when (and current-path (file-directory-p mise-shims))
-    ;; Add mise shims to front of PATH for preference
-    (setenv "PATH" (concat mise-shims path-separator current-path))))
-
-(when (getenv "PATH")
-  (setq exec-path (append (parse-colon-path (getenv "PATH"))
-                          (list exec-directory))))
-
-;; Additional CLI tools that should always be present on exec-path
-(let* ((extra-paths
-        (delq nil
-              (list
-               "{{ joinPath .chezmoi.homeDir ".local" "bin" }}"
-               {{- if stat (joinPath .chezmoi.homeDir "bin") }}
-               "{{ joinPath .chezmoi.homeDir "bin" }}"
-               {{- end }}
-               {{- $brewPrefix := "" }}
-               {{- if and (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
-               {{-   if and (hasKey . "homebrewPath") (ne .homebrewPath "") }}
-               {{-     $brewPrefix = joinPath .chezmoi.homeDir .homebrewPath }}
-               {{-   end }}
-               {{- else if stat "/opt/homebrew" }}
-               {{-   $brewPrefix = "/opt/homebrew" }}
-               {{- else if stat "/usr/local" }}
-               {{-   $brewPrefix = "/usr/local" }}
-               {{- end }}
-               {{- if $brewPrefix }}
-               (when (file-directory-p "{{ joinPath $brewPrefix "opt" "libpq" "bin" }}")
-                 "{{ joinPath $brewPrefix "opt" "libpq" "bin" }}")
-               (when (file-directory-p "{{ joinPath $brewPrefix "opt" "llvm" "bin" }}")
-                 "{{ joinPath $brewPrefix "opt" "llvm" "bin" }}")
-               (when (file-directory-p "{{ joinPath $brewPrefix "opt" "mise" "bin" }}")
-                 "{{ joinPath $brewPrefix "opt" "mise" "bin" }}")
-               (when (file-directory-p "{{ joinPath $brewPrefix "bin" }}")
-                 "{{ joinPath $brewPrefix "bin" }}")
-               {{- end }}
-               )))
-       (current-path (getenv "PATH")))
-  (let ((path-list (list)))
-    (dolist (path extra-paths)
-      (when (and path (file-directory-p path))
-        (add-to-list 'exec-path path t)  ; Append to end to preserve mise shims priority
-        (push path path-list)))
-    (when path-list
-      (setenv "PATH" (concat (mapconcat 'identity (nreverse path-list) path-separator)
-                             path-separator
-                             (getenv "PATH")))))){{- else }}
-;; Linux/other: Use exec-path-from-shell in daemon mode
-(when (daemonp)
-  (elpaca exec-path-from-shell (exec-path-from-shell-initialize)))
-{{- end }}
+;; Ensure env variables match shell
+(use-package exec-path-from-shell :ensure t
+  :config
+  (when (or (daemonp) (eq system-type 'darwin)) 
+    (dolist (var '("SSH_AUTH_SOCK" "SSH_AGENT_PID" "GPG_AGENT_INFO" "LANG" "LC_CTYPE"))
+      (exec-path-from-shell-copy-env var))
+    (exec-path-from-shell-initialize)))
 
 
 ;; Repeat mode - M-g
@@ -299,10 +248,9 @@
 ;; magit
 (use-package magit :ensure t
   :custom
-  {{- if and (eq .chezmoi.os "darwin") (stat "/Applications/Xcode.app/Contents/Developer/usr/bin/git") }}
   ;; On macOS, use the faster Xcode Git
-  (magit-git-executable "/Applications/Xcode.app/Contents/Developer/usr/bin/git")
-  {{- end }}
+  (when (and (eq system-type 'darwin) (file-exists-p "/Applications/Xcode.app/Contents/Developer/usr/bin/git"))
+    (magit-git-executable "/Applications/Xcode.app/Contents/Developer/usr/bin/git"))
   ;; Show word-level differences within changed lines
   (magit-diff-refine-hunk t)
   ;; Reuse current window except for diffs
@@ -312,11 +260,10 @@
 (use-package forge :ensure t
   :after magit
   :config
-  {{- if eq .chezmoi.os "darwin" }}
   ;; On macOS, auth-source should already be configured to use Keychain
   ;; Ensure cached auth info is cleared when Forge loads
-  (auth-source-forget-all-cached)
-  {{- end }}
+  (when (eq system-type 'darwin)
+    (auth-source-forget-all-cached))
   ;; Optional: Configure default forge list behavior
   (setq forge-topic-list-limit '(60 . 0))  ; Show 60 open PRs/issues, 0 closed
   (setq forge-pull-notifications t))
@@ -354,8 +301,7 @@
   (treesit-fold-line-count-show t)
   :init
   (global-treesit-fold-mode)
-  (global-treesit-fold-indicators-mode)
-  )
+  (global-treesit-fold-indicators-mode))
 
 (use-package grip-mode :ensure t
   :custom
@@ -365,8 +311,7 @@
 ;; Quick navigation with Avy
 (use-package avy :ensure t
   :custom
-  (avy-timeout-seconds 0.5)
-  )
+  (avy-timeout-seconds 0.5))
 
 ;; Incremental text selection
 (use-package expand-region :ensure t)
@@ -374,11 +319,10 @@
 ;; Spelling
 (use-package jinx :ensure t)
 
-{{- if eq .chezmoi.os "linux" }}
 ;; dock.el - Desktop environment dock integration for Unity-compatible desktops
-(when (member (getenv "XDG_CURRENT_DESKTOP") '("KDE" "GNOME" "Unity" "ubuntu:GNOME"))
+(when (and (memq system-type '(gnu/linux gnu/kfreebsd))
+           (member (getenv "XDG_CURRENT_DESKTOP") '("KDE" "GNOME" "Unity" "ubuntu:GNOME")))
   (use-package dock :ensure t))
-{{- end }}
 
 ;; Better mise integration with Emacs
 (use-package mise :ensure t
@@ -386,11 +330,13 @@
   :init
   (global-mise-mode))
 
-{{- if not .skip1Password }}
 ;; 1Password integration
 (elpaca (auth-source-1password :host github :repo "dlobraico/auth-source-1password" :build t)
-  (auth-source-1password-enable))
-{{- end }}
+  (unless (not skip-1password)
+    (setopt auth-source-1password-vault "Private")
+    (setopt auth-source-1password-construct-secret-reference
+            #'auth-source-1password--1password-construct-query-path-escaped)
+    (auth-source-1password-enable)))
 
 ;; Org Babel: Mermaid support (diagram rendering via mmdc)
 (use-package ob-mermaid
@@ -439,15 +385,7 @@
   (global-kkp-mode 1))
 
 ;; Modal editing configuration
-{{- if eq .modalEditingMode "meow" }}
-;; Meow: Modern modal editing with better Emacs integration (no vterm/Magit conflicts)
-(load-file (expand-file-name "meow-config.el" user-emacs-directory))
-{{- else if eq .modalEditingMode "evil" }}
-;; Evil: Vim emulation (powerful but can cause conflicts with some packages)
 (load-file (expand-file-name "evil-config.el" user-emacs-directory))
-{{- else }}
-;; No modal editing configured
-{{- end }}
 
 ;; Keybindings will be loaded after all packages are ready via elpaca-after-init-hook
 
@@ -459,31 +397,25 @@
 (add-hook 'emacs-startup-hook
           (lambda ()
             (setq gc-cons-threshold (* 20 1024 1024)  ; 20MB
-                  gc-cons-percentage 0.1)
-            (message "GC threshold reset to %s" gc-cons-threshold)))
+                  gc-cons-percentage 0.1)))
 
 ;; Pixel-precision scrolling configured in custom.el
 
 ;; Disable vc-mode entirely since we use Magit exclusively
 (setq vc-handled-backends nil)
 
-{{- if eq .chezmoi.os "darwin" }}
-;; macOS-specific optimizations
-;; Smoother scrolling on macOS (Mac Port specific)
-(setq mac-mouse-wheel-smooth-scroll t)
+(when (eq system-type 'darwin)
+  ;; Optimize for macOS window management
+  (setq ns-use-native-fullscreen t)
+  (setq ns-pop-up-frames nil)
 
-;; Optimize for macOS window management
-(setq ns-use-native-fullscreen t)
-(setq ns-pop-up-frames nil)
+  ;; Faster frame switching
+  (setq frame-title-format nil)
 
-;; Faster frame switching
-(setq frame-title-format nil)
-
-;; Launchd-managed Emacs daemon doesn't inherit environment variables.
-;; Set TERMINFO explicitly so terminfo entries in ~/.terminfo are found.
-(when (daemonp)
-  (setenv "TERMINFO" (expand-file-name "~/.terminfo")))
-{{- end }}
+  ;; Launchd-managed Emacs daemon doesn't inherit environment variables.
+  ;; Set TERMINFO explicitly so terminfo entries in ~/.terminfo are found.
+  (when (daemonp)
+    (setenv "TERMINFO" (expand-file-name "~/.terminfo"))))
 
 ;; Hide some Emacs-native modes from modeline
 (with-eval-after-load 'delight
@@ -524,8 +456,6 @@
             99)) ; Priority 99 to run after keybindings - close with-eval-after-load
 
 ;; Customization
-;; Load vars.el (defaults set by templates)
-(load-file (expand-file-name "vars.el" user-emacs-directory))
 
 ;; Load custom.el (local-only overrides)
 (setopt custom-file (expand-file-name "custom.el" user-emacs-directory))

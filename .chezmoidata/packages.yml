@@ -15,7 +15,7 @@ packages:
       - 'dtach'
       - 'dysk'
       - 'elixir-ls'
-      - 'emacs'
+      - 'emacs-wayland'
       - 'enchant'
       - 'firefox-developer-edition'
       - 'fish'
