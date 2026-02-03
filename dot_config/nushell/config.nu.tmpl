@@ -3,18 +3,14 @@
 
 {{- if lookPath "mise" }}
 # Load mise shims (always available for GUI apps and tools)
-let mise_config_dir = $nu.default-config-dir
-let mise_shim_file = ($mise_config_dir | path join "mise-path.nu")
-if (path exists $mise_shim_file) {
-    source-env $mise_shim_file
-}
+const mise_config_dir = $nu.default-config-dir
+const mise_shim_file = ($mise_config_dir | path join "mise-path.nu")
+source-env $mise_shim_file
 
 # Load full mise activation only for interactive shells
 if $nu.is-interactive {
-    let mise_module = ($mise_config_dir | path join "mise.nu")
-    if (path exists $mise_module) {
-        use $mise_module *
-    }
+    const mise_module = ($mise_config_dir | path join "mise.nu")
+    use $mise_module *
 }
 {{- end }}
 

@@ -4,11 +4,9 @@
 
 {{- if lookPath "mise" }}
 # Ensure mise shims are available in login shells
-let mise_config_dir = $nu.default-config-dir
-let mise_shim_file = ($mise_config_dir | path join "mise-path.nu")
-if (path exists $mise_shim_file) {
-    source-env $mise_shim_file
-}
+const mise_config_dir = $nu.default-config-dir
+const mise_shim_file = ($mise_config_dir | path join "mise-path.nu")
+source-env $mise_shim_file
 {{- end }}
 
 # Login shell specific environment variables
