@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+{{- /* Find antidote using same logic as .zshrc.tmpl */}}
+{{- $antidoteFiles := list }}
+{{- if eq .chezmoi.os "darwin" }}
+{{-   $brewPrefix := "" }}
+{{-   if and (hasKey . "homebrewInstallType") (eq .homebrewInstallType "alternative") }}
+{{-     if and (hasKey . "homebrewPaths") (stat .homebrewPaths.base) }}
+{{-       $brewPrefix = .homebrewPaths.base }}
+{{-     end }}
+{{-   else }}
+{{-     if stat "/opt/homebrew" }}
+{{-       $brewPrefix = "/opt/homebrew" }}
+{{-     else if stat "/usr/local/Homebrew" }}
+{{-       $brewPrefix = "/usr/local" }}
+{{-     end }}
+{{-   end }}
+{{-   if $brewPrefix }}
+{{-     $antidoteFiles = append $antidoteFiles (joinPath $brewPrefix "opt" "antidote" "share" "antidote" "antidote.zsh") }}
+{{-   end }}
+{{- end }}
+{{- $antidoteFiles = append $antidoteFiles "/usr/share/zsh-antidote/antidote.zsh" }}
+{{- range $antidoteFile := $antidoteFiles }}
+{{-   if stat $antidoteFile }}
+# hash: {{ include "dot_zsh_plugins.txt.tmpl" | sha256sum }}
+
+# Regenerate zsh plugins bundle when the plugin list changes
+mkdir -p ~/.cache/zsh
+echo "Regenerating zsh plugins bundle..."
+# Antidote is a zsh script, so we invoke it via zsh
+zsh -c 'source "{{ $antidoteFile }}" && antidote bundle < ~/.zsh_plugins.txt > ~/.cache/zsh/plugins.zsh'
+{{-     break }}
+{{-   end }}
+{{- end }}

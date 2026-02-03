@@ -13,8 +13,8 @@ if [[ -n "$CLAUDECODE" ]]; then
 {{- end }}
 fi
 
-# Ensure mise is activated for interactive shells
-eval "$(mise activate zsh)"
+# Source pre-generated mise activation
+source ~/.cache/zsh/mise.zsh
 
 # Ensure fnox is activated for interactive shells
 {{- if lookPath "fnox" }}
@@ -62,7 +62,8 @@ setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording en
 {{-   if stat $antidoteFile }}
 source "{{ $antidoteFile }}"
 # initialize plugins statically with ${ZDOTDIR:-~}/.zsh_plugins.txt
-antidote load
+# Source pre-generated antidote bundle
+source ~/.cache/zsh/plugins.zsh
 {{-     break }}
 {{-   end }}
 {{- end }}

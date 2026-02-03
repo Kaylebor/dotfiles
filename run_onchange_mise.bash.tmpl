@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+{{- if lookPath "mise" }}
+# hash: {{ (output "mise" "v" "-J" | fromJson).version | sha256sum }}
+
+# Regenerate mise activation script when mise version changes
+mkdir -p ~/.cache/zsh
+echo "Regenerating mise activation script..."
+mise activate zsh > ~/.cache/zsh/mise.zsh
+{{- end }}
