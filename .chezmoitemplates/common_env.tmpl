@@ -56,7 +56,7 @@ ulimit -n 65536 2>/dev/null || true
   {{- else if eq $shell "fish" }}
 ulimit -n 65536 2>/dev/null || true
   {{- else if eq $shell "nushell" }}
-# Nushell doesn't support ulimit in the same way - use a process spawn with ignore
-bash { ulimit -n 65536 2>/dev/null || true } | ignore
+# Nushell doesn't support ulimit directly - use bash to set it
+bash -c "ulimit -n 65536 2>/dev/null || true" | ignore
   {{- end }}
 {{- end }}

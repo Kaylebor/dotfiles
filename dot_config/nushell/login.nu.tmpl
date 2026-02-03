@@ -64,7 +64,7 @@ $env.SSH_AUTH_SOCK = "{{ .chezmoi.homeDir }}/.1password/agent.sock"
 {{- if eq .chezmoi.os "darwin" }}
 if (($env.__SSH_KEYCHAIN_LOADED? | default "") | is-empty) {
     if (which ssh-add | length) > 0 {
-        try { ssh-add --apple-load-keychain | ignore } catch { }
+        try { ssh-add --apple-load-keychain out> /dev/null err> /dev/null } catch { }
     }
     $env.__SSH_KEYCHAIN_LOADED = "1"
 }
