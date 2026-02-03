@@ -1,11 +1,10 @@
 ;; -*- lexical-binding: t; -*-
 
-;; Optional named variables for backends (filled lazily).
-(defvar gptel-synthetic-backend nil
-  "Synthetic OpenAI-compatible backend for gptel.")
-
-(defvar gptel-zai-backend nil
-  "Z.AI OpenAI-compatible backend for gptel.")
+(defun gptel-api-key-env-or-auth-source (&optional var host user)
+  (lambda ()
+    (or (and var (getenv var))
+        (auth-source-pick-first-password :host host
+                                         :user (or user user-login-name)))))
 
 (use-package gptel :ensure t
   :custom
@@ -15,84 +14,25 @@
      :host "api.synthetic.new"
      :endpoint "/openai/v1/chat/completions"
      :stream t
-     :key {{- if .skip1Password }} "{{ env "SYNTHETIC_API_KEY" }}"
-     {{- else }} (lambda (auth-source-pick-first-password :host "Synthetic" :user "API Token"))
-     {{- end }}
-     :models '((hf:moonshotai/Kimi-K2-Thinking
-                :description "Kimi K2 Thinking - Excellent reasoning and long context"
-                :capabilities (tool-use json reasoning))
+     :key (gptel-api-key-env-or-auth-source "SYNTHETIC_API_KEY" "Synthetic" "API Token")
+     :models '((hf:moonshotai/Kimi-K2.5
+                :description "Kimi K2.5 - Excellent reasoning and long context, SOTA"
+                :capabilities (media tool-use json reasoning)
+                :mime-types ("image/jpeg"
+                             "image/png"
+                             "image/gif"
+                             "image/webp"
+                             "image/heif"
+                             "image/heic"))
                (hf:zai-org/GLM-4.7
                 :description "GLM-4.7 - Strong tool use and structured outputs"
-                :capabilities (tool-use json reasoning))
-               hf:deepseek-ai/DeepSeek-V3.2
-               hf:meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8)))
-  (gptel-model 'hf:moonshotai/Kimi-K2-Thinking)
-  (gptel-use-tools t)
-  (gptel-confirm-tool-calls 'always)
-  :config
-  ;; Keep a named alias for the current default backend.
-  (setq gptel-synthetic-backend gptel-backend)
+                :capabilities (tool-use json reasoning))))
+   (gptel-model 'hf:moonshotai/Kimi-K2.5)
+   (gptel-use-tools t)
+   (gptel-confirm-tool-calls 'always)))
 
-  ;; Secondary backend: Z.AI (fallback option).
-  (defun my/gptel--ensure-zai-backend ()
-    "Return Z.AI backend, creating it if necessary."
-    (unless gptel-zai-backend
-      (when (fboundp 'gptel-make-openai)
-        (setq gptel-zai-backend
-              (gptel-make-openai "Z.AI"
-                :host "api.z.ai"
-                :endpoint "/api/paas/v4/chat/completions"
-                :stream t
-                :key {{- if .skip1Password }} "{{ env "Z_AI_API_KEY" }}"
-                {{- else }} (lambda (auth-source-pick-first-password :host "Z.AI" :user "API Token"))
-                {{- end }}
-                :models '(glm-4.6
-                          glm-4.6v-flash
-                          glm-4.5-air
-                          glm-4.5-flash)))))
-    gptel-zai-backend)
-
-  ;; Interactive helper: switch backend + model for current buffer.
-  (defun my/gptel-switch-backend-and-model ()
-    "Interactively choose gptel BACKEND and MODEL for this buffer.
-
-Presents known backends, then available models for the chosen backend,
-and sets `gptel-backend' and `gptel-model' buffer-locally."
-    (interactive)
-    (let* ((backends nil))
-      ;; Build backend list explicitly to avoid template/paren issues.
-      (when gptel-zai-backend
-        (push (cons "Z.AI" gptel-zai-backend) backends))
-      (when (fboundp 'gptel-make-openai)
-        (push (cons "Synthetic" (my/gptel--ensure-synthetic-backend)) backends))
-      (when gptel-backend
-        (push (cons (gptel-backend-name gptel-backend) gptel-backend) backends))
-      (let* ((backend-alist (nreverse backends))
-             (backend-name
-              (completing-read
-               "gptel backend: "
-               (mapcar #'car backend-alist)
-               nil t nil nil
-               (when gptel-backend (gptel-backend-name gptel-backend))))
-             (backend (cdr (assoc backend-name backend-alist)))
-             (models (and backend (gptel-backend-models backend)))
-             (model-name
-              (when models
-                (completing-read
-                 "gptel model: "
-                 (mapcar (lambda (m) (symbol-name m)) models)
-                 nil t nil nil
-                 (when (and (boundp 'gptel-model) gptel-model)
-                   (symbol-name gptel-model))))))
-        (when backend
-          (setq-local gptel-backend backend)
-          (when model-name
-            (setq-local gptel-model (intern model-name)))
-          (message "gptel: using %s / %s"
-                   (gptel-backend-name backend)
-                   gptel-model))))))
-
-(elpaca (gptel-agent :host github :repo "karthink/gptel-agent" :branch "master" :files (:defaults "agents"))
+(elpaca (gptel-agent :host github :repo "karthink/gptel-agent" :branch "master"
+                     :files (:defaults "agents"))
   ;; Safely configure agents directory after package loads
   (with-eval-after-load 'gptel-agent
     (add-to-list 'gptel-agent-dirs
