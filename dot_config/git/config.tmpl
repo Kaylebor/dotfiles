@@ -70,6 +70,7 @@
   # Uses origin/HEAD to work with both main and master repos
   swd = "!f() { git switch \"$(git rev-parse --abbrev-ref origin/HEAD | sed 's|^origin/||')\"; }; f"
   sw = switch
+  swp = switch -
   
   # Fetch from default branch
   fd = fetch origin HEAD

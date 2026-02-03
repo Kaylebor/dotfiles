@@ -28,6 +28,7 @@ abbr -a -- gcan 'git can'       # git can = commit --amend --no-edit
 abbr -a -- gs 'git sw'          # git sw = switch
 abbr -a -- gsw 'git sw'         # alternative: switch
 abbr -a -- gsm 'git swd'        # git swd = switch to default branch (main/master)
+abbr -a -- gsp 'git swp'        # git swp = switch - (previous branch)
 abbr -a -- gsmain 'git switch main'
 abbr -a -- gsmaster 'git switch master'
 
