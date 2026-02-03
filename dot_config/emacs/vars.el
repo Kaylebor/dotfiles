@@ -218,18 +218,13 @@
 
 ;; Force Emacs to use a POSIX shell
 (setopt shell-file-name (executable-find "bash"))
-;; Switch vterm to preferred shell - DISABLED (using eat now)
-;; (setopt vterm-shell {{ .preferredShell | quote }})
-(setopt explicit-shell-file-name {{ .preferredShell | quote }})
+(setopt explicit-shell-file-name (executable-find "nu"))
 
 ;; Magit config
 (setopt magit-define-global-key-bindings 'recommended)
 
-(defcustom skip-1password nil
+(defcustom skip-1password 
+  (when-let ((value (getenv "SKIP_1PASSWORD")))
+    (member (downcase value) '("1" "true" "yes" "t")))
   "If set, disables 1Password integration"
   :type 'boolean)
-{{- if .skip1Password }}
-(setq skip-1password t)
-{{- else }}
-(setq skip-1password nil)
-{{- end }}
