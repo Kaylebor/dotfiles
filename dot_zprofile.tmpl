@@ -51,9 +51,9 @@ PATH="$HOME/google-cloud-sdk/bin:$PATH"
 {{-   if and $brewPrefix (stat (joinPath $brewPrefix "opt" "libpq" "bin")) }}
 PATH="{{ $brewPrefix }}/opt/libpq/bin:$PATH" # PostgreSQL
 {{-   end }}
-{{- end }}
-{{- if and (eq .chezmoi.os "darwin") (hasKey . "brewBin") .brewBin }}
-PATH="$({{ .brewBin }} --prefix sqlite)/bin:$PATH" # Sqlite from Homebrew instead of MacOS built-in
+{{-   if and $brewPrefix (stat (joinPath $brewPrefix "opt" "sqlite" "bin")) }}
+PATH="{{ $brewPrefix }}/opt/sqlite/bin:$PATH" # Sqlite from Homebrew instead of MacOS built-in
+{{-   end }}
 {{- end }}
 export PATH
 
