@@ -265,25 +265,6 @@ $env.config = {
 source "{{ $carapaceInit }}"
 {{- end }}
 
-# Core aliases
-alias la = ls -la
-alias ll = ls -l
-
-{{- if lookPath "eza" }}
-alias ls = eza --icons=auto --git
-alias la = eza -la --icons=auto --git  
-alias ll = eza -l --icons=auto --git
-alias tree = eza --tree --icons=auto
-{{- end }}
-
-{{- if lookPath "bat" }}
-alias cat = bat
-{{- end }}
-
-{{- if lookPath "difft" }}
-alias diff = difft
-{{- end }}
-
 # Utility aliases
 alias q = exit
 alias ":q" = exit

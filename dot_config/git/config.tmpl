@@ -54,4 +54,37 @@
   abbrevCommit = true
   mailmap = true
 [alias]
+  # Viewing
   showd = show --ext-diff
+  s = status -sb
+  lg = log --oneline --decorate --graph
+  lgd = "!git log origin/HEAD..HEAD --oneline"
+  
+  # Diff
+  d = diff
+  dd = diff origin/HEAD
+  dc = diff --cached
+  dn = diff --no-ext-diff
+  
+  # Switching branches (dynamic default branch support)
+  # Uses origin/HEAD to work with both main and master repos
+  swd = "!f() { git switch \"$(git rev-parse --abbrev-ref origin/HEAD | sed 's|^origin/||')\"; }; f"
+  sw = switch
+  
+  # Fetch from default branch
+  fd = fetch origin HEAD
+  
+  # Rebase onto default branch
+  rd = rebase origin/HEAD
+  
+  # Pull from default branch
+  pld = "!f() { git pull origin \"$(git rev-parse --abbrev-ref origin/HEAD | sed 's|^origin/||')\"; }; f"
+  
+  # Add and commit combos
+  aa = add --all
+  cm = commit -m
+  ca = commit --amend
+  can = commit --amend --no-edit
+  
+  # Push with safety
+  pf = push --force-with-lease

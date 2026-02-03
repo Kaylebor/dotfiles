@@ -1,26 +1,69 @@
 # Git shortcuts and functions for nushell
-# Mirrors fish abbreviations as nushell aliases/functions
+# Mirrors fish abbreviations as nushell aliases
+# Complex logic lives in git aliases (see ~/.config/git/config), these are just shortcuts
 
-# Git aliases (matching fish abbreviations)
+# Core git
 alias g = git
+
+# Status
+alias gg = git s          # git s = status -sb
+alias ggg = git status    # full status
+alias ggp = git status --porcelain  # machine-readable status
+
+# Diff
+alias gd = git d          # git d = diff
+alias gdd = git dd        # git dd = diff origin/HEAD (vs default branch)
+alias gdc = git dc        # git dc = diff --cached
+alias gdn = git dn        # git dn = diff --no-ext-diff
+
+# Add
 alias ga = git add
-alias gaa = git add --all
+alias ga. = git add .
+alias gaa = git aa        # git aa = add --all
+
+# Commit
 alias gc = git commit
-alias gca = git commit --amend
-alias gcan = git commit --amend --no-edit
-alias gcm = git commit -m
-alias gd = git diff
-alias gdca = git diff --cached
+alias gcm = git cm        # git cm = commit -m
+alias gca = git ca        # git ca = commit --amend
+alias gcan = git can      # git can = commit --amend --no-edit
+
+# Switch branches
+alias gs = git sw         # git sw = switch
+alias gsw = git sw        # alternative: switch
+alias gsm = git swd       # git swd = switch to default branch (main/master)
+alias gsmain = git switch main
+alias gsmaster = git switch master
+
+# Fetch
 alias gf = git fetch
-alias gg = git status
+alias gfd = git fd        # git fd = fetch origin HEAD
+
+# Pull
 alias gl = git pull
-alias glog = git log --oneline --decorate --graph
-alias gm = git merge
+alias gld = git pld       # git pld = pull from default branch
+
+# Push
 alias gp = git push
-alias "gp!" = git push --force-with-lease
+alias gpf = git pf        # git pf = push --force-with-lease
+alias gp! = git pf        # alternative: push force with lease
+
+# Rebase
 alias gr = git rebase
-alias gs = git show --ext-diff
-alias gst = git status -sb
+alias grd = git rd        # git rd = rebase origin/HEAD
+alias gra = git rebase --abort
+alias grc = git rebase --continue
+
+# Merge
+alias gm = git merge
+
+# Log
+alias glog = git lg       # git lg = log --oneline --decorate --graph
+alias gldd = git lgd      # git lgd = log commits not in default branch
+
+# Show
+alias gsh = git showd     # git showd = show --ext-diff
+
+# Remote
 alias grv = git remote -v
 
 # Interactive git checkout using tv (television)
@@ -41,44 +84,26 @@ def gco [] {
     }
 }
 
-# Git log with graph (extended version with optional --all flag)
-def glog [--all (-a)] {
-    if $all {
-        git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --all
-    } else {
-        git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-    }
-}
-
-# Add all and commit
+# Add all and commit (function can't use git aliases directly)
 def gac [message: string] {
     git add -A
     git commit -m $message
 }
 
-# Git-aware file listing (similar to fish's git-aware-files)
-def gaf [] {
-    let git_status = (git status --porcelain=v1 | lines)
-    let files = (ls -a | where name != "." and name != "..")
+# Switch to branch with fuzzy finder
+def gsw [] {
+    let branch = (
+        git branch -a 
+        | lines 
+        | where { |it| not ($it | str starts-with "*") }
+        | str trim
+        | str replace "remotes/origin/" ""
+        | uniq
+        | to text
+        | tv
+    )
     
-    $files | each { |file|
-        let status = ($git_status | where { |line| $line | str ends-with $file.name } | first | default "")
-        let status_symbol = if ($status | str starts-with "??") {
-            "?"
-        } else if ($status | str starts-with " M") {
-            "M"
-        } else if ($status | str starts-with "A ") {
-            "A"
-        } else if ($status | str starts-with "D ") {
-            "D"
-        } else {
-            ""
-        }
-        
-        if $status_symbol != "" {
-            $"($status_symbol) ($file.name)"
-        } else {
-            $file.name
-        }
+    if ($branch | is-not-empty) {
+        git switch ($branch | str trim)
     }
 }
