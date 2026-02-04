@@ -1,43 +1,19 @@
 ;; -*- lexical-binding: t; -*-
 
-{{- /* Determine CPU cores and threads for native compilation */ -}}
-{{- $cpuCores := 1 -}}
-{{- $cpuThreads := 1 -}}
-{{- if eq .chezmoi.os "darwin" -}}
-{{-   $cpuCores = (output "sysctl" "-n" "hw.physicalcpu_max") | trim | atoi -}}
-{{-   $cpuThreads = (output "sysctl" "-n" "hw.logicalcpu_max") | trim | atoi -}}
-{{- else if eq .chezmoi.os "linux" -}}
-{{-   $cpuCores = (output "sh" "-c" "lscpu --online --parse | grep --invert-match '^#' | sort --field-separator=',' --key='2,4' --unique | wc --lines") | trim | atoi -}}
-{{-   $cpuThreads = (output "sh" "-c" "lscpu --online --parse | grep --invert-match '^#' | wc --lines") | trim | atoi -}}
-{{- end -}}
-{{- /* Calculate optimal job count: use half of physical cores, minimum 2, maximum 8 */ -}}
-{{- $asyncJobs := div $cpuCores 2 -}}
-{{- if lt $asyncJobs 2 -}}
-{{-   $asyncJobs = 2 -}}
-{{- else if gt $asyncJobs 8 -}}
-{{-   $asyncJobs = 8 -}}
-{{- end -}}
-
 ;; Always precompile packages on install instead of on load
 (setq-default package-native-compile t)
 (setq-default load-prefer-newer t)
 (setq-default native-comp-deferred-compilation t)
 (setq-default native-comp-jit-compilation t)
 
-;; Async native compilation settings to reduce blocking
-;; Using {{ $asyncJobs }} parallel jobs (based on {{ $cpuCores }} physical cores, {{ $cpuThreads }} threads)
-(setq native-comp-async-jobs-number {{ $asyncJobs }})  ; Dynamically calculated from CPU cores
+;; Async native compilation settings to reduce blocking (set to half of available threads)
+(setq native-comp-async-jobs-number (/ (num-processors) 2))
 (setq native-comp-async-report-warnings-errors nil)  ; Don't pop up *Warnings* buffer
 (setq native-comp-async-query-on-exit nil)  ; Don't ask about killing compile processes on exit
 
 ;; Speed up JIT compilation at the cost of optimization
 ;; 0 = no optimization, 2 = default, 3 = maximum
 (setq native-comp-speed 2)  ; Balance between compilation time and runtime performance
-
-;; Message about native compilation on first load
-(when (and (boundp 'native-comp-available-p) (native-comp-available-p))
-  (message "Native compilation enabled with %d async jobs (CPU: %d cores, %d threads)"
-           {{ $asyncJobs }} {{ $cpuCores }} {{ $cpuThreads }}))
 
 ;; Increase garbage collection threshold during startup
 (setq gc-cons-threshold 100000000)
@@ -95,45 +71,42 @@
     (with-current-buffer buf
       (setq mode-line-format nil))))
 
-{{- if eq .chezmoi.os "darwin" }}
-;;; macOS-specific libgcc fix for native compilation
-(defun my-append-env-var (var-name value)
-  "Append VALUE to the beginning of current value of env variable VAR-NAME."
-  (setenv var-name (if (getenv var-name)
-                       (format "%s:%s" value (getenv var-name))
-                     value)))
+(when (eq system-type 'darwin)
+  ;;; macOS-specific libgcc fix for native compilation
+  (defun my-append-env-var (var-name value)
+    "Append VALUE to the beginning of current value of env variable VAR-NAME."
+    (setenv var-name (if (getenv var-name)
+                         (format "%s:%s" value (getenv var-name))
+                       value)))
 
-{{- if eq .chezmoi.os "darwin" }}
-;; Use template-detected Homebrew path for GCC libraries
-;; Need to include the actual GCC subdirectory where libemutls_w.a lives
-(let* ((homebrew-prefix "{{ if and (hasKey . "brewBin") .brewBin }}{{ output .brewBin "--prefix" | trim }}{{ else }}/opt/homebrew{{ end }}")
-       (gcc-base (concat homebrew-prefix "/lib/gcc/current"))
-       (gcc-lib-base (concat gcc-base "/gcc"))
-       (gcc-subdir (when (file-directory-p gcc-lib-base)
-                    (car (directory-files gcc-lib-base t "^aarch64-apple-darwin"))))
-       (gcc-version-dir (when gcc-subdir
-                         (car (directory-files gcc-subdir t "^[0-9]+$"))))
-       (gccjitpath (if gcc-version-dir
-                      (format "%s:%s:%s/lib" 
-                              gcc-version-dir gcc-base homebrew-prefix)
-                    (format "%s:%s/lib" gcc-base homebrew-prefix))))
-  (when (file-directory-p gcc-base)
-    (mapc (lambda (var-name)
-            (my-append-env-var var-name gccjitpath))
-          '("LIBRARY_PATH" "LD_LIBRARY_PATH"))
-    
-    ;; Also set up the compiler paths for libgccjit
-    (when (file-exists-p (concat homebrew-prefix "/bin/gcc-15"))
-      (setenv "CC" (concat homebrew-prefix "/bin/gcc-15"))
-      (setenv "CXX" (concat homebrew-prefix "/bin/g++-15")))
-    
-    ;; Set native compilation driver options for libgccjit
-    (when (boundp 'native-comp-driver-options)
-      (setq native-comp-driver-options
-            (append native-comp-driver-options
-                    (list (concat "-B" homebrew-prefix "/bin/")))))))
-{{- end }}
-{{- end }}
+  ;; Use detected Homebrew path for GCC libraries
+  ;; Need to include the actual GCC subdirectory where libemutls_w.a lives
+  (let* ((homebrew-prefix (string-trim (shell-command-to-string "brew --prefix")))
+         (gcc-base (concat homebrew-prefix "/lib/gcc/current"))
+         (gcc-lib-base (concat gcc-base "/gcc"))
+         (gcc-subdir (when (file-directory-p gcc-lib-base)
+                       (car (directory-files gcc-lib-base t "^aarch64-apple-darwin"))))
+         (gcc-version-dir (when gcc-subdir
+                            (car (directory-files gcc-subdir t "^[0-9]+$"))))
+         (gccjitpath (if gcc-version-dir
+                         (format "%s:%s:%s/lib" 
+                                 gcc-version-dir gcc-base homebrew-prefix)
+                       (format "%s:%s/lib" gcc-base homebrew-prefix))))
+    (when (file-directory-p gcc-base)
+      (mapc (lambda (var-name)
+              (my-append-env-var var-name gccjitpath))
+            '("LIBRARY_PATH" "LD_LIBRARY_PATH"))
+      
+      ;; Also set up the compiler paths for libgccjit
+      (when (file-exists-p (concat homebrew-prefix "/bin/gcc-15"))
+        (setenv "CC" (concat homebrew-prefix "/bin/gcc-15"))
+        (setenv "CXX" (concat homebrew-prefix "/bin/g++-15")))
+      
+      ;; Set native compilation driver options for libgccjit
+      (when (boundp 'native-comp-driver-options)
+        (setq native-comp-driver-options
+              (append native-comp-driver-options
+                      (list (concat "-B" homebrew-prefix "/bin/"))))))))
 
 ;;; Security
 (setq gnutls-verify-error t)  ; Prompts user if there are certificate issues

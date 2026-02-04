@@ -1,12 +1,10 @@
 ;; -*- lexical-binding: t; -*-
 
-{{- if not .skip1Password }}
 (defun auth-source-1password--1password-construct-query-path-escaped (_backend _type host user _port)
   "Construct the full entry-path for the 1password entry for HOST and USER.
    Usually starting with the `auth-source-1password-vault', followed
    by host and user."
   (mapconcat #'identity (list auth-source-1password-vault host (string-replace "^" "_" user)) "/"))
-{{- end }}
 
 ;; Mise integration functions
 (defun my-mise-which (tool)
@@ -27,14 +25,15 @@
 (defun lsp-booster--advice-json-parse (old-fn &rest args)
   "Try to parse bytecode instead of json."
   (or
-   (when (equal (following-char) ?#)
-     (let ((bytecode (read (current-buffer))))
-       (when (byte-code-function-p bytecode)
-         (funcall bytecode))))
+   (save-excursion
+     (when (equal (following-char) ?#)
+       (let ((bytecode (read (current-buffer))))
+         (when (byte-code-function-p bytecode)
+           (funcall bytecode)))))
    (apply old-fn args)))
-(advice-add (if (progn (require 'json)
-                       (fboundp 'json-parse-buffer))
-                'json-parse-buffer
-              'json-read)
-            :around
-            #'lsp-booster--advice-json-parse)
+(with-eval-after-load 'json
+  (advice-add (if (fboundp 'json-parse-buffer)
+                  'json-parse-buffer
+                'json-read)
+              :around
+              #'lsp-booster--advice-json-parse))
