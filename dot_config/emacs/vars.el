@@ -218,7 +218,11 @@
 
 ;; Force Emacs to use a POSIX shell
 (setopt shell-file-name (executable-find "bash"))
-(setopt explicit-shell-file-name (executable-find "nu"))
+;; Set desired shell as default in other tools
+(with-eval-after-load 'exec-path-from-shell
+  (when-let* ((nu (executable-find "nu")))
+    (setopt explicit-shell-file-name nu)
+    (setopt eat-shell nu)))
 
 ;; Magit config
 (setopt magit-define-global-key-bindings 'recommended)
